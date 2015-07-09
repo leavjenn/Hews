@@ -1,0 +1,59 @@
+@media (min-width: 1200px)  {
+
+	.description { margin: 40px 0 10px 0; font-size: 28px; line-height: 36px; }
+
+	.top-button { margin-top: 100px; }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+	.description { font-size: 24px; line-height: 32px; }
+	
+	.top-button { margin-top: 60px; }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+
+	.description { font-size: 20px; line-height: 28px; }
+	
+	.top-content .text { padding-top: 25px; }
+	
+    .top-content h1, .features h2, .single-feature-text h2, .call-to-action-text h2 { font-size: 28px; line-height: 36px; }
+	
+	h3 { font-size: 18px; }
+	
+    .features p, .single-feature-text p { padding: 0; }
+    
+    .single-feature-img-description { float: none; width: auto; margin-top: 30px; text-align: center; }
+    .single-feature-img { float: none; width: auto; margin-top: 50px; text-align: center; }
+    
+    .single-feature-no-bg { padding-bottom: 40px; }
+    .single-feature-no-bg .single-feature-img-description { margin-top: 50px; text-align: center; }
+	.single-feature-img-description p { text-align: left; }
+    .single-feature-no-bg .single-feature-img { margin-top: 30px; }
+
+}
+
+@media (max-width: 767px) {
+    
+    .top-content .text { padding-top: 60px; text-align: center; }
+
+    .top-content h1, .features h2, .single-feature-text h2, .call-to-action-text h2 { font-size: 36px; padding: 0 20px; }
+
+    .top-content .description, .features p, .single-feature-text p, .call-to-action-text p { padding: 0 20px; }
+    
+    .features-box-1 p { padding: 0 20px; }
+    
+    .single-feature-img-description { margin-top: 30px; text-align: center; }
+    .single-feature-img { margin-top: 50px; text-align: center; }
+    .single-feature-img-description p { padding: 0 20px; }
+    
+    .single-feature-no-bg { padding-bottom: 40px; }
+    .single-feature-no-bg .single-feature-img-description { margin-top: 50px; text-align: center; }
+	.single-feature-img-description p { text-align: left; }
+    .single-feature-no-bg .single-feature-img { margin-top: 30px; }
+    
+    .footer-copyright, .footer-social { text-align: center; }
+    .footer-copyright { padding: 0 20px; }
+
+}
+

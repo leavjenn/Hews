@@ -1,0 +1,71 @@
+
+.button-1 {
+	display: inline-block;
+	height: 75px;
+	margin: 0;
+    padding: 0 0 0 15px;
+    background: #000;
+    font-size: 22px;
+    line-height: 22px;
+    color: #fff;
+    text-align: left;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+}
+
+.button-1:hover {
+	background: #000;
+	background: rgba(0, 0, 0, 0.5);
+	color: #fff;
+}
+
+.button-1 .button-1-left {
+	float: left;
+}
+
+.button-1 .button-1-left i {
+	font-size: 75px;
+	vertical-align: middle;
+}
+
+.button-1 .button-1-right {
+	float: left;
+	width: 160px;
+	margin: 7px 0 0 12px;
+}
+
+.button-1 .button-1-right .button-1-right-top, 
+.button-1 .button-1-right .button-1-right-bottom {
+	float: left;
+	width: 100%;
+	font-weight: 400;
+}
+
+.button-1 .button-1-right .button-1-right-bottom {
+	font-size: 34px;
+	line-height: 34px;
+}
+
+
+/***** Social icons *****/
+
+.social {
+	display: inline-block;
+	width: 42px;
+	height: 42px;
+	margin: 5px;
+    padding: 11px 0 0 0;
+    font-size: 20px;
+    line-height: 20px;
+    color: #fff;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+.social:hover { color: #fff; background: #888; }
+
+.social-twitter { background: #54c0dd; }
+.social-github { background: #9cdaf0; }
+.social-googleplus { background: #dd4b38; }
+
