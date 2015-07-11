@@ -1,0 +1,26 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+
+    <string name="pref_key_scroll_down_fab">key_scroll_down_fab</string>
+    <string name="pref_title_scroll_down_fab">Scroll down floating button</string>
+    <string-array name="pref_scroll_down_fab_mode">
+        <item>Press to scroll down</item>
+        <item>Drag to scroll down</item>
+        <item>Disable</item>
+    </string-array>
+
+    <string-array name="pref_scroll_down_fab_mode_value">
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
+    <string name="pref_key_show_post_summary">key_show_post_summary</string>
+    <string name="pref_title_show_post_summary">Show post summary (experiment)</string>
+    <string name="summary_show_post_summary">If there exists comment contains \"summary\" or \"tl;dr\"
+        in first words, show it under post title</string>
+</resources>

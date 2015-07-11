@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp">
+
+    <TextView
+        android:id="@+id/tv_header_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="@color/black"
+        android:text="test test etst g"/>
+
+    <TextView
+        android:id="@+id/tv_header_url"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_below="@id/tv_header_title"
+        android:ellipsize="middle"
+        android:text="avery.longlonglong.url"/>
+
+    <TextView
+        android:id="@+id/tv_header_points"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_header_url"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="&#8593;1231" />
+
+    <TextView
+        android:id="@+id/tv_header_comments"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/tv_header_points"
+        android:layout_alignTop="@id/tv_header_points"
+        android:layout_marginLeft="8dp"
+        android:text="1665 comments"
+        />
+
+    <TextView
+    android:id="@+id/tv_header_time"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_toRightOf="@id/tv_header_comments"
+    android:layout_alignTop="@id/tv_header_points"
+    android:layout_marginLeft="8dp"
+    android:text="1111 days ago"
+    />
+
+    <TextView
+        android:id="@+id/tv_header_poster"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/tv_header_time"
+        android:layout_alignTop="@id/tv_header_points"
+        android:layout_marginLeft="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="by: anyonewithlongname"/>
+
+    <TextView
+        android:id="@+id/tv_header_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_header_points"
+        android:layout_margin="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:textColor="@color/black"
+        android:visibility="gone" />
+
+</RelativeLayout>

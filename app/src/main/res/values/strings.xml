@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Hews</string>
+
+    <string name="open_drawer">Open drawer</string>
+    <string name="close_drawer">Close drawer</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_open_post">Open post</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_display">Display</string>
+    <string name="title_activity_comments">CommentsActivity</string>
+    <string name="open_with_hn">Open With Necker Hews</string>
+    <string name="no_comment_promt">No comment yet</string>
+
+    <!-- Nav drawer -->
+    <string name="nav_top_story">Top</string>
+    <string name="nav_new_story">New</string>
+    <string name="nav_ask_hn">Ask HN</string>
+    <string name="nav_show_hn">Show HN</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Dialog -->
+    <string-array name="dialog">
+        <item>Reply via browser</item>
+        <item>Author profile</item>
+        <item>Share to&#8230;</item>
+        <item>Share comment text to&#8230;</item>
+    </string-array>
+
+</resources>

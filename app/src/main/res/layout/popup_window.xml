@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/grey_middle"
+    android:elevation="4dp">
+
+<TextView
+    android:id="@+id/tv_font_size"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_marginTop="16dp"
+    android:layout_marginLeft="8dp"
+    android:layout_alignTop="@+id/imgbtn_font_small"
+    android:textSize="14sp"
+    android:text="Font Size: "/>
+
+    <ImageButton
+        android:id="@id/imgbtn_font_small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/tv_font_size"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_format_size_small" />
+
+    <ImageButton
+        android:id="@+id/imgbtn_font_large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/imgbtn_font_small"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_format_size_large"/>
+
+    <ImageButton
+        android:id="@+id/imgbtn_line_height_wide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:src="@drawable/ic_format_line_spacing_wide" />
+
+    <ImageButton
+        android:id="@+id/imgbtn_line_height_narrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:layout_toLeftOf="@id/imgbtn_line_height_wide"
+        android:src="@drawable/ic_format_line_spacing_narrow"/>
+
+
+    <TextView
+        android:id="@+id/tv_line_height"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_alignTop="@id/imgbtn_line_height_narrow"
+        android:layout_toLeftOf="@id/imgbtn_line_height_narrow"
+        android:text="Line Height: "
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/spinner_font"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/imgbtn_font_small"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:spinnerMode="dialog" />
+
+    <Button
+        android:id="@+id/btn_done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/spinner_font"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:text="Done" />
+
+</RelativeLayout>

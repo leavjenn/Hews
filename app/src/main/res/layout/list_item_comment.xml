@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <!--android:layout_marginBottom="8dp"-->
+
+    <TextView
+        android:id="@+id/iv_indent"
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@+id/tv_comment"
+        android:layout_alignParentTop="true" />
+    <!--android:background="@color/orange_600" -->
+
+    <TextView
+        android:id="@+id/tv_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/tv_collapse_older_comments"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="8dp"
+        android:layout_toRightOf="@id/iv_indent"
+        android:textColor="@color/grey" />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/tv_collapse_older_comments"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_toRightOf="@id/tv_author"
+        android:textColor="@color/grey" />
+
+    <TextView
+        android:id="@id/tv_collapse_older_comments"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:layout_toRightOf="@id/tv_time"
+        android:paddingTop="16dp"
+        android:text="   "
+        android:textAllCaps="false"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tv_collapsed_children_comments_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/tv_collapse_older_comments"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp" />
+
+    <TextView
+        android:id="@id/tv_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_collapse_older_comments"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_toRightOf="@id/iv_indent"
+        android:background="@drawable/list_item_bg"
+        android:paddingBottom="8dp"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+</RelativeLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_top_story"
+            android:checked="true"
+            android:title="@string/nav_top_story" />
+
+        <item
+            android:id="@+id/nav_new_story"
+            android:title="@string/nav_new_story" />
+        <item
+            android:id="@+id/nav_ask_hn"
+            android:title="@string/nav_ask_hn" />
+        <item
+            android:id="@+id/nav_show_hn"
+            android:title="@string/nav_show_hn" />
+        <item
+            android:id="@+id/nav_settings"
+            android:title="@string/nav_settings" />
+    </group>
+
+</menu>

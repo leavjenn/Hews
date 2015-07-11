@@ -1,0 +1,29 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.leavjenn.hews.ui.CommentsActivity">
+    <item
+    android:id="@+id/action_open_post"
+    android:icon="@drawable/ic_web"
+    android:orderInCategory="1"
+    android:title="@string/menu_open_post"
+    app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:orderInCategory="2"
+        android:title="@string/menu_refresh"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share"
+        android:orderInCategory="5"
+        android:title="@string/menu_share"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_display"
+        android:icon="@drawable/ic_text_format"
+        android:orderInCategory="9"
+        android:title="@string/menu_display"
+        app:showAsAction="ifRoom" />
+</menu>

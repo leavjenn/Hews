@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="2"
+        android:entries="@array/pref_scroll_down_fab_mode"
+        android:entryValues="@array/pref_scroll_down_fab_mode_value"
+        android:key="fabkey"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:summary="%s"
+        android:title="@string/pref_title_scroll_down_fab" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/pref_key_show_post_summary"
+        android:title="@string/pref_title_show_post_summary"
+        android:summary="@string/summary_show_post_summary"
+        />
+</PreferenceScreen>

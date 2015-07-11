@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="grey">#bbb</color>
+    <color name="grey_middle">#ccc</color>
+    <color name="grey_light_bg">#eee</color>
+    <color name="black">#000</color>
+    <color name="orange">#FF6600</color>
+    <color name="orange_600">#FB8C00</color>
+    <color name="orange_900">#e65100</color>
+    <drawable name="transparent">#00000000</drawable>
+
+    <color name="menu_item">#CCFFFFFF</color>
+</resources>
