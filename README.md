@@ -31,6 +31,5 @@ Distill the summary (tl; dr) of a post from it's comments, save yourself from cl
 
 
 ## What's next: 
-* Replace the it's-so-ugly-I-wanna-kill-myself icon
-* Theme option
+* Theme
 * Improve error handling
