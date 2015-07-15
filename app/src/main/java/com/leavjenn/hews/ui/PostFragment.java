@@ -182,6 +182,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private void setupFAB() {
         String mode = SharedPrefsManager.getFabMode(prefs);
         if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
+            fab.setVisibility(View.VISIBLE);
             fab.setRecyclerView(mRecyclerView);
             fab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
             //set fab position to default
