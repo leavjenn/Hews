@@ -111,7 +111,11 @@ public class CommentsActivity extends AppCompatActivity {
                 break;
 
             case R.id.action_display:
-                mWindow.show();
+                if(!mWindow.isWindowShowing()){
+                    mWindow.show();
+                }else{
+                    mWindow.dismiss();
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);

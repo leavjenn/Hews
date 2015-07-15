@@ -95,7 +95,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 break;
 
             case R.id.action_display:
-                mWindow.show();
+                if(!mWindow.isWindowShowing()){
+                    mWindow.show();
+                }else{
+                    mWindow.dismiss();
+                }
                 break;
 
             case android.R.id.home:
