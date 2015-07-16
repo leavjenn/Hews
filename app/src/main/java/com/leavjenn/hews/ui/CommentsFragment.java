@@ -206,7 +206,7 @@ public class CommentsFragment extends Fragment
                 mSubscription.unsubscribe();
             }
             mSubscription = AppObservable.bindActivity(getActivity(),
-                    mDataManager.getComments(commentIds, 0))
+                    mDataManager.getCommentsFromFirebase(commentIds, 0))
                     .subscribeOn(mDataManager.getScheduler())
                     .subscribe(new Subscriber<Comment>() {
                         @Override

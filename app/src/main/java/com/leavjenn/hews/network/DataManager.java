@@ -190,7 +190,7 @@ public class DataManager {
                 .concatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long aLong) {
-                        return mService.getComment(String.valueOf(aLong));
+                        return getComment(aLong);
                     }
                 }).filter(new Func1<Comment, Boolean>() {
                     @Override
@@ -245,6 +245,78 @@ public class DataManager {
                                 && comment.getText() != null && !comment.getText().trim().isEmpty());
                     }
                 });
+    }
+
+    public Observable<Comment> getCommentsFromFirebase(final List<Long> commentIds, final int level) {
+        return Observable.from(commentIds)
+                .concatMap(new Func1<Long, Observable<? extends Comment>>() {
+                    @Override
+                    public Observable<? extends Comment> call(Long aLong) {
+                        return getComment(aLong);
+                    }
+                }).concatMap(new Func1<Comment, Observable<Comment>>() {
+                    @Override
+                    public Observable<Comment> call(Comment comment) {
+                        if (comment != null && comment.getText() != null) {
+                            comment.setLevel(level);
+                            if (comment.getKids() == null || comment.getKids().isEmpty()) {
+                                return Observable.just(comment);
+                            } else {
+                                return Observable.just(comment)
+                                        .mergeWith(getCommentsFromFirebase(comment.getKids(), level + 1));
+                            }
+                        }
+                        return Observable.just(null);
+
+                    }
+                }).filter(new Func1<Comment, Boolean>() {
+                    @Override
+                    public Boolean call(Comment comment) {
+                        return (comment != null
+                                && comment.getBy() != null && !comment.getBy().trim().isEmpty()
+                                && comment.getText() != null && !comment.getText().trim().isEmpty());
+                    }
+                });
+    }
+
+    public Observable<Comment> getComment(final Long id) {
+        return Observable.create(new Observable.OnSubscribe<Comment>() {
+            @Override
+            public void call(final Subscriber<? super Comment> subscriber) {
+
+                Firebase itemRef = new Firebase(Constants.KEY_ITEM_URL + id);
+                itemRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Comment comment = mapToComment(dataSnapshot);
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(comment);
+                        }
+                        subscriber.onCompleted();
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        subscriber.onError(firebaseError.toException());
+                    }
+                });
+            }
+        });
+    }
+
+    private Comment mapToComment(DataSnapshot snapshot) {
+        HashMap<String, Object> item = (HashMap<String, Object>) snapshot.getValue();
+        Comment comment = null;
+        if (item != null && item.get(Constants.KEY_TEXT) != null) {
+            comment = new Comment();
+            comment.setId((Long) item.get(Constants.KEY_ID));
+            comment.setKids((ArrayList<Long>) item.get(Constants.KEY_KIDS));
+            comment.setBy((String) item.get(Constants.KEY_BY));
+            comment.setText((String) item.get(Constants.KEY_TEXT));
+            comment.setTime((Long) item.get(Constants.KEY_TIME));
+        }
+        return comment;
+
     }
 
     public Scheduler getScheduler() {
