@@ -17,9 +17,11 @@
         android:id="@+id/tv_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/tv_collapse_older_comments"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/iv_indent"
         android:textColor="@color/grey" />
 
@@ -27,37 +29,24 @@
         android:id="@+id/tv_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/tv_collapse_older_comments"
+        android:layout_alignBaseline="@id/tv_author"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="4dp"
         android:layout_toRightOf="@id/tv_author"
         android:textColor="@color/grey" />
 
     <TextView
-        android:id="@id/tv_collapse_older_comments"
+        android:id="@+id/tv_collapse_older_comments"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="8dp"
+        android:layout_alignBaseline="@id/tv_author"
         android:layout_toRightOf="@id/tv_time"
-        android:paddingTop="16dp"
-        android:text="   "
-        android:textAllCaps="false"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/tv_collapsed_children_comments_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/tv_collapse_older_comments"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="16dp" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@id/tv_comment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_collapse_older_comments"
+        android:layout_below="@+id/tv_author"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_toRightOf="@id/iv_indent"

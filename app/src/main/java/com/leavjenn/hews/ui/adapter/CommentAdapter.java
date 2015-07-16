@@ -176,10 +176,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             commentViewHolder.tvTime.setText(Utils.setTimeFormat(comment.getTime()));
 
             if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
-                commentViewHolder.tvCollapsedChildrenCommentsCount.setText(
-                        "+" + mCollapsedChildrenCommentsIndex.get(comment.getId()).size());
+                commentViewHolder.tvComment.setText(
+                        "\n" + (mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1)
+                                + " comments collapsed\n");
+                commentViewHolder.tvComment.setGravity(Gravity.CENTER);
             } else {
-                commentViewHolder.tvCollapsedChildrenCommentsCount.setText("   ");
+                commentViewHolder.tvComment.setText(Html.fromHtml(comment.getText()));
+                commentViewHolder.tvComment.setGravity(Gravity.LEFT);
             }
 
             if (mCollapsedOlderCommentsIndex.containsKey(comment.getId())) {

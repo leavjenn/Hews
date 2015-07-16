@@ -19,7 +19,6 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
     public TextView tvComment;
     public TextView tvAuthor;
     public TextView tvTime;
-    public TextView tvCollapsedChildrenCommentsCount;
     public TextView tvCollapseOlderComments;
     ViewHolderClickListener mListener;
     final static int UNIT_COMMENT_INDENT_PIXEL = 15;
@@ -36,8 +35,6 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
         tvComment.setOnLongClickListener(this);
         tvAuthor = (TextView) v.findViewById(R.id.tv_author);
         tvTime = (TextView) v.findViewById(R.id.tv_time);
-        tvCollapsedChildrenCommentsCount =
-                (TextView) v.findViewById(R.id.tv_collapsed_children_comments_count);
         tvCollapseOlderComments = (TextView) v.findViewById(R.id.tv_collapse_older_comments);
         v.setOnClickListener(this);
         v.setOnLongClickListener(this);
