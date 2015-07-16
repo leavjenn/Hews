@@ -8,7 +8,7 @@
     <string name="pref_key_scroll_down_fab">key_scroll_down_fab</string>
     <string name="pref_title_scroll_down_fab">Scroll down floating button</string>
     <string-array name="pref_scroll_down_fab_mode">
-        <item>Press to scroll down</item>
+        <item>Press &amp; hold to scroll down</item>
         <item>Drag to scroll down</item>
         <item>Disable</item>
     </string-array>
