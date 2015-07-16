@@ -178,11 +178,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
                 commentViewHolder.tvComment.setText(
-                        "\n" + (mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1)
-                                + " comments collapsed\n");
+                        (mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1)
+                                + " comments collapsed");
+                commentViewHolder.tvComment.setMinLines(2);
                 commentViewHolder.tvComment.setGravity(Gravity.CENTER);
             } else {
                 commentViewHolder.tvComment.setText(Html.fromHtml(comment.getText()));
+                commentViewHolder.tvComment.setMinLines(Integer.MIN_VALUE);
                 commentViewHolder.tvComment.setGravity(Gravity.LEFT);
             }
 
@@ -299,7 +301,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 mItemList.remove(comment);
             }
             notifyItemChanged(position);
-             notifyItemRangeRemoved(position + 1, childrenComments.size());
+            notifyItemRangeRemoved(position + 1, childrenComments.size());
         }
     }
 
