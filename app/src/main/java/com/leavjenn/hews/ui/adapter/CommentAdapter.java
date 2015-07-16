@@ -187,8 +187,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
 
             if (mCollapsedOlderCommentsIndex.containsKey(comment.getId())) {
+                commentViewHolder.tvCollapseOlderComments.setVisibility(View.VISIBLE);
                 commentViewHolder.tvCollapseOlderComments.setText(
-                        "+" + mCollapsedOlderCommentsIndex.get(comment.getId()).size());
+                        " +" + mCollapsedOlderCommentsIndex.get(comment.getId()).size() + " ");
             } else {
                 commentViewHolder.tvCollapseOlderComments.setText("   ");
             }
