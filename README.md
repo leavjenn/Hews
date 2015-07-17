@@ -31,5 +31,6 @@ Distill the summary (tl; dr) of a post from it's comments, save yourself from cl
 
 
 ## What's next: 
-* Theme
+* In-app searching
 * Improve error handling
+* Login and relative features
