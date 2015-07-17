@@ -5,9 +5,9 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="@dimen/toolbar_height"
+    android:background="?toolbar_bg_color"
     android:minHeight="?android:attr/actionBarSize"
-    android:background="@color/orange_600"
     android:elevation="4dp"
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    app:popupTheme="?attr/toolbar_poptheme"
     android:fitsSystemWindows="true"/>

@@ -147,7 +147,7 @@ public class PopupFloatingWindow implements View.OnClickListener {
                     "setContentView was not called with a view to display.");
 
         if (mBackground == null)
-            mWindow.setBackgroundDrawable(mContext.getResources().getDrawable(R.color.grey_middle));
+            mWindow.setBackgroundDrawable(mContext.getResources().getDrawable(R.color.grey_400));
         else
             mWindow.setBackgroundDrawable(mBackground);
 

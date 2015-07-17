@@ -1,10 +1,22 @@
 <resources>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- Example General settings -->
-    <string name="pref_header_general">General</string>
+    <!-- Themes -->
+    <string name="pref_title_themes">Themes</string>
 
+    <string-array name="pref_themes">
+        <item>Light</item>
+        <item>Sepia</item>
+        <item>Dark</item>
+    </string-array>
 
+    <string-array name="pref_themes_value">
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
+    <!-- Floating actino button -->
     <string name="pref_key_scroll_down_fab">key_scroll_down_fab</string>
     <string name="pref_title_scroll_down_fab">Scroll down floating button</string>
     <string-array name="pref_scroll_down_fab_mode">
@@ -19,6 +31,7 @@
         <item>0</item>
     </string-array>
 
+    <!-- Summary -->
     <string name="pref_key_show_post_summary">key_show_post_summary</string>
     <string name="pref_title_show_post_summary">Show post summary (experiment)</string>
     <string name="summary_show_post_summary">If there exists comment contains \"summary\" or \"tl;dr\"

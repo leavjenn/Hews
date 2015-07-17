@@ -10,11 +10,15 @@ public class SharedPrefsManager {
     public static final String KEY_COMMENT_FONT = "key_comment_font";
     public static final String KEY_COMMENT_FONT_SIZE = "key_comment_font_size";
     public static final String KEY_COMMENT_LINE_HEIGHT = "key_comment_line_height";
+    public static final String KEY_THEME = "themekey";
+    public static final String THEME_DARK = "0";
+    public static final String THEME_SEPIA = "1";
+    public static final String THEME_LIGHT = "2";
     public static final String KEY_FAB_MODE = "fabkey";
-    public static final String KEY_SHOW_POST_SUMMARY = "key_show_post_summary";
     public static final String FAB_DISABLE = "0";
     public static final String FAB_DRAG_SCROLL_DOWN = "1";
     public static final String FAB_PRESS_SCROLL_DOWN = "2";
+    public static final String KEY_SHOW_POST_SUMMARY = "key_show_post_summary";
 
     static String[] fontsForComment = {"PT Sans", "Roboto", "Lato",
             "Open Sans", "Muli", "Slabo 27px", "Crimson Text", "Roboto Slab",
@@ -90,6 +94,10 @@ public class SharedPrefsManager {
     }
 
     //Settings
+    public static String getTheme(SharedPreferences sp) {
+        return sp.getString(KEY_THEME, THEME_LIGHT);
+    }
+
     public static String getFabMode(SharedPreferences sp) {
         return sp.getString(KEY_FAB_MODE, FAB_PRESS_SCROLL_DOWN);
     }

@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="grey">#bbb</color>
+    <!-- primary text (dark) / bg (light) -->
+    <color name="grey_200">#eee</color>
+    <!-- popupWindow bg (light / sepia) -->
     <color name="grey_middle">#ccc</color>
-    <color name="grey_light_bg">#eee</color>
+    <!-- secondary text / (test) popupWindow bg-->
+    <color name="grey_400">#bdbdbd</color>
+
+    <color name="grey_700">#616161</color>
+    <!-- toolbar (dark) -->
+    <color name="grey_800">#424242</color>
+    <!-- bg (dark) -->
+    <color name="grey_900">#212121</color>
+    <!-- primary text (light) -->
     <color name="black">#000</color>
     <color name="orange">#FF6600</color>
+    <color name="orange_100">#ffe0b2</color>
     <color name="orange_600">#FB8C00</color>
     <color name="orange_900">#e65100</color>
-    <drawable name="transparent">#00000000</drawable>
 
-    <color name="menu_item">#CCFFFFFF</color>
+    <!-- bg (sepia) -->
+    <color name="sepia">#F4ECD8</color>
+    <!-- primary text (sepia) -->
+    <color name="sepia_dark">#5B4636</color>
+
+    <color name="fab_arrow">#CCFFFFFF</color>
 </resources>

@@ -11,12 +11,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
@@ -45,6 +43,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     Typeface mFont;
     float mTextSize, mLineHeight;
     int mLoadingState = 0;
+    int mCommentIndentColorOrange, mCommentIndentColorBg, mCommentIndentWidth;
 
     public CommentAdapter(Context context) {
         mContext = context;
@@ -53,6 +52,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mCollapsedOlderCommentsIndex = new HashMap<>();
         prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         updateCommentPrefs();
+        setCommentIndentStyle();
     }
 
     @Override
@@ -138,12 +138,12 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             }
                         });
 
-                vh.tvComment = (TextView) v.findViewById(R.id.tv_comment);
                 vh.tvComment.setTypeface(mFont);
                 vh.tvComment.setPaintFlags(vh.tvComment.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
-
                 vh.tvComment.setTextSize(mTextSize);
                 vh.tvComment.setLineSpacing(0, mLineHeight);
+                vh.setCommentIndentStripeStyle(mCommentIndentColorOrange,
+                        mCommentIndentColorBg, mCommentIndentWidth);
                 viewHolder = vh;
                 break;
             case VIEW_TYPE_HEADER:
@@ -193,7 +193,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 commentViewHolder.tvCollapseOlderComments.setText(
                         " +" + mCollapsedOlderCommentsIndex.get(comment.getId()).size() + " ");
             } else {
-                commentViewHolder.tvCollapseOlderComments.setText("   ");
+                commentViewHolder.tvCollapseOlderComments.setVisibility(View.GONE);
             }
         } else if (viewHolder instanceof CommentHeaderViewHolder) {
             CommentHeaderViewHolder commentHeaderViewHolder = (CommentHeaderViewHolder) viewHolder;
@@ -237,6 +237,17 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
                 commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
             }
+        }
+    }
+
+    public void setCommentIndentStripWidth() {
+        int widthStrip = Utils.convertDpToPixels(15, mContext);
+
+    }
+
+    public void setCommentIndentTheme() {
+        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
+
         }
     }
 
@@ -316,9 +327,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
         notifyItemRangeInserted(mItemList.indexOf(parentComment) + 1,
                 collapsedComments.size());
-        // Any different?
-        Log.d(String.valueOf(mItemList.indexOf(parentComment) + 1),
-                String.valueOf(position + 1));
         notifyItemChanged(position);
         mCollapsedChildrenCommentsIndex.remove(parentComment.getId());
     }
@@ -374,6 +382,20 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 SharedPrefsManager.getCommentFont(prefs) + ".ttf");
         mTextSize = SharedPrefsManager.getCommentFontSize(prefs);
         mLineHeight = SharedPrefsManager.getCommentLineHeight(prefs);
+    }
+
+    private void setCommentIndentStyle() {
+        mCommentIndentWidth = Utils.convertDpToPixels(CommentViewHolder.UNIT_COMMENT_INDENT_DP, mContext);
+        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_LIGHT)) {
+            mCommentIndentColorOrange = 0xFFffa726; //orange_400
+            mCommentIndentColorBg = 0xFFEEEEEE; //grey_200
+        } else if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
+            mCommentIndentColorOrange = 0xFFe65100; //orange_900
+            mCommentIndentColorBg = 0xFF212121; //grey_900
+        } else {
+            mCommentIndentColorOrange = 0xFFffa726; //orange_400
+            mCommentIndentColorBg = 0xFFF4ECD8; //sepia
+        }
     }
 
 }

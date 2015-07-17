@@ -2,8 +2,10 @@ package com.leavjenn.hews.ui;
 
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
+import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
@@ -23,6 +26,15 @@ public class CommentsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Set theme
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String theme = SharedPrefsManager.getTheme(prefs);
+        if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
+            setTheme(R.style.AppTheme_Sepia);
+        }
+        if (theme.equals(SharedPrefsManager.THEME_DARK)) {
+            setTheme(R.style.AppTheme_Dark);
+        }
         setContentView(R.layout.activity_comments);
         //Setup Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

@@ -1,10 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
+    android:background="?bg_color"
     tools:context="com.leavjenn.hews.ui.PostFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -25,12 +25,10 @@
 
     <com.leavjenn.hews.ui.widget.FloatingActionButton
         android:id="@+id/fab"
-        style="@style/FloatingActionButton"
+        style="?attr/floating_action_button"
         android:src="@drawable/fab_arrow_down"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="16dp"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
         android:contentDescription="@null" />
 </RelativeLayout>

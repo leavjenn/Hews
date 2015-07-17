@@ -1,72 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_post_frame"
-    android:layout_height="wrap_content"
+    style="?attr/list_item_bg_color"
     android:layout_width="wrap_content"
-    android:background="@drawable/list_item_bg"
-    android:layout_marginTop="8dp"
+    android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
+    android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
-    android:layout_marginLeft="16dp">
+    android:layout_marginTop="8dp">
 
     <TextView
         android:id="@+id/tv_post_title"
-        android:textSize="18sp"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:minLines="2"
-        android:textColor="@color/black"
         android:layout_alignParentTop="true"
+        android:layout_marginBottom="4dp"
         android:layout_marginTop="4dp"
         android:gravity="center_vertical"
-        android:layout_marginBottom="4dp"
-        android:text="title test"/>
+        android:minLines="2"
+        android:text="title test"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/tv_post_summary"
-        android:layout_height="wrap_content"
         android:layout_width="fill_parent"
-        android:layout_below="@id/tv_post_title"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:textColor="@color/black"
+        android:layout_below="@id/tv_post_title"
         android:text="fdfhu sdufkhdfkds dksufsdkf ukdfhsdkufh dskfhsdfkdshfksdu fhdskfus dh"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_post_point"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_marginRight="8dp"
-        android:layout_alignParentLeft="true"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:layout_below="@id/tv_post_summary"
+        android:layout_marginRight="8dp"
         android:text="+1234"
-        android:textColor="@color/grey"/>
+        android:textColor="?attr/text_info_color" />
 
     <TextView
         android:id="@+id/tv_post_comments"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignTop="@id/tv_post_point"
         android:layout_toRightOf="@id/tv_post_point"
         android:text="234 comments"
-        android:textColor="@color/grey"/>
+        android:textColor="?attr/text_info_color" />
 
     <TextView
         android:id="@+id/tv_post_pretty_url"
-        android:layout_height="wrap_content"
         android:layout_width="fill_parent"
-        android:layout_toRightOf="@id/tv_post_comments"
-        android:layout_alignTop="@id/tv_post_point"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/tv_post_point"
         android:layout_marginLeft="8dp"
-        android:singleLine="true"
-        android:gravity="right"
+        android:layout_toRightOf="@id/tv_post_comments"
         android:ellipsize="middle"
+        android:gravity="right"
+        android:singleLine="true"
         android:text="averyveryveryveryveryveryveryveryveryverylongurl.com"
-        android:textColor="@color/grey"/>
+        android:textColor="?attr/text_info_color" />
     <!--android:ellipsize:"start" style has some issue-->
     <!--android:maxLines="1"-->
 

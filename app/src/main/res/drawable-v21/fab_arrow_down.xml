@@ -6,7 +6,7 @@
     android:viewportWidth="24">
 
     <path
-        android:strokeColor="@color/menu_item"
+        android:strokeColor="@color/fab_arrow"
         android:strokeLineCap="round"
         android:strokeWidth="3"
         android:pathData="M4,12L12,20M12,4L12,19M12,20L20,12" />

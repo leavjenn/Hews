@@ -20,14 +20,14 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
     public TextView tvAuthor;
     public TextView tvTime;
     public TextView tvCollapseOlderComments;
+    public int colorOrange, colorBg, indentWidth;
     ViewHolderClickListener mListener;
-    final static int UNIT_COMMENT_INDENT_PIXEL = 15;
+    public final static int UNIT_COMMENT_INDENT_DP = 9;
 
 
     public CommentViewHolder(View v, ViewHolderClickListener listener) {
         super(v);
         ivIndent = (TextView) v.findViewById(R.id.iv_indent);
-        ivIndent.setBackground(getStripeDrawable());
         tvComment = (TextView) v.findViewById(R.id.tv_comment);
         // enable link clicking. If not setOnClickListener, itemView ClickListener will not work
         tvComment.setOnClickListener(this);
@@ -41,15 +41,22 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
         mListener = listener;
     }
 
+    public void setCommentIndentStripeStyle(int orange, int bg, int width) {
+        colorOrange = orange;
+        colorBg = bg;
+        indentWidth = width;
+        ivIndent.setBackground(getStripeDrawable());
+    }
+
     public Drawable getStripeDrawable() {
         ShapeDrawable bg = new ShapeDrawable(new RectShape());
-        int[] pixels = new int[UNIT_COMMENT_INDENT_PIXEL];
-        for (int i = 0; i < 5; i++) {
-            pixels[i] = 0xFFffa726;
-            pixels[i + 5] = 0xFFffa726;
-            pixels[UNIT_COMMENT_INDENT_PIXEL - 1 - i] = 0xFFEEEEEE;
+        int[] pixels = new int[indentWidth];
+        for (int i = 0; i < indentWidth / 3; i++) {
+            pixels[i] = colorOrange;
+            pixels[i + indentWidth / 3] = colorOrange;
+            pixels[i + indentWidth / 3 * 2 - 1] = colorBg;
         }
-        Bitmap bm = Bitmap.createBitmap(pixels, UNIT_COMMENT_INDENT_PIXEL, 1, Bitmap.Config.ARGB_8888);
+        Bitmap bm = Bitmap.createBitmap(pixels, indentWidth, 1, Bitmap.Config.ARGB_8888);
         Shader shader = new BitmapShader(bm,
                 Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         bg.getPaint().setShader(shader);
@@ -57,7 +64,7 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
     }
 
     public void setCommentIndent(int level) {
-        ivIndent.getLayoutParams().width = level * UNIT_COMMENT_INDENT_PIXEL;
+        ivIndent.getLayoutParams().width = level * indentWidth;
         ivIndent.requestLayout();
     }
 

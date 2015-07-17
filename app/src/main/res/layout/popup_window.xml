@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/grey_middle"
+    android:background="?popup_window_bg_color"
     android:elevation="4dp">
 
 <TextView
@@ -23,7 +23,7 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/tv_font_size"
         android:layout_marginTop="8dp"
-        android:src="@drawable/ic_format_size_small" />
+        android:src="?popup_window_icon_textsize_small" />
 
     <ImageButton
         android:id="@+id/imgbtn_font_large"
@@ -32,7 +32,7 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/imgbtn_font_small"
         android:layout_marginTop="8dp"
-        android:src="@drawable/ic_format_size_large"/>
+        android:src="?popup_window_icon_textsize_large"/>
 
     <ImageButton
         android:id="@+id/imgbtn_line_height_wide"
@@ -42,7 +42,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
-        android:src="@drawable/ic_format_line_spacing_wide" />
+        android:src="?popup_window_icon_lineheight_wide" />
 
     <ImageButton
         android:id="@+id/imgbtn_line_height_narrow"
@@ -51,7 +51,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="8dp"
         android:layout_toLeftOf="@id/imgbtn_line_height_wide"
-        android:src="@drawable/ic_format_line_spacing_narrow"/>
+        android:src="?popup_window_icon_lineheight_narrow"/>
 
 
     <TextView

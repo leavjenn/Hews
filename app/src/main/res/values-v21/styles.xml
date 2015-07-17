@@ -1,15 +1,15 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:colorPrimary">@color/orange_600</item>
-        <!--   darker variant for the status bar and contextual app bars -->
-        <item name="android:colorPrimaryDark">@color/orange</item>
-        <!--   theme UI controls like checkboxes and text fields -->
-        <item name="android:colorAccent">@color/orange_600</item>
-        <!--   Touch feedback for ripple, etc. -->
-        <item name="android:colorControlHighlight">@color/orange_900</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="windowActionBar">false</item>
+
+    <style name="ListItemBgColor">
+        <item name="android:background">@drawable/list_item_bg</item>
+    </style>
+
+    <style name="ListItemBgColor.Sepia">
+        <item name="android:background">@drawable/list_item_bg_sepia</item>
+    </style>
+
+    <style name="ListItemBgColor.Dark">
+        <item name="android:background">@drawable/list_item_bg_dark</item>
     </style>
 
     <style name="FloatingActionButton" parent="android:Widget.Material.Button">
@@ -17,4 +17,7 @@
         <item name="android:layout_width">56dp</item>
         <item name="android:layout_height">56dp</item>
     </style>
+
+
+    <style name="FloatingActionButton.Dark"></style>
 </resources>

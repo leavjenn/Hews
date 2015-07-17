@@ -28,7 +28,7 @@
         <activity
             android:name="com.leavjenn.hews.ui.CommentsActivity"
             android:screenOrientation="sensorPortrait"
-            android:label="@string/open_with_hn">
+            android:label="@string/open_with_hn" >
             <intent-filter>
                 <data
                     android:host="news.ycombinator.com"

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
+    style="?attr/list_item_bg_color"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <!--android:layout_marginBottom="8dp"-->
@@ -23,7 +24,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/iv_indent"
-        android:textColor="@color/grey" />
+        android:textColor="?attr/text_info_color" />
 
     <TextView
         android:id="@+id/tv_time"
@@ -32,7 +33,7 @@
         android:layout_alignBaseline="@id/tv_author"
         android:layout_marginRight="8dp"
         android:layout_toRightOf="@id/tv_author"
-        android:textColor="@color/grey" />
+        android:textColor="?attr/text_info_color" />
 
     <TextView
         android:id="@+id/tv_collapse_older_comments"
@@ -40,19 +41,20 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/tv_author"
         android:layout_toRightOf="@id/tv_time"
-        android:visibility="gone" />
+        android:background="?android:textColor"
+        android:visibility="gone"
+        android:textColor="?attr/bg_color" />
 
     <TextView
         android:id="@id/tv_comment"
+        style="?attr/list_item_bg_color"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_author"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_toRightOf="@id/iv_indent"
-        android:background="@drawable/list_item_bg"
         android:paddingBottom="8dp"
-        android:textColor="@color/black"
         android:textSize="16sp" />
 
 </RelativeLayout>

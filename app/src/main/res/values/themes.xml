@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/orange_600</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/orange</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/orange_600</item>
+        <!--   Touch feedback for ripple, etc. -->
+        <item name="colorControlHighlight">@color/orange_100</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="text_info_color">@color/grey_400</item>
+        <item name="bg_color">@color/grey_200</item>
+        <item name="list_item_bg_color">@style/ListItemBgColor</item>
+        <item name="toolbar_bg_color">@color/orange_600</item>
+        <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="popup_window_bg_color">@color/grey_400</item>
+        <item name="popup_window_icon_textsize_small">@drawable/ic_format_size_small</item>
+        <item name="popup_window_icon_textsize_large">@drawable/ic_format_size_large</item>
+        <item name="popup_window_icon_lineheight_narrow">@drawable/ic_format_line_spacing_narrow</item>
+        <item name="popup_window_icon_lineheight_wide">@drawable/ic_format_line_spacing_wide</item>
+        <item name="floating_action_button">@style/FloatingActionButton</item>
+    </style>
+
+    <style name="AppTheme.Sepia">
+        <item name="text_info_color">@color/grey_400</item>
+        <item name="bg_color">@color/sepia</item>
+        <item name="android:textColor">@color/sepia_dark</item>
+        <item name="list_item_bg_color">@style/ListItemBgColor.Sepia</item>
+        <item name="toolbar_bg_color">@color/orange_600</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/grey_900</item>
+        <item name="colorPrimaryDark">@color/grey_900</item>
+        <item name="colorAccent">@color/orange_900</item>
+        <item name="colorControlHighlight">@color/orange_900</item>
+        <item name="android:textColor">@color/grey_200</item>
+        <item name="text_info_color">@color/grey_400</item>
+        <item name="bg_color">@color/grey_900</item>
+        <item name="list_item_bg_color">@style/ListItemBgColor.Dark</item>
+        <item name="toolbar_bg_color">@color/grey_800</item>
+        <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat</item>
+        <item name="popup_window_bg_color">@color/grey_800</item>
+        <item name="popup_window_icon_textsize_small">@drawable/ic_format_size_small_dark</item>
+        <item name="popup_window_icon_textsize_large">@drawable/ic_format_size_large_dark</item>
+        <item name="popup_window_icon_lineheight_narrow">@drawable/ic_format_line_spacing_narrow_dark</item>
+        <item name="popup_window_icon_lineheight_wide">@drawable/ic_format_line_spacing_wide_dark</item>
+        <item name="floating_action_button">@style/FloatingActionButton.Dark</item>
+    </style>
+</resources>

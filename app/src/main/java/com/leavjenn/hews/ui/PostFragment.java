@@ -338,6 +338,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
             setupFAB();
         }
+        if (key.equals(SharedPrefsManager.KEY_THEME)){
+            getActivity().recreate();
+        }
     }
 
 }
