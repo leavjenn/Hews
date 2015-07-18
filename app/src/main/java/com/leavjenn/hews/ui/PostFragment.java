@@ -65,7 +65,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private DataManager mDataManager;
     private CompositeSubscription mCompositeSubscription;
 
-
 //    public static PostFragment newInstance(String param1, String param2) {
 //        PostFragment fragment = new PostFragment();
 //        Bundle args = new Bundle();
@@ -338,7 +337,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
             setupFAB();
         }
-        if (key.equals(SharedPrefsManager.KEY_THEME)){
+        if (key.equals(SharedPrefsManager.KEY_THEME)) {
             getActivity().recreate();
         }
     }

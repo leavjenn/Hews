@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.Gravity;
@@ -36,6 +37,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int VIEW_TYPE_FOOTER = 2;
 
     Context mContext;
+    RecyclerView mRecyclerView;
     ArrayList<HNItem> mItemList;
     Map<Long, List<Comment>> mCollapsedChildrenCommentsIndex;
     Map<Long, List<Comment>> mCollapsedOlderCommentsIndex;
@@ -45,8 +47,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     int mLoadingState = 0;
     int mCommentIndentColorOrange, mCommentIndentColorBg, mCommentIndentWidth;
 
-    public CommentAdapter(Context context) {
+    public CommentAdapter(Context context, RecyclerView recyclerView) {
         mContext = context;
+        mRecyclerView = recyclerView;
         mItemList = new ArrayList<>();
         mCollapsedChildrenCommentsIndex = new HashMap<>();
         mCollapsedOlderCommentsIndex = new HashMap<>();
@@ -240,17 +243,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public void setCommentIndentStripWidth() {
-        int widthStrip = Utils.convertDpToPixels(15, mContext);
-
-    }
-
-    public void setCommentIndentTheme() {
-        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
-
-        }
-    }
-
     @Override
     public int getItemCount() {
         return mItemList.size();
@@ -298,6 +290,11 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void collapseChildrenComment(int position) {
         ArrayList<Comment> childrenComments = new ArrayList<>();
         Comment parentComment = (Comment) mItemList.get(position);
+        LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+        // if a comment header is not visible when collapsing, scroll to it's header
+        if (position != linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
+            linearLayoutManager.scrollToPosition(position);
+        }
 
         for (int curPosition = position + 1;
              (mItemList.get(curPosition) instanceof Comment

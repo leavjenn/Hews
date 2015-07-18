@@ -128,8 +128,8 @@ public class CommentsFragment extends Fragment
     }
 
     private void initRecyclerView(View rootView) {
-        mCommentAdapter = new CommentAdapter(getActivity());
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.comment_list);
+        mCommentAdapter = new CommentAdapter(getActivity(), mRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setAdapter(mCommentAdapter);
