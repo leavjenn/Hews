@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.leavjenn.hews.ui.widget.FloatingActionButton xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fab"
+    android:layout_width="56dp"
+    android:layout_height="56dp"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:layout_marginBottom="@dimen/fab_margin_bottom"
+    android:src="@drawable/fab_arrow_down"
+    app:borderWidth="0dp"
+    app:elevation="8dp" />

@@ -11,13 +11,4 @@
     <style name="ListItemBgColor.Dark">
         <item name="android:background">@drawable/list_item_bg_dark</item>
     </style>
-
-    <style name="FloatingActionButton" parent="android:Widget.Material.Button">
-        <item name="android:background">@drawable/fab_background</item>
-        <item name="android:layout_width">56dp</item>
-        <item name="android:layout_height">56dp</item>
-    </style>
-
-
-    <style name="FloatingActionButton.Dark"></style>
 </resources>

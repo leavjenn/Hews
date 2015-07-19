@@ -3,5 +3,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="navigation_drawer_width">300dp</dimen>
     <dimen name="toolbar_height">56dp</dimen>
-    <dimen name="fab_margin_bottom">0dp</dimen>
+    <dimen name="fab_margin_bottom">16dp</dimen>
 </resources>

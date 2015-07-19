@@ -1,14 +1,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?bg_color"
     tools:context="com.leavjenn.hews.ui.CommentsFragment">
     <!--<TextView-->
-        <!--android:id="@+id/tv_post_title"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentTop="true"/>-->
+    <!--android:id="@+id/tv_post_title"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentTop="true"/>-->
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/comment_list"
@@ -16,37 +17,29 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:scrollbars="vertical"
         android:clipToPadding="false"
-        android:paddingBottom="72dp" />
+        android:paddingBottom="72dp"
+        android:scrollbars="vertical" />
 
     <RelativeLayout
         android:id="@android:id/empty"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="0dp"
-        android:layout_marginTop="0dp">
+        android:visibility="gone">
 
         <ProgressBar
             android:id="@+id/progress_bar"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:translationZ="2dp"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            android:translationZ="2dp" />
     </RelativeLayout>
 
-    <com.leavjenn.hews.ui.widget.FloatingActionButton
-        android:id="@+id/fab"
-        style="?attr/floating_action_button"
-        android:src="@drawable/fab_arrow_down"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
-        android:contentDescription="@null" />
-
+    <include layout="@layout/include_fab" />
 </RelativeLayout>

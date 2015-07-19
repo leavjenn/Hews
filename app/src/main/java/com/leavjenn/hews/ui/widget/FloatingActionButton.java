@@ -6,11 +6,10 @@ import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.ImageButton;
 
 import com.leavjenn.hews.SharedPrefsManager;
 
-public class FloatingActionButton extends ImageButton {
+public class FloatingActionButton extends android.support.design.widget.FloatingActionButton {
 
     public static final int FAB_DRAG_MODE = 1;
     public static final int FAB_PRESS_MODE = 2;
@@ -26,7 +25,7 @@ public class FloatingActionButton extends ImageButton {
     }
 
     public FloatingActionButton(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public FloatingActionButton(Context context, AttributeSet attrs, int defStyle) {

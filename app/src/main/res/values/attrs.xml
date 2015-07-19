@@ -11,6 +11,5 @@
         <attr name="popup_window_icon_textsize_large" format="reference" />
         <attr name="popup_window_icon_lineheight_narrow" format="reference" />
         <attr name="popup_window_icon_lineheight_wide" format="reference" />
-        <attr name="floating_action_button" format="reference" />
     </declare-styleable>
 </resources>
