@@ -26,6 +26,9 @@ public final class Constants {
             = "https://hacker-news.firebaseio.com/v0/showstories";
     public static final String KEY_API_URL = "https://hacker-news.firebaseio.com/v0";
     public static final String KEY_ITEM_URL = "https://hacker-news.firebaseio.com/v0/item/";
+	
+	public static final String SEARCH_BASE_URL = "https://hn.algolia.com/api/v1/";
+	
     public static final String TYPE_STORY = "story";
     public static final String TYPE_COMMENT = "comment";
     public static final String TYPE_POLL = "poll";
