@@ -15,6 +15,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
@@ -22,7 +25,11 @@ import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
+import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
+
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity implements PostAdapter.OnItemClickListener {
@@ -31,9 +38,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final long DRAWER_CLOSE_DELAY_MS = 250;
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
+    Toolbar toolbar;
+    private AlwaysShowDialogSpinner mSpinner;
     private PopupFloatingWindow mWindow;
     //    private SearchView mSearchView;
-    String mStoryType;
+    String mStoryTypeSpec;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +59,16 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(this);
         // setup Toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        // set up time range spinner
+        mSpinner = (AlwaysShowDialogSpinner) findViewById(R.id.spinner_time_range);
+        setUpSpinner();
         //setup drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -65,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
-        mStoryType = Constants.KEY_TOP_STORIES_URL;
+        mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
         mWindow = new PopupFloatingWindow(this, toolbar);
     }
 
@@ -103,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             case R.id.action_refresh:
                 PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.frag_post_list);
-                currentFrag.refresh();
+                currentFrag.refresh(currentFrag.getStoryType(), currentFrag.getStoryTypeSpec());
                 break;
 
             case R.id.action_display:
-                if(!mWindow.isWindowShowing()){
+                if (!mWindow.isWindowShowing()) {
                     mWindow.show();
-                }else{
+                } else {
                     mWindow.dismiss();
                 }
                 break;
@@ -129,44 +141,115 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         final int type = menuItem.getItemId();
                         switch (type) {
                             case R.id.nav_top_story:
-                                mStoryType = Constants.KEY_TOP_STORIES_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
                                 break;
-
                             case R.id.nav_new_story:
-                                mStoryType = Constants.KEY_NEW_STORIES_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_NEW_URL;
                                 break;
-
                             case R.id.nav_ask_hn:
-                                mStoryType = Constants.KEY_ASK_HN_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_URL;
                                 break;
-
                             case R.id.nav_show_hn:
-                                mStoryType = Constants.KEY_SHOW_HN_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_URL;
                                 break;
-
+                            case R.id.nav_popular:
+                                mStoryTypeSpec = Constants.TYPE_SEARCH;
+                                break;
                             case R.id.nav_settings:
                                 break;
                         }
                         // allow some time after closing the drawer before performing real navigation
                         // so the user can see what is happening
                         mDrawerLayout.closeDrawer(GravityCompat.START);
-                        mDrawerActionHandler.postDelayed(new Runnable() {
+
+                        Runnable r = new Runnable() {
                             @Override
                             public void run() {
-                                if (type != R.id.nav_settings) {
+                                if (type == R.id.nav_settings) {
+                                    Intent i = new Intent(getBaseContext(), SettingsActivity.class);
+                                    startActivity(i);
+                                } else if (type == R.id.nav_popular) {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
                                             .findFragmentById(R.id.frag_post_list);
-                                    currentFrag.updateStoryFeed(mStoryType);
+                                    currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
+                                    if (getSupportActionBar() != null) {
+                                        getSupportActionBar().setDisplayShowTitleEnabled(false);
+                                    }
+                                    mSpinner.setVisibility(View.VISIBLE);
                                 } else {
-                                    Intent i = new Intent(getBaseContext(), SettingsActivity.class);
-                                    startActivity(i);
+                                    menuItem.setChecked(true);
+                                    PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
+                                            .findFragmentById(R.id.frag_post_list);
+                                    currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
+                                    if (getSupportActionBar() != null) {
+                                        getSupportActionBar().setDisplayShowTitleEnabled(true);
+                                    }
+                                    mSpinner.setVisibility(View.GONE);
                                 }
+
                             }
-                        }, DRAWER_CLOSE_DELAY_MS);
+                        };
+
+                        mDrawerActionHandler.postDelayed(r, DRAWER_CLOSE_DELAY_MS);
                         return true;
                     }
-                });
+                }
+        );
+    }
+
+    void setUpSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
+                R.array.time_range, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner.setAdapter(adapter);
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.frag_post_list);
+                Calendar c = Calendar.getInstance();
+                long secStart, secEnd;
+                Date d;
+                switch (position) {
+                    case 0: // Past 24 hours
+                        d = c.getTime();
+                        secEnd = d.getTime() / 1000;
+                        c.add(Calendar.DAY_OF_YEAR, -1);
+                        d = c.getTime();
+                        secStart = d.getTime() / 1000;
+                        currentFrag.refresh(Constants.TYPE_SEARCH,
+                                String.valueOf(secStart) + String.valueOf(secEnd));
+                        break;
+                    case 1: // Last 3 days
+                        d = c.getTime();
+                        secEnd = d.getTime() / 1000;
+                        c.add(Calendar.DAY_OF_YEAR, -3);
+                        d = c.getTime();
+                        secStart = d.getTime() / 1000;
+                        currentFrag.refresh(Constants.TYPE_SEARCH,
+                                String.valueOf(secStart) + String.valueOf(secEnd));
+                        break;
+                    case 2: // Last week
+//                        currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
+                        break;
+                    case 3: // Last month
+//                        currentFrag.refresh(Constants.TYPE_SEARCH, "1437609600" + "1437782400");
+                        break;
+                    //TODO Custom range
+                    case 4: // Custom range
+//                        DialogFragment newFragment = new DatePickerFragment();
+//                        newFragment.show(getSupportFragmentManager(), "datePicker");
+//                        //currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
+//                        ((TextView) view).setText("");
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
     }
 
     @Override
@@ -184,4 +267,33 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         intent.putExtra(Constants.KEY_POST, post);
         startActivity(intent);
     }
+
+//    public static class DatePickerFragment extends DialogFragment
+//            implements DatePickerDialog.OnDateSetListener {
+//        public DatePickerDialog mDatePicker;
+//        int year, month, day;
+//
+//        @Override
+//        public Dialog onCreateDialog(Bundle savedInstanceState) {
+//            // Use the current date as the default date in the picker
+//            final Calendar c = Calendar.getInstance();
+//            int year = c.get(Calendar.YEAR);
+//            int month = c.get(Calendar.MONTH);
+//            int day = c.get(Calendar.DAY_OF_MONTH);
+//
+//            // Create a new instance of DatePickerDialog and return it
+//            return new DatePickerDialog(getActivity(), this, year, month, day);
+//        }
+//
+//        public void onDateSet(DatePicker view, int year, int month, int day) {
+//            // Do something with the date chosen by the user
+//            this.year = year;
+//            this.month = month;
+//            this.day = day;
+//        }
+//
+//        public int[] getDate() {
+//            return new int[]{year, month, day};
+//        }
+//    }
 }

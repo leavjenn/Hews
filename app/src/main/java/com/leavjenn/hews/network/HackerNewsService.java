@@ -1,6 +1,7 @@
 package com.leavjenn.hews.network;
 
 import com.leavjenn.hews.model.Comment;
+import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;
+import retrofit.http.Query;
 import rx.Observable;
 
 public interface HackerNewsService {
@@ -36,8 +38,13 @@ public interface HackerNewsService {
     @GET("/item/{itemId}.json")
     Observable<Post> getStory(@Path("itemId") String itemId);
 
-
     @GET("/item/{itemId}.json")
     Observable<Comment> getComment(@Path("itemId") String itemId);
+
+    // popularity by time range
+    @GET("/search?tags=story")
+    Observable<HNItem.SearchResult> searchPopularity(@Query("numericFilters") String timeRange,
+                                                     @Query("page") int page,
+                                                     @Query("hitsPerPage") int hitsPerPage);
 
 }

@@ -8,7 +8,9 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.model.Comment;
+import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
+import com.leavjenn.hews.ui.PostFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,15 +23,12 @@ import rx.functions.Func1;
 
 public class DataManager {
     private static final int MINIMUM_STRING = 20;
-    HackerNewsService mService;
+    HackerNewsService mHackerNewsService, mSearchService;
     private Scheduler mScheduler;
 
-    public DataManager() {
-        mService = new RetrofitHelper().getHackerNewsService();
-    }
-
     public DataManager(Scheduler scheduler) {
-        mService = new RetrofitHelper().getHackerNewsService();
+        mHackerNewsService = new RetrofitHelper().getHackerNewsService();
+        mSearchService = new RetrofitHelper().getSearchService();
         mScheduler = scheduler;
     }
 
@@ -95,9 +94,19 @@ public class DataManager {
         });
     }
 
-    public Observable<Post> getPostFromListFirebase(final List<Long> list) {
+    public Observable<Post> getPostFromList(final List<Long> list) {
         return Observable.from(list)
                 .flatMap(new Func1<Long, Observable<Post>>() {
+                    @Override
+                    public Observable<Post> call(Long aLong) {
+                        return getPostFromFirebase(aLong);
+                    }
+                });
+    }
+
+    public Observable<Post> getPostFromListByOrder(final List<Long> list) {
+        return Observable.from(list)
+                .concatMap(new Func1<Long, Observable<Post>>() {
                     @Override
                     public Observable<Post> call(Long aLong) {
                         return getPostFromFirebase(aLong);
@@ -175,7 +184,7 @@ public class DataManager {
                 .concatMap(new Func1<Long, Observable<Post>>() {
                     @Override
                     public Observable<Post> call(Long aLong) {
-                        return mService.getStory(String.valueOf(aLong));
+                        return mHackerNewsService.getStory(String.valueOf(aLong));
                     }
                 }).filter(new Func1<Post, Boolean>() {
                     @Override
@@ -220,7 +229,7 @@ public class DataManager {
                 .concatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long aLong) {
-                        return mService.getComment(String.valueOf(aLong));
+                        return mHackerNewsService.getComment(String.valueOf(aLong));
                     }
                 }).concatMap(new Func1<Comment, Observable<Comment>>() {
                     @Override
@@ -317,6 +326,10 @@ public class DataManager {
         }
         return comment;
 
+    }
+
+    public Observable<HNItem.SearchResult> getPopularPosts(String startTime, int page) {
+        return mSearchService.searchPopularity(startTime, page, PostFragment.ITEM_LOADING_NUM);
     }
 
     public Scheduler getScheduler() {

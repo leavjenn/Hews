@@ -56,7 +56,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder viewHolder, final int i) {
         if (mMaxRead < i) {
             mMaxRead = i;
-            if (mMaxRead == getItemCount() - UNREAD_ITEM_LEFT_FOR_RELOADING) {
+            if (mMaxRead >= getItemCount() - UNREAD_ITEM_LEFT_FOR_RELOADING) {
                 mOnReachBottomListener.OnReachBottom();
             }
         }

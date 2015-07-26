@@ -16,6 +16,9 @@
             android:id="@+id/nav_show_hn"
             android:title="@string/nav_show_hn" />
         <item
+            android:id="@+id/nav_popular"
+            android:title="@string/nav_popular" />
+        <item
             android:id="@+id/nav_settings"
             android:title="@string/nav_settings" />
     </group>

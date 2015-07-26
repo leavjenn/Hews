@@ -17,7 +17,16 @@
     <string name="nav_new_story">New</string>
     <string name="nav_ask_hn">Ask HN</string>
     <string name="nav_show_hn">Show HN</string>
+    <string name="nav_popular">Popular by time range</string>
     <string name="nav_settings">Settings</string>
+
+    <string-array name="time_range">
+        <item>Past 24 hours</item>
+        <item>Last 3 days</item>
+        <item>Last week</item>
+        <item>Last month</item>
+        <item>Custom range&#8230;</item>
+    </string-array>
 
     <!-- Dialog -->
     <string-array name="dialog">

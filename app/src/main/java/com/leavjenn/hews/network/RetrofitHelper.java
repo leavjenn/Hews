@@ -8,9 +8,6 @@ import retrofit.RestAdapter;
 import retrofit.client.OkClient;
 import retrofit.converter.GsonConverter;
 
-/**
- * Created by Jenn on 2015/4/15.
- */
 public class RetrofitHelper {
 
     public HackerNewsService getHackerNewsService() {
