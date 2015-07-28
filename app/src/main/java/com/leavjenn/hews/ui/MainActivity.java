@@ -26,6 +26,7 @@ import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
 import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
+import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import java.util.Calendar;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
     Toolbar toolbar;
-    private AlwaysShowDialogSpinner mSpinner;
+    private AlwaysShowDialogSpinner mTimeRangeSpinner;
     private PopupFloatingWindow mWindow;
     //    private SearchView mSearchView;
     String mStoryTypeSpec;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         // set up time range spinner
-        mSpinner = (AlwaysShowDialogSpinner) findViewById(R.id.spinner_time_range);
+        mTimeRangeSpinner = (AlwaysShowDialogSpinner) findViewById(R.id.spinner_time_range);
         setUpSpinner();
         //setup drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     if (getSupportActionBar() != null) {
                                         getSupportActionBar().setDisplayShowTitleEnabled(false);
                                     }
-                                    mSpinner.setVisibility(View.VISIBLE);
+                                    mTimeRangeSpinner.setVisibility(View.VISIBLE);
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
@@ -185,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     if (getSupportActionBar() != null) {
                                         getSupportActionBar().setDisplayShowTitleEnabled(true);
                                     }
-                                    mSpinner.setVisibility(View.GONE);
+                                    mTimeRangeSpinner.setVisibility(View.GONE);
                                 }
 
                             }
@@ -202,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.time_range, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpinner.setAdapter(adapter);
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mTimeRangeSpinner.setAdapter(adapter);
+        mTimeRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
@@ -238,8 +239,14 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         break;
                     //TODO Custom range
                     case 4: // Custom range
-//                        DialogFragment newFragment = new DatePickerFragment();
-//                        newFragment.show(getSupportFragmentManager(), "datePicker");
+                        DateRangeDialogFragment newFragment = new DateRangeDialogFragment();
+                        newFragment.show(getSupportFragmentManager(), "datePicker");
+                        newFragment.setOnDateSetListner(new DateRangeDialogFragment.onDateSetListener() {
+                            @Override
+                            public void onDateSet(int startYear, int startMonth, int startDay,
+                                                  int endYear, int endMonth, int endDay) {
+                            }
+                        });
 //                        //currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
 //                        ((TextView) view).setText("");
                         break;
