@@ -13,11 +13,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
@@ -206,8 +208,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         mTimeRangeSpinner.setAdapter(adapter);
         mTimeRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
+            public void onItemSelected(AdapterView<?> parent, final View view, int position, long id) {
+                final PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.frag_post_list);
                 Calendar c = Calendar.getInstance();
                 long secStart, secEnd;
@@ -237,7 +239,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     case 3: // Last month
 //                        currentFrag.refresh(Constants.TYPE_SEARCH, "1437609600" + "1437782400");
                         break;
-                    //TODO Custom range
                     case 4: // Custom range
                         DateRangeDialogFragment newFragment = new DateRangeDialogFragment();
                         newFragment.show(getSupportFragmentManager(), "datePicker");
@@ -245,10 +246,41 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             @Override
                             public void onDateSet(int startYear, int startMonth, int startDay,
                                                   int endYear, int endMonth, int endDay) {
+                                Calendar c = Calendar.getInstance();
+                                c.set(startYear, startMonth, startDay, 0, 0, 0);
+                                long startDate = c.getTimeInMillis() / 1000;
+                                c.set(endYear, endMonth, endDay, 0, 0, 0);
+                                long endDate = c.getTimeInMillis() / 1000;
+                                if (endDate >= startDate) {
+                                    currentFrag.refresh(Constants.TYPE_SEARCH,
+                                            String.valueOf(startDate) + String.valueOf(endDate + 86400));
+                                    Log.i(String.valueOf(startDate), String.valueOf(endDate + 86400));
+                                    if (endDate == startDate) {
+                                        ((TextView) view).setText(String.valueOf(startMonth)
+                                                + "." + String.valueOf(startDay)
+                                                + "." + String.valueOf(startYear));
+                                    } else {
+                                        ((TextView) view).setText(String.valueOf(startMonth)
+                                                + "." + String.valueOf(startDay)
+                                                + "." + String.valueOf(startYear)
+                                                + "-" + String.valueOf(endMonth)
+                                                + "." + String.valueOf(endDay)
+                                                + "." + String.valueOf(endYear));
+                                    }
+                                } else {
+                                    currentFrag.refresh(Constants.TYPE_SEARCH,
+                                            String.valueOf(endDate) + String.valueOf(startDate + 86400));
+                                    Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
+                                    ((TextView) view).setText(String.valueOf(endMonth)
+                                            + "." + String.valueOf(endDay)
+                                            + "." + String.valueOf(endYear)
+                                            + "-" + String.valueOf(startMonth)
+                                            + "." + String.valueOf(startDay)
+                                            + "." + String.valueOf(startYear));
+                                }
                             }
                         });
 //                        //currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
-//                        ((TextView) view).setText("");
                         break;
                 }
             }
