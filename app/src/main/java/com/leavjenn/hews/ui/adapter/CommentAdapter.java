@@ -177,7 +177,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 commentViewHolder.tvComment.setText(Html.fromHtml(comment.getText()));
                 commentViewHolder.tvAuthor.setText(comment.getBy());
             }
-            commentViewHolder.tvTime.setText(Utils.setTimeFormat(comment.getTime()));
+            commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
 
             if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
                 commentViewHolder.tvComment.setText(
@@ -213,7 +213,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             commentHeaderViewHolder.tvPoints.setText("+" + String.valueOf(post.getScore()));
             commentHeaderViewHolder.tvComments.setText(String.valueOf(post.getDescendants())
                     + (post.getDescendants() > 1 ? " comments" : " comment"));
-            commentHeaderViewHolder.tvTime.setText(Utils.setTimeFormat(post.getTime()));
+            commentHeaderViewHolder.tvTime.setText(Utils.formatTime(post.getTime()));
             commentHeaderViewHolder.tvPoster.setText("by: " + post.getBy());
             if (post.getText() != null && !post.getText().isEmpty()) {
                 commentHeaderViewHolder.tvContent.setVisibility(View.VISIBLE);

@@ -246,7 +246,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         for (int i = 0; i < searchResult.getHits().length; i++) {
                             list.add(searchResult.getHits()[i].getObjectID());
                         }
-                        Toast.makeText(getActivity(), "Search list loaded", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getActivity(), "Search list loaded", Toast.LENGTH_SHORT).show();
                         loadPostFromList(list);
                         IS_LOADING = true;
                     }
@@ -373,7 +373,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             } else if (mStoryType.equals(Constants.TYPE_SEARCH)
                     && LOADING_TIME < searchResultTotalPages) {
                 Log.i(String.valueOf(searchResultTotalPages), String.valueOf(LOADING_TIME));
-                loadPostListFromSearch(getStoryTypeSpec(), (++LOADING_TIME));
+                loadPostListFromSearch(getStoryTypeSpec(), LOADING_TIME++);
                 IS_LOADING = true;
             } else {
                 Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();

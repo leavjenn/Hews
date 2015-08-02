@@ -53,13 +53,22 @@
         android:textColor="?attr/text_info_color" />
 
     <TextView
+        android:id="@+id/tv_post_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/tv_post_point"
+        android:layout_toRightOf="@id/tv_post_comments"
+        android:text=""
+        android:textColor="?attr/text_info_color" />
+
+    <TextView
         android:id="@+id/tv_post_pretty_url"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@id/tv_post_point"
         android:layout_marginLeft="8dp"
-        android:layout_toRightOf="@id/tv_post_comments"
+        android:layout_toRightOf="@id/tv_post_time"
         android:ellipsize="middle"
         android:gravity="right"
         android:singleLine="true"

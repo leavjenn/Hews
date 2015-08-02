@@ -10,6 +10,9 @@ import android.widget.DatePicker;
 
 import com.leavjenn.hews.R;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 public class DateRangeDialogFragment extends DialogFragment {
     onDateSetListener mListener;
     private int startYear, startMonth, startDay, endYear, endMonth, endDay;
@@ -26,6 +29,10 @@ public class DateRangeDialogFragment extends DialogFragment {
         // Define your date pickers
         final DatePicker dpStart = (DatePicker) customView.findViewById(R.id.dpStartDate);
         final DatePicker dpEnd = (DatePicker) customView.findViewById(R.id.dpEndDate);
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+        long curTime = c.getTimeInMillis();
+        dpStart.setMaxDate(curTime);
+        dpEnd.setMaxDate(curTime);
         builder.setTitle("Select start and end date");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override

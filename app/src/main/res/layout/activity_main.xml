@@ -16,10 +16,9 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/toolbar_height"
+            android:layout_height="?actionBarSize"
             android:layout_alignParentTop="true"
             android:background="?toolbar_bg_color"
-            android:minHeight="?android:attr/actionBarSize"
             android:elevation="4dp"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="?attr/toolbar_poptheme"
@@ -27,7 +26,8 @@
 
             <com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner
                 android:id="@+id/spinner_time_range"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
+                android:minWidth="256dp"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 android:gravity="center_vertical" />

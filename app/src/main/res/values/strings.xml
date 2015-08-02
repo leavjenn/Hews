@@ -22,9 +22,8 @@
 
     <string-array name="time_range">
         <item>Past 24 hours</item>
-        <item>Last 3 days</item>
-        <item>Last week</item>
-        <item>Last month</item>
+        <item>Past 3 days</item>
+        <item>Past 7 days</item>
         <item>Custom range&#8230;</item>
     </string-array>
 

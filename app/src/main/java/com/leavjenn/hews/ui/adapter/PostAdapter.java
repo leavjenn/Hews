@@ -64,13 +64,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         viewHolder.tvTitle.setText(currentPost.getTitle());
 
         String s = currentPost.getDescendants() > 1 ? " comments" : " comment";
-        viewHolder.tvDescendants.setText(String.valueOf(currentPost.getDescendants()) + s);
         viewHolder.tvScore.setText("+ " + String.valueOf(currentPost.getScore()));
+        viewHolder.tvDescendants.setText(String.valueOf(currentPost.getDescendants()) + s);
+        //viewHolder.tvTime.setText(String.valueOf(Utils.formatTime(currentPost.getTime())));
         viewHolder.tvPrettyUrl.setText(currentPost.getPrettyUrl());
         if (currentPost.getSummary() != null) {
             viewHolder.tvSummary.setVisibility(View.VISIBLE);
             viewHolder.tvSummary.setText(currentPost.getSummary());
-        }else {
+        } else {
             viewHolder.tvSummary.setVisibility(View.GONE);
         }
         viewHolder.layoutFrame.setOnClickListener(new View.OnClickListener() {
@@ -109,6 +110,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         TextView tvTitle;
         TextView tvScore;
         TextView tvDescendants;
+        TextView tvTime;
         TextView tvPrettyUrl;
         TextView tvSummary;
 
@@ -117,6 +119,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             layoutFrame = (RelativeLayout) v.findViewById(R.id.layout_post_frame);
             tvTitle = (TextView) v.findViewById(R.id.tv_post_title);
             tvScore = (TextView) v.findViewById(R.id.tv_post_point);
+            //tvTime = (TextView) v.findViewById(R.id.tv_post_time);
             tvDescendants = (TextView) v.findViewById(R.id.tv_post_comments);
             tvPrettyUrl = (TextView) v.findViewById(R.id.tv_post_pretty_url);
             tvSummary = (TextView) v.findViewById(R.id.tv_post_summary);

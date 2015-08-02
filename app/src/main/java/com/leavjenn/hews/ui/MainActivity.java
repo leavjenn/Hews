@@ -32,7 +32,7 @@ import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import java.util.Calendar;
-import java.util.Date;
+import java.util.TimeZone;
 
 
 public class MainActivity extends AppCompatActivity implements PostAdapter.OnItemClickListener {
@@ -175,11 +175,16 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
                                             .findFragmentById(R.id.frag_post_list);
-                                    currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
+                                    Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                                    String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                                    c.add(Calendar.DAY_OF_YEAR, -1);
+                                    String secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                                    currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
                                     if (getSupportActionBar() != null) {
                                         getSupportActionBar().setDisplayShowTitleEnabled(false);
                                     }
                                     mTimeRangeSpinner.setVisibility(View.VISIBLE);
+                                    mTimeRangeSpinner.setSelection(0);
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
@@ -211,76 +216,69 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             public void onItemSelected(AdapterView<?> parent, final View view, int position, long id) {
                 final PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.frag_post_list);
-                Calendar c = Calendar.getInstance();
-                long secStart, secEnd;
-                Date d;
+                final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                String secStart, secEnd;
                 switch (position) {
                     case 0: // Past 24 hours
-                        d = c.getTime();
-                        secEnd = d.getTime() / 1000;
+                        secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -1);
-                        d = c.getTime();
-                        secStart = d.getTime() / 1000;
-                        currentFrag.refresh(Constants.TYPE_SEARCH,
-                                String.valueOf(secStart) + String.valueOf(secEnd));
+                        secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                        currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
                         break;
-                    case 1: // Last 3 days
-                        d = c.getTime();
-                        secEnd = d.getTime() / 1000;
+                    case 1: // Past 3 days
+                        secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -3);
-                        d = c.getTime();
-                        secStart = d.getTime() / 1000;
-                        currentFrag.refresh(Constants.TYPE_SEARCH,
-                                String.valueOf(secStart) + String.valueOf(secEnd));
+                        secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                        currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
                         break;
-                    case 2: // Last week
-//                        currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
+                    case 2: // Past 7 days
+                        secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                        c.add(Calendar.DAY_OF_YEAR, -7);
+                        secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                        currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
                         break;
-                    case 3: // Last month
-//                        currentFrag.refresh(Constants.TYPE_SEARCH, "1437609600" + "1437782400");
-                        break;
-                    case 4: // Custom range
+                    case 3: // Custom range
                         DateRangeDialogFragment newFragment = new DateRangeDialogFragment();
                         newFragment.show(getSupportFragmentManager(), "datePicker");
                         newFragment.setOnDateSetListner(new DateRangeDialogFragment.onDateSetListener() {
                             @Override
-                            public void onDateSet(int startYear, int startMonth, int startDay,
-                                                  int endYear, int endMonth, int endDay) {
-                                Calendar c = Calendar.getInstance();
+                            public void onDateSet(final int startYear, final int startMonth,
+                                                  final int startDay, final int endYear,
+                                                  final int endMonth, final int endDay) {
                                 c.set(startYear, startMonth, startDay, 0, 0, 0);
                                 long startDate = c.getTimeInMillis() / 1000;
                                 c.set(endYear, endMonth, endDay, 0, 0, 0);
                                 long endDate = c.getTimeInMillis() / 1000;
                                 if (endDate >= startDate) {
-                                    currentFrag.refresh(Constants.TYPE_SEARCH,
-                                            String.valueOf(startDate) + String.valueOf(endDate + 86400));
                                     Log.i(String.valueOf(startDate), String.valueOf(endDate + 86400));
                                     if (endDate == startDate) {
-                                        ((TextView) view).setText(String.valueOf(startMonth)
-                                                + "." + String.valueOf(startDay)
-                                                + "." + String.valueOf(startYear));
+                                        // month starts from 0
+                                        ((TextView) view).setText(String.valueOf(startMonth + 1)
+                                                + "/" + String.valueOf(startDay)
+                                                + "/" + String.valueOf(startYear).substring(2));
                                     } else {
-                                        ((TextView) view).setText(String.valueOf(startMonth)
-                                                + "." + String.valueOf(startDay)
-                                                + "." + String.valueOf(startYear)
-                                                + "-" + String.valueOf(endMonth)
-                                                + "." + String.valueOf(endDay)
-                                                + "." + String.valueOf(endYear));
+                                        ((TextView) view).setText(String.valueOf(startMonth + 1)
+                                                + "/" + String.valueOf(startDay)
+                                                + "/" + String.valueOf(startYear).substring(2)
+                                                + " - " + String.valueOf(endMonth + 1)
+                                                + "/" + String.valueOf(endDay)
+                                                + "/" + String.valueOf(endYear).substring(2));
                                     }
+                                    currentFrag.refresh(Constants.TYPE_SEARCH,
+                                            String.valueOf(startDate) + String.valueOf(endDate + 86400));
                                 } else {
+                                    Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
+                                    ((TextView) view).setText(String.valueOf(endMonth + 1)
+                                            + "/" + String.valueOf(endDay)
+                                            + "/" + String.valueOf(endYear).substring(2)
+                                            + " - " + String.valueOf(startMonth + 1)
+                                            + "/" + String.valueOf(startDay)
+                                            + "/" + String.valueOf(startYear).substring(2));
                                     currentFrag.refresh(Constants.TYPE_SEARCH,
                                             String.valueOf(endDate) + String.valueOf(startDate + 86400));
-                                    Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
-                                    ((TextView) view).setText(String.valueOf(endMonth)
-                                            + "." + String.valueOf(endDay)
-                                            + "." + String.valueOf(endYear)
-                                            + "-" + String.valueOf(startMonth)
-                                            + "." + String.valueOf(startDay)
-                                            + "." + String.valueOf(startYear));
                                 }
                             }
                         });
-//                        //currentFrag.refresh(Constants.TYPE_SEARCH, "1436572800" + "1436745600");
                         break;
                 }
             }
@@ -306,33 +304,4 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         intent.putExtra(Constants.KEY_POST, post);
         startActivity(intent);
     }
-
-//    public static class DatePickerFragment extends DialogFragment
-//            implements DatePickerDialog.OnDateSetListener {
-//        public DatePickerDialog mDatePicker;
-//        int year, month, day;
-//
-//        @Override
-//        public Dialog onCreateDialog(Bundle savedInstanceState) {
-//            // Use the current date as the default date in the picker
-//            final Calendar c = Calendar.getInstance();
-//            int year = c.get(Calendar.YEAR);
-//            int month = c.get(Calendar.MONTH);
-//            int day = c.get(Calendar.DAY_OF_MONTH);
-//
-//            // Create a new instance of DatePickerDialog and return it
-//            return new DatePickerDialog(getActivity(), this, year, month, day);
-//        }
-//
-//        public void onDateSet(DatePicker view, int year, int month, int day) {
-//            // Do something with the date chosen by the user
-//            this.year = year;
-//            this.month = month;
-//            this.day = day;
-//        }
-//
-//        public int[] getDate() {
-//            return new int[]{year, month, day};
-//        }
-//    }
 }

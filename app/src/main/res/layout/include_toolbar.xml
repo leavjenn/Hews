@@ -3,10 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/toolbar_height"
+    android:layout_height="?actionBarSize"
     android:background="?toolbar_bg_color"
     android:elevation="4dp"
     android:fitsSystemWindows="true"
-    android:minHeight="?android:attr/actionBarSize"
     app:popupTheme="?attr/toolbar_poptheme"
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />

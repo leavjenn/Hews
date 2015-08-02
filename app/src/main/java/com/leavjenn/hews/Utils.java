@@ -9,7 +9,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 public class Utils {
-    public static CharSequence setTimeFormat(long timeStamp) {
+    public static CharSequence formatTime(long timeStamp) {
         timeStamp = timeStamp * 1000;
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(timeStamp,
                 System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);

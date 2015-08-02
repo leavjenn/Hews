@@ -6,7 +6,7 @@
     tools:context="com.leavjenn.hews.ui.CommentsActivity">
 
     <include
-        layout="@layout/includes_toolbar"
+        layout="@layout/include_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
