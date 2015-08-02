@@ -4,10 +4,10 @@
     style="?attr/list_item_bg_color"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    android:layout_marginTop="8dp">
+    android:paddingBottom="8dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp">
 
     <TextView
         android:id="@+id/tv_post_title"
@@ -47,7 +47,7 @@
         android:id="@+id/tv_post_comments"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/tv_post_point"
+        android:layout_alignBaseline="@id/tv_post_point"
         android:layout_toRightOf="@id/tv_post_point"
         android:text="234 comments"
         android:textColor="?attr/text_info_color" />
@@ -56,7 +56,7 @@
         android:id="@+id/tv_post_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/tv_post_point"
+        android:layout_alignBaseline="@id/tv_post_point"
         android:layout_toRightOf="@id/tv_post_comments"
         android:text=""
         android:textColor="?attr/text_info_color" />
@@ -66,7 +66,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/tv_post_point"
+        android:layout_alignBaseline="@id/tv_post_point"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@id/tv_post_time"
         android:ellipsize="middle"
