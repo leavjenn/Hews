@@ -255,7 +255,7 @@ public class PopupFloatingWindow implements View.OnClickListener {
                 }
                 break;
             case R.id.btn_done:
-                PopupFloatingWindow.this.mWindow.dismiss();
+                this.dismiss();
                 break;
         }
     }
