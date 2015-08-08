@@ -209,7 +209,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     void setUpSpinner() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.time_range, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
         mTimeRangeSpinner.setAdapter(adapter);
         mTimeRangeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
