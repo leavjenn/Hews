@@ -1,47 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:id="@+id/relative_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/toolbar"
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/coordinator_layout"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:layout_alignParentTop="true"
-            android:background="?toolbar_bg_color"
-            android:elevation="4dp"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="?attr/toolbar_poptheme"
-            android:fitsSystemWindows="true">
+            android:layout_height="match_parent">
 
-            <com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner
-                android:id="@+id/spinner_time_range"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/appbar_layout"
                 android:layout_width="match_parent"
-                android:minWidth="256dp"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:gravity="center_vertical" />
-        </android.support.v7.widget.Toolbar>
+                android:layout_height="wrap_content">
 
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/frag_post_list"
-            android:name="com.leavjenn.hews.ui.PostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/toolbar"
-            tools:context="com.leavjenn.hews.ui.MainActivity"
-            tools:layout="@android:layout/list_content" />
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    android:background="?toolbar_bg_color"
+                    android:fitsSystemWindows="true"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    app:popupTheme="?attr/toolbar_poptheme"
+                    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+                </android.support.v7.widget.Toolbar>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    app:layout_scrollFlags="scroll|enterAlways">
+
+                    <com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner
+                        android:id="@+id/spinner_time_range"
+                        android:layout_width="wrap_content"
+                        android:layout_height="56dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:gravity="bottom"
+                        android:minWidth="25dp"
+                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                        android:visibility="gone" />
+
+                    <Spinner
+                        android:id="@+id/spinner_sort_order"
+                        android:layout_width="wrap_content"
+                        android:layout_height="56dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                        android:visibility="gone" />
+                </RelativeLayout>
+            </android.support.design.widget.AppBarLayout>
+
+            <!--<fragment-->
+                <!--android:id="@+id/frag_post_list"-->
+                <!--android:name="com.leavjenn.hews.ui.PostFragment"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+                <!--tools:context="com.leavjenn.hews.ui.MainActivity" />-->
+            <FrameLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        </android.support.design.widget.CoordinatorLayout>
+
+        <!--<include layout="@layout/include_fab" />-->
     </RelativeLayout>
 
     <!-- The navigation drawer -->

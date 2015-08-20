@@ -47,4 +47,16 @@ public interface HackerNewsService {
                                                      @Query("page") int page,
                                                      @Query("hitsPerPage") int hitsPerPage);
 
+    @GET("/search?tags=story")
+    Observable<HNItem.SearchResult> search(@Query("query") String keyword,
+                                                 @Query("numericFilters") String timeRange,
+                                                 @Query("page") int page,
+                                                 @Query("hitsPerPage") int hitsPerPage);
+
+    @GET("/search_by_date?tags=story")
+    Observable<HNItem.SearchResult> searchByDate(@Query("query") String keyword,
+                                                 @Query("numericFilters") String timeRange,
+                                                 @Query("page") int page,
+                                                 @Query("hitsPerPage") int hitsPerPage);
+
 }

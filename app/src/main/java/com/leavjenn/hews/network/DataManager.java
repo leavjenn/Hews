@@ -10,7 +10,6 @@ import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
-import com.leavjenn.hews.ui.PostFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -329,7 +328,16 @@ public class DataManager {
     }
 
     public Observable<HNItem.SearchResult> getPopularPosts(String startTime, int page) {
-        return mSearchService.searchPopularity(startTime, page, PostFragment.ITEM_LOADING_NUM);
+        return mSearchService.searchPopularity(startTime, page, Constants.NUM_LOADING_ITEM);
+    }
+
+    public Observable<HNItem.SearchResult> getSearchResult(String keyword, String timeRange,
+                                                           int page, boolean isSortByDate) {
+        if (isSortByDate) {
+            return mSearchService.searchByDate(keyword, timeRange, page, Constants.NUM_LOADING_ITEM);
+        } else {
+            return mSearchService.search(keyword, timeRange, page, Constants.NUM_LOADING_ITEM);
+        }
     }
 
     public Scheduler getScheduler() {

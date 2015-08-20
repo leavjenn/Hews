@@ -38,17 +38,10 @@ import rx.subscriptions.CompositeSubscription;
 public class PostFragment extends Fragment implements PostAdapter.OnReachBottomListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-//    private static final String ARG_PARAM1 = "param1";
-//    private static final String ARG_PARAM2 = "param2";
-//    private String mParam1;
-//    private String mParam2;
-
     public static final String KEY_LAST_TIME_POSITION = "key_last_time_position";
     public static final String KEY_STORY_TYPE = "story_type";
     public static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
 
-    public final static int ITEM_LOADING_NUM = 25;
     static int LOADING_TIME = 1;
     static Boolean IS_LOADING = false;
     static Boolean SHOW_POST_SUMMARY = false;
@@ -68,14 +61,14 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private DataManager mDataManager;
     private CompositeSubscription mCompositeSubscription;
 
-//    public static PostFragment newInstance(String param1, String param2) {
-//        PostFragment fragment = new PostFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
+    public static PostFragment newInstance(String storyType, String storyTypeSpec) {
+        PostFragment fragment = new PostFragment();
+        Bundle args = new Bundle();
+        args.putString(KEY_STORY_TYPE, storyType);
+        args.putString(KEY_STORY_TYPE_SPEC, storyTypeSpec);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public PostFragment() {
     }
@@ -87,7 +80,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mOnItemClickListener = (PostAdapter.OnItemClickListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement (PostAdapter.OnItemClickListener");
+                    + " must implement (PostAdapter.OnItemClickListener)");
         }
     }
 
@@ -96,8 +89,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         super.onCreate(savedInstanceState);
 
 //        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
+//            mStoryType = getArguments().getString(KEY_STORY_TYPE);
+//            mStoryTypeSpec = getArguments().getString(KEY_STORY_TYPE_SPEC);
 //        }
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
@@ -111,7 +104,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.item_list);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_post);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
@@ -199,6 +192,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         }
     }
 
+    public RecyclerView getRecyclerView(){
+        return mRecyclerView;
+    }
+
     void loadPostListFromFirebase(String storyTypeUrl) {
         mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
                 mDataManager.getPostListFromFirebase(storyTypeUrl))
@@ -218,7 +215,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                     public void onNext(List<Long> longs) {
                         mPostIdList = longs;
                         Toast.makeText(getActivity(), "Feed list loaded", Toast.LENGTH_SHORT).show();
-                        loadPostFromList(mPostIdList.subList(0, ITEM_LOADING_NUM));
+                        loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
                         IS_LOADING = true;
                     }
                 }));
@@ -309,6 +306,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         }
     }
 
+
     private void reformatListStyle() {
         int position = mLinearLayoutManager.findFirstVisibleItemPosition();
         int offset = 0;
@@ -364,8 +362,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public void OnReachBottom() {
         if (!IS_LOADING) {
             if (mStoryType.equals(Constants.TYPE_STORY)
-                    && ITEM_LOADING_NUM * (LOADING_TIME + 1) < mPostIdList.size()) {
-                int start = ITEM_LOADING_NUM * LOADING_TIME, end = ITEM_LOADING_NUM * (++LOADING_TIME);
+                    && Constants.NUM_LOADING_ITEM * (LOADING_TIME + 1) < mPostIdList.size()) {
+                int start = Constants.NUM_LOADING_ITEM * LOADING_TIME,
+                        end = Constants.NUM_LOADING_ITEM * (++LOADING_TIME);
                 loadPostFromList(mPostIdList.subList(start, end));
                 IS_LOADING = true;
                 //Toast.makeText(getActivity(), "Loading more", Toast.LENGTH_SHORT).show();

@@ -20,11 +20,26 @@
     <string name="nav_popular">Popular by time range</string>
     <string name="nav_settings">Settings</string>
 
-    <string-array name="time_range">
+    <!--Time Range Popular Spinner-->
+    <string-array name="time_range_popular">
         <item>Past 24 hours</item>
         <item>Past 3 days</item>
         <item>Past 7 days</item>
         <item>Custom range&#8230;</item>
+    </string-array>
+
+    <!--Time Range Search Spinner-->
+    <string-array name="time_range_search">
+        <item>All time</item>
+        <item>Last year</item>
+        <item>Last month</item>
+        <item>Custom range&#8230;</item>
+    </string-array>
+
+    <!--Sort Order Spinner-->
+    <string-array name="sort_order">
+        <item>Popularity</item>
+        <item>Date</item>
     </string-array>
 
     <!-- Dialog -->
@@ -34,5 +49,8 @@
         <item>Share to&#8230;</item>
         <item>Share comment text to&#8230;</item>
     </string-array>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
