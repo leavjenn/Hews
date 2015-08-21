@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
@@ -91,7 +92,6 @@ public class CommentsFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
-
         initRecyclerView(rootView);
         setupFab(rootView);
 
@@ -101,6 +101,9 @@ public class CommentsFragment extends Fragment
             mCommentAdapter.addHeader(mPost);
             getComments(mPost.getKids());
         } else {
+            if (savedInstanceState != null) {
+                mPostId = savedInstanceState.getLong(ARG_POST_ID);
+            }
             mService = new RetrofitHelper().getHackerNewsService();
 //            getPost(mPostId);
             getPostInfo(mPostId);
@@ -111,6 +114,13 @@ public class CommentsFragment extends Fragment
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mPostId = mPost.getId();
+        outState.putLong(ARG_POST_ID, mPostId);
     }
 
     @Override

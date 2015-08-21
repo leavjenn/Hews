@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
@@ -36,6 +37,7 @@ public class CommentsActivity extends AppCompatActivity {
             setTheme(R.style.AppTheme_Dark);
         }
         setContentView(R.layout.activity_comments);
+        Firebase.setAndroidContext(this);
         //Setup Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
