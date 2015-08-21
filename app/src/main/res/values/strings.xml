@@ -11,6 +11,7 @@
     <string name="title_activity_comments">CommentsActivity</string>
     <string name="open_with_hn">Open With Necker Hews</string>
     <string name="no_comment_promt">No comment yet</string>
+    <string name="share_with">Share with</string>
 
     <!-- Nav drawer -->
     <string name="nav_top_story">Top</string>
