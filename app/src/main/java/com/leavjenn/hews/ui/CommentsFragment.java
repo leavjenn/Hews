@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
@@ -24,7 +23,7 @@ import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.network.HackerNewsService;
 import com.leavjenn.hews.network.RetrofitHelper;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
-import com.leavjenn.hews.ui.widget.FloatingActionButton;
+import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 
 import java.util.List;
 
@@ -146,7 +145,7 @@ public class CommentsFragment extends Fragment
     }
 
     private void setupFab(View rootView) {
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        FloatingScrollDownButton fab = (FloatingScrollDownButton) rootView.findViewById(R.id.fab);
         String mode = SharedPrefsManager.getFabMode(prefs);
         if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
             fab.setRecyclerView(mRecyclerView);

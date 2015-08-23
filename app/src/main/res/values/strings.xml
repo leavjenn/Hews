@@ -25,7 +25,7 @@
         <item>Past 24 hours</item>
         <item>Past 3 days</item>
         <item>Past 7 days</item>
-        <item>Custom range&#8230;</item>
+        <item>Custom date range&#8230;</item>
     </string-array>
 
     <!--Time Range Search Spinner-->
@@ -33,7 +33,7 @@
         <item>All time</item>
         <item>Last year</item>
         <item>Last month</item>
-        <item>Custom range&#8230;</item>
+        <item>Custom date range&#8230;</item>
     </string-array>
 
     <!--Sort Order Spinner-->

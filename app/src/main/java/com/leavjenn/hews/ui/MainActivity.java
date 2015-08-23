@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,6 +18,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -32,10 +34,12 @@ import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
 import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
 import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
+import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import java.util.Calendar;
@@ -43,25 +47,29 @@ import java.util.TimeZone;
 
 
 public class MainActivity extends AppCompatActivity implements PostAdapter.OnItemClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener {
 
     private DrawerLayout mDrawerLayout;
     private static final long DRAWER_CLOSE_DELAY_MS = 250;
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
+    private AppBarLayout mAppbar;
     private Toolbar toolbar;
-    private AlwaysShowDialogSpinner mSpinnerTimeRange;
+    private AlwaysShowDialogSpinner mSpinnerDateRange;
     private Spinner mSpinnerSortOrder;
     private PopupFloatingWindow mWindow;
     private SearchView mSearchView;
     private MenuItem mSearchItem;
+    private FloatingScrollDownButton mFab;
     private String mStoryType, mStoryTypeSpec;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Set theme
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.registerOnSharedPreferenceChangeListener(this);
         String theme = SharedPrefsManager.getTheme(prefs);
         if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
             setTheme(R.style.AppTheme_Sepia);
@@ -72,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(this);
         // setup Toolbar
+        mAppbar = (AppBarLayout) findViewById(R.id.appbar);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
@@ -79,11 +88,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        // set up time range spinner
-        mSpinnerTimeRange = (AlwaysShowDialogSpinner) findViewById(R.id.spinner_time_range);
+        // init spinner
+        mSpinnerDateRange = (AlwaysShowDialogSpinner) findViewById(R.id.spinner_time_range);
         mSpinnerSortOrder = (Spinner) findViewById(R.id.spinner_sort_order);
-        setUpSpinnerPopularTimeRange();
-        setUpSpinnerSortOrder();
         //setup drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -92,23 +99,20 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
+        mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
 
         mStoryType = Constants.STORY_TYPE_TOP_URL;
         mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
-        mWindow = new PopupFloatingWindow(this, toolbar);
+        mWindow = new PopupFloatingWindow(this, mAppbar);
 
         PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
         getSupportFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+    protected void onDestroy() {
+        super.onDestroy();
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -123,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         int id = item.getItemId();
         switch (id) {
             case R.id.action_search:
-                //mSpinnerTimeRange.setVisibility(View.VISIBLE);
+                //mSpinnerDateRange.setVisibility(View.VISIBLE);
                 //mSpinnerSortOrder.setVisibility(View.VISIBLE);
                 //Intent urlIntent = new Intent(Intent.ACTION_VIEW);
                 //String url = "https://hn.algolia.com/";
@@ -134,9 +138,14 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 break;
 
             case R.id.action_refresh:
-                PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
+                Fragment currentFrag = getSupportFragmentManager()
                         .findFragmentById(R.id.container);
-                currentFrag.refresh(currentFrag.getStoryType(), currentFrag.getStoryTypeSpec());
+                if (currentFrag instanceof PostFragment) {
+                    ((PostFragment) currentFrag).refresh(((PostFragment) currentFrag).getStoryType(),
+                            ((PostFragment) currentFrag).getStoryTypeSpec());
+                } else if (currentFrag instanceof SearchFragment) {
+                    ((SearchFragment) currentFrag).refresh();
+                }
                 break;
 
             case R.id.action_display:
@@ -154,6 +163,19 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         return super.onOptionsItemSelected(item);
     }
 
+    private void setupFAB() {
+        String mode = SharedPrefsManager.getFabMode(prefs);
+        if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
+            mFab.setVisibility(View.VISIBLE);
+            mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
+            //set fab position to default
+            mFab.setTranslationX(0f);
+            mFab.setTranslationY(0f);
+        } else {
+            mFab.setVisibility(View.GONE);
+        }
+    }
+
     void setUpSearchBar(Menu menu) {
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -168,16 +190,29 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         MenuItemCompat.setOnActionExpandListener(mSearchItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
+                SearchFragment searchFragment = new SearchFragment();
+                FragmentTransaction transaction = MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction();
+                transaction.replace(R.id.container, searchFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                getSupportFragmentManager().executePendingTransactions();
                 mSpinnerSortOrder.setVisibility(View.VISIBLE);
-                mSpinnerTimeRange.setVisibility(View.VISIBLE);
-                setUpSpinnerSearchTimeRange();
+                mSpinnerDateRange.setVisibility(View.VISIBLE);
+                setUpSpinnerSearchDateRange();
+                setUpSpinnerSortOrder();
+                mSearchView.requestFocus();
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 mSpinnerSortOrder.setVisibility(View.GONE);
-                mSpinnerTimeRange.setVisibility(View.GONE);
+                mSpinnerDateRange.setVisibility(View.GONE);
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    Log.i("fragment", "popback");
+                    getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                }
                 return true;
             }
         });
@@ -185,18 +220,21 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-                String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                c.add(Calendar.YEAR, -1);
-                String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                SearchFragment searchFragment = SearchFragment.newInstance(query, secStart + secEnd, false);
-                FragmentTransaction transaction = MainActivity.this.getSupportFragmentManager()
-                        .beginTransaction();
-                transaction.replace(R.id.container, searchFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                getSupportFragmentManager().executePendingTransactions();
-                searchFragment.refresh(query, secStart + secEnd, false);
+                Fragment currentFrag = getSupportFragmentManager().findFragmentById(R.id.container);
+                if (currentFrag instanceof SearchFragment) {
+                    String dateRange = ((SearchFragment) currentFrag).getDateRange();
+                    if (dateRange == null) {
+                        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                        String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                        c.add(Calendar.YEAR, -1);
+                        String secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                        dateRange = secStart + secEnd;
+                    }
+                    ((SearchFragment) currentFrag).setKeyword(query);
+                    ((SearchFragment) currentFrag).refresh(query, dateRange,
+                            ((SearchFragment) currentFrag).getIsSortByDate());
+                }
+                mSearchView.clearFocus();
                 return true;
             }
 
@@ -253,15 +291,15 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     String secStart = String.valueOf(c.getTimeInMillis() / 1000);
                                     currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
 
-                                    setUpSpinnerPopularTimeRange();
-                                    mSpinnerTimeRange.setVisibility(View.VISIBLE);
-                                    mSpinnerTimeRange.setSelection(0);
+                                    setUpSpinnerPopularDateRange();
+                                    mSpinnerDateRange.setVisibility(View.VISIBLE);
+                                    mSpinnerDateRange.setSelection(0);
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
                                             .findFragmentById(R.id.container);
                                     currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
-                                    mSpinnerTimeRange.setVisibility(View.GONE);
+                                    mSpinnerDateRange.setVisibility(View.GONE);
                                 }
 
                             }
@@ -274,13 +312,13 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         );
     }
 
-    void setUpSpinnerPopularTimeRange() {
+    void setUpSpinnerPopularDateRange() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.time_range_popular, android.R.layout.simple_spinner_item);
 //        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
-        mSpinnerTimeRange.setAdapter(adapter);
-        mSpinnerTimeRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mSpinnerDateRange.setAdapter(adapter);
+        mSpinnerDateRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, final View view, int position, long id) {
                 final PostFragment currentFrag = (PostFragment) getSupportFragmentManager()
@@ -358,8 +396,67 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         });
     }
 
-    String setupDatePicker(final View dropDownView) {
-        final StringBuffer sb = new StringBuffer();
+    void setUpSpinnerSearchDateRange() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
+                R.array.time_range_search, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
+        mSpinnerDateRange.setAdapter(adapter);
+        mSpinnerDateRange.setSelection(1);
+        mSpinnerDateRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Fragment currentFrag = getSupportFragmentManager().findFragmentById(R.id.container);
+                if (currentFrag instanceof SearchFragment) {
+                    final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                    String secStart, secEnd;
+                    secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                    // the day before a year
+                    secStart = String.valueOf(c.getTimeInMillis() / 1000 - 31536000);
+                    switch (position) {
+                        case 0: // All time
+                            secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                            // the time of first post
+                            secStart = "1160418111";
+                            if (((SearchFragment) currentFrag).getKeyword() != null) {
+                                ((SearchFragment) currentFrag).refresh(secStart + secEnd);
+                                mSearchView.clearFocus();
+                            }
+                            break;
+                        case 1: // Last year
+                            secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                            c.add(Calendar.YEAR, -1);
+                            secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                            if (((SearchFragment) currentFrag).getKeyword() != null) {
+                                ((SearchFragment) currentFrag).refresh(secStart + secEnd);
+                                mSearchView.clearFocus();
+                            }
+                            break;
+                        case 2: // Last month
+                            secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                            c.add(Calendar.MONTH, -1);
+                            secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                            if (((SearchFragment) currentFrag).getKeyword() != null) {
+                                ((SearchFragment) currentFrag).refresh(secStart + secEnd);
+                                mSearchView.clearFocus();
+                            }
+                            break;
+                        case 3: // Custom range
+                            setupDateRangePicker(view, currentFrag);
+                            break;
+                    }
+                    ((SearchFragment) currentFrag).setDateRange(secStart + secEnd);
+                    Log.i(secStart, secEnd);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    void setupDateRangePicker(final View dropDownView, final Fragment currentFrag) {
+        final String[] dateRange = new String[2];
         final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
         DateRangeDialogFragment dateRangeDialogFragment = new DateRangeDialogFragment();
         dateRangeDialogFragment.show(getSupportFragmentManager(), "datePicker");
@@ -374,6 +471,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 c.set(endYear, endMonth, endDay, 0, 0, 0);
                 long endDate = c.getTimeInMillis() / 1000;
                 if (endDate >= startDate) {
+                    // add one day to endDate, make it as next day 00:00
                     Log.i(String.valueOf(startDate), String.valueOf(endDate + 86400));
                     if (endDate == startDate) {
                         // month starts from 0
@@ -388,9 +486,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 + "/" + String.valueOf(endDay)
                                 + "/" + String.valueOf(endYear).substring(2));
                     }
-                    sb.append(startDate);
-                    sb.append(endDate + 86400);
-                } else {
+                    dateRange[0] = String.valueOf(startDate);
+                    dateRange[1] = String.valueOf(endDate + 86400);
+                } else { // endDate < startDate, use endDate as start
                     Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
                     ((TextView) dropDownView).setText(String.valueOf(endMonth + 1)
                             + "/" + String.valueOf(endDay)
@@ -398,53 +496,19 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             + " - " + String.valueOf(startMonth + 1)
                             + "/" + String.valueOf(startDay)
                             + "/" + String.valueOf(startYear).substring(2));
-                    sb.append(endDate);
-                    sb.append(startDate + 86400);
+                    dateRange[0] = String.valueOf(endDate);
+                    dateRange[1] = String.valueOf(startDate + 86400);
                 }
-            }
-        });
-        Log.i("sb", sb.toString());
-        return sb.toString();
-    }
-
-    void setUpSpinnerSearchTimeRange() {
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
-                R.array.time_range_search, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
-        mSpinnerTimeRange.setAdapter(adapter);
-        mSpinnerTimeRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Fragment currentFrag = getSupportFragmentManager().findFragmentById(R.id.container);
-                if (currentFrag instanceof SearchFragment) {
-                    SearchFragment currentSearchFrag = (SearchFragment) currentFrag;
-                    final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-                    String secStart, secEnd;
-                    switch (position) {
-                        case 0: // All time
-                            break;
-                        case 1: // Last year
-                            secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                            c.add(Calendar.YEAR, -1);
-                            secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                            currentSearchFrag.refresh(secStart + secEnd);
-                            break;
-                        case 2: // Last month
-                            secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                            c.add(Calendar.YEAR, -1);
-                            secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                            currentSearchFrag.refresh(secStart + secEnd);
-                            break;
-                        case 3: // Custom range
-                            setupDatePicker(view);
-                            break;
+                if (currentFrag instanceof PostFragment) {
+                    ((PostFragment) currentFrag).refresh(Constants.TYPE_SEARCH,
+                            dateRange[0] + dateRange[1]);
+                } else if (currentFrag instanceof SearchFragment) {
+                    ((SearchFragment) currentFrag).setDateRange(dateRange[0] + dateRange[1]);
+                    if (((SearchFragment) currentFrag).getKeyword() != null) {
+                        ((SearchFragment) currentFrag).refresh(dateRange[0] + dateRange[1]);
+                        mSearchView.clearFocus();
                     }
                 }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
     }
@@ -458,19 +522,23 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         mSpinnerSortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Fragment curFrag = getSupportFragmentManager()
+                Fragment currentFrag = getSupportFragmentManager()
                         .findFragmentById(R.id.container);
-                switch (position) {
-                    case 0: // popularity
-                        if (curFrag instanceof SearchFragment) {
-                            ((SearchFragment) curFrag).refresh(false);
-                        }
-                        break;
-                    case 1: // date
-                        if (curFrag instanceof SearchFragment) {
-                            ((SearchFragment) curFrag).refresh(true);
-                        }
-                        break;
+                if (currentFrag instanceof SearchFragment) {
+                    boolean isSortByDate = false;
+                    switch (position) {
+                        case 0: // popularity
+                            isSortByDate = false;
+                            break;
+                        case 1: // date
+                            isSortByDate = true;
+                            break;
+                    }
+                    ((SearchFragment) currentFrag).setIsSortByDate(isSortByDate);
+                    if (((SearchFragment) currentFrag).getKeyword() != null) {
+                        ((SearchFragment) currentFrag).refresh(isSortByDate);
+                        mSearchView.clearFocus();
+                    }
                 }
             }
 
@@ -487,10 +555,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             mDrawerLayout.closeDrawers();
         } else if (mSearchItem.isActionViewExpanded()) {
             mSearchItem.collapseActionView();
-            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                Log.i("back pressed", "popback");
-                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            }
+//            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+//                Log.i("back pressed", "popback");
+//                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//            }
         } else {
             super.onBackPressed();
         }
@@ -506,6 +574,14 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
+            setupFAB();
+        }
+    }
 
+    @Override
+    public void onRecyclerViewCreate(RecyclerView recyclerView) {
+        mFab.setRecyclerView(recyclerView);
+        setupFAB();
     }
 }

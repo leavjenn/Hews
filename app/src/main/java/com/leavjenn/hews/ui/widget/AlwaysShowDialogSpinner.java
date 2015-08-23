@@ -37,7 +37,9 @@ public class AlwaysShowDialogSpinner extends Spinner {
         super.setSelection(position);
 
         if (position == getSelectedItemPosition()) {
-            listener.onItemSelected(null, getSelectedView(), position, 0);
+            if(getSelectedView()!=null){
+                listener.onItemSelected(null, getSelectedView(), position, 0);
+            }
         }
     }
 

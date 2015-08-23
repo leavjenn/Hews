@@ -18,12 +18,12 @@ import android.widget.Toast;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
-import com.leavjenn.hews.ui.widget.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     private static final String KEY_SORT = "sort";
 
     private String mKeyword;
-    private String mTimeRange;
+    private String mDateRange;
     private boolean mIsSortByDate;
 
     static int LOADING_TIME = 1;
@@ -49,10 +49,10 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     private int mLastTimeListPosition;
     private PostAdapter.OnItemClickListener mOnItemClickListener;
+    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
-    private FloatingActionButton fab;
     private LinearLayoutManager mLinearLayoutManager;
     private PostAdapter mPostAdapter;
     private SharedPreferences prefs;
@@ -62,14 +62,14 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     /**
      * @param keyword   Parameter 1.
-     * @param timeRange Parameter 2.
+     * @param dateRange Parameter 2.
      * @return A new instance of fragment SearchFragment.
      */
-    public static SearchFragment newInstance(String keyword, String timeRange, boolean isSortByDate) {
+    public static SearchFragment newInstance(String keyword, String dateRange, boolean isSortByDate) {
         SearchFragment fragment = new SearchFragment();
         Bundle args = new Bundle();
         args.putString(KEY_KEYWORD, keyword);
-        args.putString(KEY_TIME_RANGE, timeRange);
+        args.putString(KEY_TIME_RANGE, dateRange);
         args.putBoolean(KEY_SORT, isSortByDate);
         fragment.setArguments(args);
         return fragment;
@@ -83,7 +83,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mKeyword = getArguments().getString(KEY_KEYWORD);
-            mTimeRange = getArguments().getString(KEY_TIME_RANGE);
+            mDateRange = getArguments().getString(KEY_TIME_RANGE);
             mIsSortByDate = getArguments().getBoolean(KEY_SORT);
         }
 
@@ -100,6 +100,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_search);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
         mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
         mRecyclerView.setAdapter(mPostAdapter);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
@@ -107,7 +108,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refresh(mKeyword, mTimeRange, mIsSortByDate);
+                refresh();
             }
         });
         SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
@@ -119,19 +120,6 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (Utils.isOnline(getActivity())) {
-            // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
-            // https://code.google.com/p/android/issues/detail?id=77712
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
-            //loadPostListFromSearch(mKeyword, mTimeRange, 0, mIsSortByDate);
-        } else {
-            Toast.makeText(getActivity(), "No connection :(", Toast.LENGTH_LONG).show();
-        }
     }
 
     @Override
@@ -139,6 +127,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         super.onAttach(activity);
         try {
             mOnItemClickListener = (PostAdapter.OnItemClickListener) activity;
+            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement (PostAdapter.OnItemClickListener)");
@@ -149,12 +138,13 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     public void onDetach() {
         super.onDetach();
         mCompositeSubscription.unsubscribe();
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    void loadPostListFromSearch(String keyword, String timeRange, int page, boolean isSortByDate) {
+    void loadPostListFromSearch(String keyword, String dateRange, int page, boolean isSortByDate) {
         mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                mDataManager.getSearchResult(keyword, "created_at_i>" + timeRange.substring(0, 10)
-                        + "," + "created_at_i<" + timeRange.substring(10), page, isSortByDate))
+                mDataManager.getSearchResult(keyword, "created_at_i>" + dateRange.substring(0, 10)
+                        + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate))
                 .subscribeOn(mDataManager.getScheduler())
                 .subscribe(new Subscriber<HNItem.SearchResult>() {
                     @Override
@@ -236,9 +226,9 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         );
     }
 
-    public void refresh(String keyword, String timeRange, boolean isSortByDate) {
+    public void refresh(String keyword, String dateRange, boolean isSortByDate) {
         mKeyword = keyword;
-        mTimeRange = timeRange;
+        mDateRange = dateRange;
         mIsSortByDate = isSortByDate;
 
         if (Utils.isOnline(getActivity())) {
@@ -247,7 +237,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mSwipeRefreshLayout.setRefreshing(true);
             mPostAdapter.clear();
             mPostAdapter.notifyDataSetChanged();
-            loadPostListFromSearch(keyword, timeRange, 0, isSortByDate);
+            loadPostListFromSearch(keyword, dateRange, 0, isSortByDate);
         } else {
             if (mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(false);
@@ -256,24 +246,55 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         }
     }
 
-    public void refresh(String timeRange) {
-        refresh(mKeyword, timeRange, mIsSortByDate);
+    public void refresh(String dateRange) {
+        refresh(mKeyword, dateRange, mIsSortByDate);
     }
 
     public void refresh(boolean isSortByDate) {
-        refresh(mKeyword, mTimeRange, isSortByDate);
+        refresh(mKeyword, mDateRange, isSortByDate);
+    }
+
+    public void refresh() {
+        if (mKeyword != null && mDateRange != null) {
+            refresh(mKeyword, mDateRange, mIsSortByDate);
+        }
     }
 
     public String getKeyword() {
         return mKeyword;
     }
 
-    public String getTimeRange() {
-        return mTimeRange;
+    public void setKeyword(String keyword) {
+        mKeyword = keyword;
+    }
+
+    public String getDateRange() {
+        return mDateRange;
+    }
+
+    public void setDateRange(String dateRange) {
+        mDateRange = dateRange;
     }
 
     public boolean getIsSortByDate() {
         return mIsSortByDate;
+    }
+
+    public void setIsSortByDate(boolean isSortByDate) {
+        mIsSortByDate = isSortByDate;
+    }
+
+
+    private void reformatListStyle() {
+        int position = mLinearLayoutManager.findFirstVisibleItemPosition();
+        int offset = 0;
+        View firstChild = mLinearLayoutManager.getChildAt(0);
+        if (firstChild != null) {
+            offset = firstChild.getTop();
+        }
+        PostAdapter newAdapter = (PostAdapter) mRecyclerView.getAdapter();
+        mRecyclerView.setAdapter(newAdapter);
+        mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
     }
 
     @Override
@@ -281,7 +302,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         if (!IS_LOADING) {
             if (LOADING_TIME < searchResultTotalPages) {
                 Log.i(String.valueOf(searchResultTotalPages), String.valueOf(LOADING_TIME));
-                loadPostListFromSearch(mKeyword, mTimeRange, LOADING_TIME++, mIsSortByDate);
+                loadPostListFromSearch(mKeyword, mDateRange, LOADING_TIME++, mIsSortByDate);
                 IS_LOADING = true;
             } else {
                 Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();
@@ -292,6 +313,11 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
+        if (key.equals(SharedPrefsManager.KEY_POST_FONT)
+                || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
+                || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
+            mPostAdapter.updatePostPrefs();
+            reformatListStyle();
+        }
     }
 }

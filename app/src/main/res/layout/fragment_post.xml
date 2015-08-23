@@ -23,5 +23,5 @@
             android:scrollbars="vertical" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <include layout="@layout/include_fab" />
+    <!--<include layout="@layout/include_fab" />-->
 </RelativeLayout>

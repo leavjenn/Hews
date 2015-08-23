@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
@@ -24,7 +25,6 @@ import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
-import com.leavjenn.hews.ui.widget.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +49,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private int mLastTimeListPosition;
     private String mStoryType, mStoryTypeSpec;
     private PostAdapter.OnItemClickListener mOnItemClickListener;
+    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
-    private FloatingActionButton fab;
     private LinearLayoutManager mLinearLayoutManager;
     private PostAdapter mPostAdapter;
     private SharedPreferences prefs;
@@ -78,9 +78,11 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         super.onAttach(activity);
         try {
             mOnItemClickListener = (PostAdapter.OnItemClickListener) activity;
+            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement (PostAdapter.OnItemClickListener)");
+                    + " must implement (PostAdapter.OnItemClickListener" +
+                    " && MainActivity.OnRecyclerViewCreateListener)");
         }
     }
 
@@ -107,6 +109,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_post);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
         mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
         mRecyclerView.setAdapter(mPostAdapter);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
@@ -117,8 +120,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 refresh(mStoryType, mStoryTypeSpec);
             }
         });
-        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        setupFAB();
         SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
         mDataManager = new DataManager(Schedulers.io());
         mCompositeSubscription = new CompositeSubscription();
@@ -134,21 +135,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_URL);
             Log.d("mLastTimeListPosition", String.valueOf(mLastTimeListPosition));
         }
-
-        if (Utils.isOnline(getActivity())) {
-            // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
-            // https://code.google.com/p/android/issues/detail?id=77712
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
-//            loadPostListFromSearch();
-            loadPostListFromFirebase(mStoryTypeSpec);
-        } else {
-            Toast.makeText(getActivity(), "No connection :(", Toast.LENGTH_LONG).show();
-        }
+            refresh(mStoryType, mStoryTypeSpec);
     }
 
     @Override
@@ -176,24 +163,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         outState.putString(KEY_STORY_TYPE, mStoryType);
         outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
         Log.d("saveState", String.valueOf(lastTimePosition));
-    }
-
-    private void setupFAB() {
-        String mode = SharedPrefsManager.getFabMode(prefs);
-        if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
-            fab.setVisibility(View.VISIBLE);
-            fab.setRecyclerView(mRecyclerView);
-            fab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
-            //set fab position to default
-            fab.setTranslationX(0f);
-            fab.setTranslationY(0f);
-        } else {
-            fab.setVisibility(View.GONE);
-        }
-    }
-
-    public RecyclerView getRecyclerView(){
-        return mRecyclerView;
     }
 
     void loadPostListFromFirebase(String storyTypeUrl) {
@@ -288,7 +257,14 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         if (Utils.isOnline(getActivity())) {
             LOADING_TIME = 1;
             mCompositeSubscription.clear();
-            mSwipeRefreshLayout.setRefreshing(true);
+            // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
+            // https://code.google.com/p/android/issues/detail?id=77712
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
             mPostAdapter.clear();
             mPostAdapter.notifyDataSetChanged();
             if (type.equals(Constants.TYPE_SEARCH)) {
@@ -387,9 +363,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
             mPostAdapter.updatePostPrefs();
             reformatListStyle();
-        }
-        if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
-            setupFAB();
         }
         if (key.equals(SharedPrefsManager.KEY_THEME)) {
             getActivity().recreate();

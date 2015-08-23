@@ -9,7 +9,7 @@ import android.view.MotionEvent;
 
 import com.leavjenn.hews.SharedPrefsManager;
 
-public class FloatingActionButton extends android.support.design.widget.FloatingActionButton {
+public class FloatingScrollDownButton extends android.support.design.widget.FloatingActionButton {
 
     public static final int FAB_DRAG_MODE = 1;
     public static final int FAB_PRESS_MODE = 2;
@@ -20,15 +20,15 @@ public class FloatingActionButton extends android.support.design.widget.Floating
     Handler handler = new Handler();
 
 
-    public FloatingActionButton(Context context) {
+    public FloatingScrollDownButton(Context context) {
         this(context, null);
     }
 
-    public FloatingActionButton(Context context, AttributeSet attrs) {
+    public FloatingScrollDownButton(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FloatingActionButton(Context context, AttributeSet attrs, int defStyle) {
+    public FloatingScrollDownButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
