@@ -1,10 +1,10 @@
 package com.leavjenn.hews.ui;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,10 +16,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
@@ -135,7 +135,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_URL);
             Log.d("mLastTimeListPosition", String.valueOf(mLastTimeListPosition));
         }
-            refresh(mStoryType, mStoryTypeSpec);
+        refresh(mStoryType, mStoryTypeSpec);
     }
 
     @Override
@@ -148,9 +148,14 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mCompositeSubscription.unsubscribe();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
-        mCompositeSubscription.unsubscribe();
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -183,7 +188,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                     @Override
                     public void onNext(List<Long> longs) {
                         mPostIdList = longs;
-                        Toast.makeText(getActivity(), "Feed list loaded", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getActivity(), "Feed list loaded", Toast.LENGTH_SHORT).show();
                         loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
                         IS_LOADING = true;
                     }
@@ -282,6 +287,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         }
     }
 
+    public void refresh() {
+        refresh(mStoryType, mStoryTypeSpec);
+    }
 
     private void reformatListStyle() {
         int position = mLinearLayoutManager.findFirstVisibleItemPosition();
@@ -322,16 +330,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         );
     }
 
-    public String getStoryType() {
-        return mStoryType;
-    }
-
-    public void setStoryType(String storyType) {
-        mStoryType = storyType;
-    }
-
-    public String getStoryTypeSpec() {
-        return mStoryTypeSpec;
+    public void setSwipeRefreshLayoutState(boolean isEnable) {
+        mSwipeRefreshLayout.setEnabled(isEnable);
     }
 
     @Override
@@ -348,7 +348,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             } else if (mStoryType.equals(Constants.TYPE_SEARCH)
                     && LOADING_TIME < searchResultTotalPages) {
                 Log.i(String.valueOf(searchResultTotalPages), String.valueOf(LOADING_TIME));
-                loadPostListFromSearch(getStoryTypeSpec(), LOADING_TIME++);
+                loadPostListFromSearch(mStoryTypeSpec, LOADING_TIME++);
                 IS_LOADING = true;
             } else {
                 Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();

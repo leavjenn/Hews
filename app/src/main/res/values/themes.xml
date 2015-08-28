@@ -17,6 +17,7 @@
         <item name="bg_color">@color/grey_200</item>
         <item name="list_item_bg_color">@style/ListItemBgColor</item>
         <item name="toolbar_bg_color">@color/orange_600</item>
+        <item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>
         <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="popup_window_bg_color">@color/grey_400</item>
         <item name="popup_window_icon_textsize_small">@drawable/ic_format_size_small</item>
@@ -31,6 +32,7 @@
         <item name="android:textColor">@color/sepia_dark</item>
         <item name="list_item_bg_color">@style/ListItemBgColor.Sepia</item>
         <item name="toolbar_bg_color">@color/orange_600</item>
+        <item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>
     </style>
 
     <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar">
@@ -43,6 +45,7 @@
         <item name="bg_color">@color/grey_900</item>
         <item name="list_item_bg_color">@style/ListItemBgColor.Dark</item>
         <item name="toolbar_bg_color">@color/grey_800</item>
+        <item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>
         <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat</item>
         <item name="popup_window_bg_color">@color/grey_800</item>
         <item name="popup_window_icon_textsize_small">@drawable/ic_format_size_small_dark</item>

@@ -1,10 +1,10 @@
 package com.leavjenn.hews.ui;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -135,9 +135,14 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mCompositeSubscription.unsubscribe();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
-        mCompositeSubscription.unsubscribe();
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -284,6 +289,9 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mIsSortByDate = isSortByDate;
     }
 
+    public void setSwipeRefreshLayoutState(boolean isEnable){
+        mSwipeRefreshLayout.setEnabled(isEnable);
+    }
 
     private void reformatListStyle() {
         int position = mLinearLayoutManager.findFirstVisibleItemPosition();
