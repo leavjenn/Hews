@@ -96,8 +96,17 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 //        }
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
-        mStoryType = Constants.TYPE_STORY;
-        mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+
+        if (savedInstanceState != null) {
+            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
+            mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
+            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_URL);
+            Log.d("postfrag onCreate", mStoryType);
+            Log.d("postfrag onCreate", mStoryTypeSpec);
+        }else{
+            mStoryType = Constants.TYPE_STORY;
+            mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+        }
     }
 
     @Override
@@ -129,13 +138,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
-            mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
-            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_URL);
-            Log.d("mLastTimeListPosition", String.valueOf(mLastTimeListPosition));
-        }
         refresh(mStoryType, mStoryTypeSpec);
+        Log.d("postfragActivityCreated", mStoryType);
+        Log.d("postfragActivityCreated", mStoryTypeSpec);
     }
 
     @Override
@@ -151,11 +156,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public void onDestroy() {
         super.onDestroy();
         mCompositeSubscription.unsubscribe();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -167,7 +167,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         outState.putInt(KEY_LAST_TIME_POSITION, lastTimePosition);
         outState.putString(KEY_STORY_TYPE, mStoryType);
         outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
-        Log.d("saveState", String.valueOf(lastTimePosition));
+        Log.d("postfrag saveState", mStoryType);
+        Log.d("postfrag saveState", mStoryTypeSpec);
+        Log.d("postfrag saveState", String.valueOf(lastTimePosition));
     }
 
     void loadPostListFromFirebase(String storyTypeUrl) {

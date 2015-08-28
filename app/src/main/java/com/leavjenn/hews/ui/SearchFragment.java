@@ -138,11 +138,6 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     public void onDestroy() {
         super.onDestroy();
         mCompositeSubscription.unsubscribe();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 

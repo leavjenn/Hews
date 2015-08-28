@@ -103,12 +103,15 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 R.string.close_drawer);
         mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
 
-        mStoryType = Constants.STORY_TYPE_TOP_URL;
-        mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
         mWindow = new PopupFloatingWindow(this, mAppbar);
 
-        PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
-        getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
+        if (getFragmentManager().findFragmentById(R.id.container) == null) {
+            Log.i("act oncreate", "null frag");
+            mStoryType = Constants.STORY_TYPE_TOP_URL;
+            mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+            PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
+            getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
+        }
     }
 
     @Override
@@ -317,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     void setUpSpinnerPopularDateRange() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.time_range_popular, android.R.layout.simple_spinner_item);
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
         mSpinnerDateRange.setAdapter(adapter);
         mSpinnerDateRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -592,7 +595,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         if (getFragmentManager().findFragmentById(R.id.container) instanceof PostFragment) {
             ((PostFragment) getFragmentManager().findFragmentById(R.id.container))
                     .setSwipeRefreshLayoutState(i == 0);
-        }else if(getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment){
+        } else if (getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment) {
             ((SearchFragment) getFragmentManager().findFragmentById(R.id.container))
                     .setSwipeRefreshLayoutState(i == 0);
         }
