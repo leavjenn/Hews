@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/group_story"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/nav_top_story"
             android:checked="true"
             android:title="@string/nav_top_story" />
-
         <item
             android:id="@+id/nav_new_story"
             android:title="@string/nav_new_story" />
@@ -18,9 +19,13 @@
         <item
             android:id="@+id/nav_popular"
             android:title="@string/nav_popular" />
+    </group>
+
+    <group
+        android:id="@+id/group_other"
+        android:checkableBehavior="none">
         <item
             android:id="@+id/nav_settings"
             android:title="@string/nav_settings" />
     </group>
-
 </menu>
