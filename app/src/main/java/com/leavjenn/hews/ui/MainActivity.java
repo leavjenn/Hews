@@ -50,8 +50,12 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
         AppBarLayout.OnOffsetChangedListener {
 
+    private static final int DRAWER_CLOSE_DELAY_MS = 250;
+    private static final String STATE_DRAWER_SELECTED_ITEM = "state_drawer_selected_item";
+    private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
     private DrawerLayout mDrawerLayout;
-    private static final long DRAWER_CLOSE_DELAY_MS = 250;
+    private NavigationView mNavigationView;
+    private int mDrawerSelectedItem;
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
     private AppBarLayout mAppbar;
@@ -95,9 +99,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         mSpinnerSortOrder = (Spinner) findViewById(R.id.spinner_sort_order);
         //setup drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
-            setupDrawerContent(navigationView);
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (mNavigationView != null) {
+            setupDrawerContent(mNavigationView);
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
@@ -111,6 +115,31 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mDrawerSelectedItem = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ITEM, 0);
+        Menu menu = mNavigationView.getMenu();
+        menu.getItem(mDrawerSelectedItem).setChecked(true);
+        Log.i("mDrawerSelectedItem", String.valueOf(mDrawerSelectedItem));
+        if (mDrawerSelectedItem == 4) { // popular
+            Log.i("mDrawerSelectedItem", "DateRange");
+            setUpSpinnerPopularDateRange();
+            mSpinnerDateRange.setVisibility(View.VISIBLE);
+            int selectedDateRange = savedInstanceState.getInt(STATE_POPULAR_DATE_RANGE, 0);
+            mSpinnerDateRange.setSelection(selectedDateRange);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_DRAWER_SELECTED_ITEM, mDrawerSelectedItem);
+        if (mSpinnerDateRange.getVisibility() == View.VISIBLE) {
+            outState.putInt(STATE_POPULAR_DATE_RANGE, mSpinnerDateRange.getSelectedItemPosition());
         }
     }
 
@@ -260,18 +289,23 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         switch (type) {
                             case R.id.nav_top_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+                                mDrawerSelectedItem = 0;
                                 break;
                             case R.id.nav_new_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_NEW_URL;
+                                mDrawerSelectedItem = 1;
                                 break;
                             case R.id.nav_ask_hn:
                                 mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_URL;
+                                mDrawerSelectedItem = 2;
                                 break;
                             case R.id.nav_show_hn:
                                 mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_URL;
+                                mDrawerSelectedItem = 3;
                                 break;
                             case R.id.nav_popular:
                                 mStoryTypeSpec = Constants.TYPE_SEARCH;
+                                mDrawerSelectedItem = 4;
                                 break;
                             case R.id.nav_settings:
                                 break;
@@ -364,7 +398,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 if (endDate >= startDate) {
                                     Log.i(String.valueOf(startDate), String.valueOf(endDate + 86400));
                                     if (endDate == startDate) {
-                                        // month starts from 0
                                         ((TextView) view).setText(String.valueOf(startMonth + 1)
                                                 + "/" + String.valueOf(startDay)
                                                 + "/" + String.valueOf(startYear).substring(2));
@@ -380,12 +413,14 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             String.valueOf(startDate) + String.valueOf(endDate + 86400));
                                 } else {
                                     Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
+
                                     ((TextView) view).setText(String.valueOf(endMonth + 1)
                                             + "/" + String.valueOf(endDay)
                                             + "/" + String.valueOf(endYear).substring(2)
                                             + " - " + String.valueOf(startMonth + 1)
                                             + "/" + String.valueOf(startDay)
                                             + "/" + String.valueOf(startYear).substring(2));
+
                                     currentFrag.refresh(Constants.TYPE_SEARCH,
                                             String.valueOf(endDate) + String.valueOf(startDate + 86400));
                                 }
