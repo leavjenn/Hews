@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mAppbar.removeOnOffsetChangedListener(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
