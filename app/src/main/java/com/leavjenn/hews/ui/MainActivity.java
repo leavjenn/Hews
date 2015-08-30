@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private PopupFloatingWindow mWindow;
     private SearchView mSearchView;
     private MenuItem mSearchItem;
+    private boolean isSearchKeywordSubmitted;
     private FloatingScrollDownButton mFab;
     private String mStoryType, mStoryTypeSpec;
     private SharedPreferences prefs;
@@ -264,6 +265,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         String secStart = String.valueOf(c.getTimeInMillis() / 1000);
                         dateRange = secStart + secEnd;
                     }
+                    isSearchKeywordSubmitted = true;
                     ((SearchFragment) currentFrag).setKeyword(query);
                     ((SearchFragment) currentFrag).refresh(query, dateRange,
                             ((SearchFragment) currentFrag).getIsSortByDate());
@@ -274,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                isSearchKeywordSubmitted = false;
                 return true;
             }
         };
@@ -457,7 +460,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             // the time of first post
                             secStart = "1160418111";
-                            if (((SearchFragment) currentFrag).getKeyword() != null) {
+                            if (((SearchFragment) currentFrag).getKeyword() != null
+                                    && isSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
@@ -466,7 +470,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             c.add(Calendar.YEAR, -1);
                             secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                            if (((SearchFragment) currentFrag).getKeyword() != null) {
+                            if (((SearchFragment) currentFrag).getKeyword() != null
+                                    && isSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
@@ -475,7 +480,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             c.add(Calendar.MONTH, -1);
                             secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                            if (((SearchFragment) currentFrag).getKeyword() != null) {
+                            if (((SearchFragment) currentFrag).getKeyword() != null
+                                    && isSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
@@ -544,7 +550,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             dateRange[0] + dateRange[1]);
                 } else if (currentFrag instanceof SearchFragment) {
                     ((SearchFragment) currentFrag).setDateRange(dateRange[0] + dateRange[1]);
-                    if (((SearchFragment) currentFrag).getKeyword() != null) {
+                    if (((SearchFragment) currentFrag).getKeyword() != null
+                            && isSearchKeywordSubmitted) {
                         ((SearchFragment) currentFrag).refresh(dateRange[0] + dateRange[1]);
                         mSearchView.clearFocus();
                     }
@@ -575,7 +582,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             break;
                     }
                     ((SearchFragment) currentFrag).setIsSortByDate(isSortByDate);
-                    if (((SearchFragment) currentFrag).getKeyword() != null) {
+                    if (((SearchFragment) currentFrag).getKeyword() != null
+                            && isSearchKeywordSubmitted) {
                         ((SearchFragment) currentFrag).refresh(isSortByDate);
                         mSearchView.clearFocus();
                     }
