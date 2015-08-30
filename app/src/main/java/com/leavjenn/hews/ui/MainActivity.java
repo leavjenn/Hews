@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                                     c.add(Calendar.DAY_OF_YEAR, -1);
                                     String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                                    currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
+                                    currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
 
                                     setUpSpinnerPopularDateRange();
                                 } else {
