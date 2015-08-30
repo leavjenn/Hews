@@ -129,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         if (mDrawerSelectedItem == 4) { // popular
             Log.i("mDrawerSelectedItem", "DateRange");
             setUpSpinnerPopularDateRange();
-            mSpinnerDateRange.setVisibility(View.VISIBLE);
             int selectedDateRange = savedInstanceState.getInt(STATE_POPULAR_DATE_RANGE, 0);
             mSpinnerDateRange.setSelection(selectedDateRange);
         }
@@ -334,8 +333,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
 
                                     setUpSpinnerPopularDateRange();
-                                    mSpinnerDateRange.setVisibility(View.VISIBLE);
-                                    mSpinnerDateRange.setSelection(0);
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getFragmentManager()
@@ -354,12 +351,13 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         );
     }
 
-    void setUpSpinnerPopularDateRange() {
+    public void setUpSpinnerPopularDateRange() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.time_range_popular, android.R.layout.simple_spinner_item);
         //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
         mSpinnerDateRange.setAdapter(adapter);
+        mSpinnerDateRange.setSelection(0);
         mSpinnerDateRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, final View view, int position, long id) {
@@ -372,19 +370,19 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -1);
                         secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
+                        currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
                         break;
                     case 1: // Past 3 days
                         secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -3);
                         secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
+                        currentFrag.refresh(Constants.TYPE_SEARCH, "1" + secStart + secEnd);
                         break;
                     case 2: // Past 7 days
                         secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -7);
                         secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        currentFrag.refresh(Constants.TYPE_SEARCH, secStart + secEnd);
+                        currentFrag.refresh(Constants.TYPE_SEARCH, "2" + secStart + secEnd);
                         break;
                     case 3: // Custom range
                         DateRangeDialogFragment newFragment = new DateRangeDialogFragment();
@@ -413,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                                 + "/" + String.valueOf(endYear).substring(2));
                                     }
                                     currentFrag.refresh(Constants.TYPE_SEARCH,
-                                            String.valueOf(startDate) + String.valueOf(endDate + 86400));
+                                            "3" + String.valueOf(startDate) + String.valueOf(endDate + 86400));
                                 } else {
                                     Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
 
@@ -425,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             + "/" + String.valueOf(startYear).substring(2));
 
                                     currentFrag.refresh(Constants.TYPE_SEARCH,
-                                            String.valueOf(endDate) + String.valueOf(startDate + 86400));
+                                            "3" + String.valueOf(endDate) + String.valueOf(startDate + 86400));
                                 }
                             }
                         });
@@ -437,6 +435,12 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+        mSpinnerDateRange.setVisibility(View.VISIBLE);
+    }
+
+    public void setUpSpinnerPopularDateRange(int selection) {
+        setUpSpinnerPopularDateRange();
+        mSpinnerDateRange.setSelection(selection);
     }
 
     void setUpSpinnerSearchDateRange() {

@@ -101,9 +101,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
             mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
             mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_URL);
-            Log.d("postfrag onCreate", mStoryType);
-            Log.d("postfrag onCreate", mStoryTypeSpec);
-        }else{
+            //Log.d("postfrag onCreate", mStoryType);
+            //Log.d("postfrag onCreate", mStoryTypeSpec);
+        } else {
             mStoryType = Constants.TYPE_STORY;
             mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
         }
@@ -139,8 +139,12 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         refresh(mStoryType, mStoryTypeSpec);
-        Log.d("postfragActivityCreated", mStoryType);
-        Log.d("postfragActivityCreated", mStoryTypeSpec);
+        if (mStoryType.equals(Constants.TYPE_SEARCH)) {
+            ((MainActivity) getActivity()).
+                    setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0,1)));
+        }
+        //Log.d("postfragActivityCreated", mStoryType);
+        //Log.d("postfragActivityCreated", mStoryTypeSpec);
     }
 
     @Override
@@ -199,8 +203,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadPostListFromSearch(String timeRangeCombine, int page) {
         mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(0, 10)
-                        + "," + "created_at_i<" + timeRangeCombine.substring(10), page))
+                mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(1, 11)
+                        + "," + "created_at_i<" + timeRangeCombine.substring(11), page))
                 .subscribeOn(mDataManager.getScheduler())
                 .subscribe(new Subscriber<HNItem.SearchResult>() {
                     @Override
