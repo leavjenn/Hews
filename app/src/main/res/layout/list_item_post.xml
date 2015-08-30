@@ -10,15 +10,23 @@
     android:paddingTop="8dp">
 
     <TextView
+        android:id="@+id/tv_post_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:text=""
+        android:textColor="?attr/text_info_color" />
+
+    <TextView
         android:id="@+id/tv_post_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/tv_post_time"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
         android:layout_marginBottom="4dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:gravity="center_vertical"
-        android:minLines="2"
         android:text="title test"
         android:textSize="18sp" />
 
@@ -40,6 +48,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@id/tv_post_summary"
         android:layout_marginRight="8dp"
+        android:paddingBottom="8dp"
         android:text="+1234"
         android:textColor="?attr/text_info_color" />
 
@@ -53,22 +62,13 @@
         android:textColor="?attr/text_info_color" />
 
     <TextView
-        android:id="@+id/tv_post_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/tv_post_point"
-        android:layout_toRightOf="@id/tv_post_comments"
-        android:text=""
-        android:textColor="?attr/text_info_color" />
-
-    <TextView
         android:id="@+id/tv_post_pretty_url"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignBaseline="@id/tv_post_point"
         android:layout_marginLeft="8dp"
-        android:layout_toRightOf="@id/tv_post_time"
+        android:layout_toRightOf="@id/tv_post_comments"
         android:ellipsize="middle"
         android:gravity="right"
         android:singleLine="true"
@@ -76,6 +76,5 @@
         android:textColor="?attr/text_info_color" />
     <!--android:ellipsize:"start" style has some issue-->
     <!--android:maxLines="1"-->
-
-
+    
 </RelativeLayout>

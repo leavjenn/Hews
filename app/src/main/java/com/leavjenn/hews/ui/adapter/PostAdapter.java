@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.model.Post;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         String s = currentPost.getDescendants() > 1 ? " comments" : " comment";
         viewHolder.tvScore.setText("+ " + String.valueOf(currentPost.getScore()));
         viewHolder.tvDescendants.setText(String.valueOf(currentPost.getDescendants()) + s);
-        //viewHolder.tvTime.setText(String.valueOf(Utils.formatTime(currentPost.getTime())));
+        viewHolder.tvTime.setText(String.valueOf(Utils.formatTime(currentPost.getTime())));
         viewHolder.tvPrettyUrl.setText(currentPost.getPrettyUrl());
         if (currentPost.getSummary() != null) {
             viewHolder.tvSummary.setVisibility(View.VISIBLE);
@@ -119,7 +120,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             layoutFrame = (RelativeLayout) v.findViewById(R.id.layout_post_frame);
             tvTitle = (TextView) v.findViewById(R.id.tv_post_title);
             tvScore = (TextView) v.findViewById(R.id.tv_post_point);
-            //tvTime = (TextView) v.findViewById(R.id.tv_post_time);
+            tvTime = (TextView) v.findViewById(R.id.tv_post_time);
             tvDescendants = (TextView) v.findViewById(R.id.tv_post_comments);
             tvPrettyUrl = (TextView) v.findViewById(R.id.tv_post_pretty_url);
             tvSummary = (TextView) v.findViewById(R.id.tv_post_summary);
