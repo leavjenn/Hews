@@ -8,27 +8,35 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
+import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 
-public class CommentsActivity extends AppCompatActivity {
+public class CommentsActivity extends AppCompatActivity implements
+        SharedPreferences.OnSharedPreferenceChangeListener,OnRecyclerViewCreateListener {
     private PopupFloatingWindow mWindow;
+    private FloatingScrollDownButton mFab;
     private Post mPost;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Set theme
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.registerOnSharedPreferenceChangeListener(this);
         String theme = SharedPrefsManager.getTheme(prefs);
         if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
             setTheme(R.style.AppTheme_Sepia);
@@ -49,7 +57,7 @@ public class CommentsActivity extends AppCompatActivity {
         }
 
         mWindow = new PopupFloatingWindow(this, toolbar);
-
+        mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -135,4 +143,29 @@ public class CommentsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void setupFAB() {
+        String mode = SharedPrefsManager.getFabMode(prefs);
+        if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
+            mFab.setVisibility(View.VISIBLE);
+            mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
+            //set fab position to default
+            mFab.setTranslationX(0f);
+            mFab.setTranslationY(0f);
+        } else {
+            mFab.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
+            setupFAB();
+        }
+    }
+
+    @Override
+    public void onRecyclerViewCreate(RecyclerView recyclerView) {
+        mFab.setRecyclerView(recyclerView);
+        setupFAB();
+    }
 }

@@ -21,25 +21,23 @@
         android:paddingBottom="72dp"
         android:scrollbars="vertical" />
 
-    <RelativeLayout
-        android:id="@android:id/empty"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_marginTop="0dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
+    <!--<RelativeLayout-->
+        <!--android:id="@android:id/empty"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_marginLeft="0dp"-->
+        <!--android:layout_marginTop="0dp"-->
+        <!--android:gravity="center"-->
+        <!--android:orientation="vertical"-->
+        <!--android:visibility="gone">-->
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:translationZ="2dp" />
-    </RelativeLayout>
-
-    <include layout="@layout/include_fab" />
+        <!--<ProgressBar-->
+            <!--android:id="@+id/progress_bar"-->
+            <!--android:layout_width="50dp"-->
+            <!--android:layout_height="50dp"-->
+            <!--android:layout_centerInParent="true"-->
+            <!--android:translationZ="2dp" />-->
+    <!--</RelativeLayout>-->
 </RelativeLayout>

@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
@@ -23,7 +24,6 @@ import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.network.HackerNewsService;
 import com.leavjenn.hews.network.RetrofitHelper;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
-import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 
 import java.util.List;
 
@@ -47,6 +47,7 @@ public class CommentsFragment extends Fragment
     private DataManager mDataManager;
     private Subscription mSubscription;
     private HackerNewsService mService;
+    OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
     private static final String ARG_POST = "post";
     private static final String ARG_POST_ID = "post_id";
@@ -92,7 +93,7 @@ public class CommentsFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
         initRecyclerView(rootView);
-        setupFab(rootView);
+        //setupFab(rootView);
 
         mDataManager = new DataManager(Schedulers.io());
         if (mPost != null) {
@@ -113,6 +114,12 @@ public class CommentsFragment extends Fragment
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        try {
+            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement (MainActivity.OnRecyclerViewCreateListener)");
+        }
     }
 
     @Override
@@ -142,17 +149,7 @@ public class CommentsFragment extends Fragment
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setAdapter(mCommentAdapter);
-    }
-
-    private void setupFab(View rootView) {
-        FloatingScrollDownButton fab = (FloatingScrollDownButton) rootView.findViewById(R.id.fab);
-        String mode = SharedPrefsManager.getFabMode(prefs);
-        if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
-            fab.setRecyclerView(mRecyclerView);
-            fab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
-        } else {
-            fab.setVisibility(View.GONE);
-        }
+        mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
     }
 
     void getPost(long postId) {
