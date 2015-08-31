@@ -11,12 +11,8 @@
         <item name="android:background">@color/grey_900</item>
     </style>
 
-    <!--dose not work on pre lollipop-->
-    <!--<style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">-->
-        <!--<item name="android:textCursorDrawable">@drawable/searchview_cursor</item>-->
-    <!--</style>-->
+    <style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:textCursorDrawable">@drawable/searchview_cursor</item>
+    </style>
 
-    <!--<style name="search_cursor_color">-->
-        <!--<item name="android:colorControlActivated">@color/grey_200</item>-->
-    <!--</style>-->
 </resources>

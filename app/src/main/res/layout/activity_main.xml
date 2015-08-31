@@ -29,6 +29,7 @@
                     android:layout_height="?actionBarSize"
                     android:background="?toolbar_bg_color"
                     android:fitsSystemWindows="true"
+                    android:theme="@style/ToolBarTheme"
                     app:layout_scrollFlags="scroll|enterAlways"
                     app:popupTheme="?attr/toolbar_poptheme"/>
 

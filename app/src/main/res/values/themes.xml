@@ -17,10 +17,6 @@
         <item name="bg_color">@color/grey_200</item>
         <item name="list_item_bg_color">@style/ListItemBgColor</item>
         <item name="toolbar_bg_color">@color/orange_600</item>
-        <!--dose not work on pre lollipop-->
-        <!--<item name="android:autoCompleteTextViewStyle">@style/cursorColor</item>-->
-        <!--use for search view cursor color-->
-        <item name="colorControlActivated">@color/orange_900</item>
         <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="popup_window_bg_color">@color/grey_400</item>
         <item name="popup_window_icon_textsize_small">@drawable/ic_format_size_small</item>
@@ -53,5 +49,9 @@
         <item name="popup_window_icon_textsize_large">@drawable/ic_format_size_large_dark</item>
         <item name="popup_window_icon_lineheight_narrow">@drawable/ic_format_line_spacing_narrow_dark</item>
         <item name="popup_window_icon_lineheight_wide">@drawable/ic_format_line_spacing_wide_dark</item>
+    </style>
+
+    <style name="ToolBarTheme" parent="Theme.AppCompat">
+        <item name="autoCompleteTextViewStyle">@style/cursorColor</item>
     </style>
 </resources>
