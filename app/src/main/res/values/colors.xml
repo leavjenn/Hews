@@ -23,6 +23,8 @@
     <color name="sepia">#F4ECD8</color>
     <!-- primary text (sepia) -->
     <color name="sepia_dark">#5B4636</color>
+    <!-- secondary text (sepia) -->
+    <color name="sepia_light">#CEC1A0</color>
 
     <color name="fab_arrow">#CCFFFFFF</color>
 </resources>
