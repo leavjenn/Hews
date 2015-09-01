@@ -15,4 +15,7 @@
         <item name="android:textCursorDrawable">@drawable/searchview_cursor</item>
     </style>
 
+    <style name="ElevationCompatTheme">
+        <item name="android:visibility">visible</item>
+    </style>
 </resources>

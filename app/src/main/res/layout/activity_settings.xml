@@ -10,6 +10,12 @@
         android:layout_height="?actionBarSize"
         android:layout_alignParentTop="true" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:background="@drawable/elevation_compat"
+        android:theme="@style/ElevationCompatTheme"/>
+
     <FrameLayout
         android:id="@+id/container"
         android:background="?bg_color"
