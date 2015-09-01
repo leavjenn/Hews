@@ -33,6 +33,9 @@ public class DateRangeDialogFragment extends DialogFragment {
         long curTime = c.getTimeInMillis();
         dpStart.setMaxDate(curTime);
         dpEnd.setMaxDate(curTime);
+        // 1160418110000 = 10/10/2006, the time when the first post has been submitted
+        dpStart.setMinDate(1160418110000l);
+        dpEnd.setMinDate(1160418110000l);
         builder.setTitle("Select start and end date");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
