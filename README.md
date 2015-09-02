@@ -33,6 +33,8 @@ Distill the summary (tl; dr) of a post from it's comments, save yourself from cl
 * Clear nested comments
 * Three themes: light, sepia and dark
 * Browse Top, New, Show HN and Ask HN stories
+* Browse popular posts by any date range
+* Search by any date range, with popularity/date sorting
 * Open hacker news links by this app
 * Open post/other links in external browser
 * Check User's HN profile (long press)
