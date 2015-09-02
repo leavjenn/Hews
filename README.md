@@ -1,7 +1,7 @@
 # Hews
 A hacker news reader dedicates to readng experience with some handy features.
 
-** [Download from Google Play](https://play.google.com/store/apps/details?id=com.leavjenn.hews)**
+[![Get it on Google Play](https://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](https://play.google.com/store/apps/details?id=com.leavjenn.hews)
 
 ## Special features
 
@@ -41,6 +41,5 @@ Distill the summary (tl; dr) of a post from it's comments, save yourself from cl
 * Open source
 
 ## What's next
-* In-app searching
 * Improve error handling
-* Login and relative features
+* Login and related features
