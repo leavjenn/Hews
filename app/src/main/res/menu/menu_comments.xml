@@ -18,7 +18,7 @@
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share"
         android:orderInCategory="5"
-        android:title="@string/menu_share"
+        android:title="@string/menu_share_link"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_display"

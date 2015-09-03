@@ -129,7 +129,7 @@ public class CommentsActivity extends AppCompatActivity implements
                         + mPost.getId();
                 sendIntent.putExtra(Intent.EXTRA_TEXT, commentUrl);
                 sendIntent.setType("text/plain");
-                startActivity(Intent.createChooser(sendIntent, getString(R.string.share_with)));
+                startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
                 break;
 
             case R.id.action_display:

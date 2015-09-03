@@ -124,7 +124,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                                         + comment.getId();
                                                 sendIntent.putExtra(Intent.EXTRA_TEXT, url);
                                                 sendIntent.setType("text/plain");
-                                                mContext.startActivity(sendIntent);
+                                                mContext.startActivity(Intent.createChooser(sendIntent,
+                                                        mContext.getString(R.string.share_link_to)));
                                             }
 
                                             @Override
@@ -135,7 +136,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                                         + Html.fromHtml(comment.getText());
                                                 sendIntent.putExtra(Intent.EXTRA_TEXT, text);
                                                 sendIntent.setType("text/plain");
-                                                mContext.startActivity(sendIntent);
+                                                mContext.startActivity(Intent.createChooser(sendIntent,
+                                                        mContext.getString(R.string.send_to)));
                                             }
                                         });
                             }

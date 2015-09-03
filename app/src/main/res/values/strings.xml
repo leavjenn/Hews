@@ -5,13 +5,14 @@
     <string name="close_drawer">Close drawer</string>
     <string name="menu_search">Search</string>
     <string name="menu_open_post">Open post</string>
-    <string name="menu_share">Share</string>
+    <string name="menu_share_link">Share link</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_display">Display</string>
+    <string name="send_to">Send to</string>
+    <string name="share_link_to">Share link to</string>
     <string name="title_activity_comments">CommentsActivity</string>
     <string name="open_with_hn">Open With Necker Hews</string>
     <string name="no_comment_promt">No comment yet</string>
-    <string name="share_with">Share with</string>
 
     <!-- Nav drawer -->
     <string name="nav_top_story">Top</string>
@@ -47,8 +48,8 @@
     <string-array name="dialog">
         <item>Reply via browser</item>
         <item>Author profile</item>
-        <item>Share to&#8230;</item>
-        <item>Share comment text to&#8230;</item>
+        <item>Share link to&#8230;</item>
+        <item>Send comment text to&#8230;</item>
     </string-array>
 
 <!-- TODO: Remove or change this placeholder text -->
