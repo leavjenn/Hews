@@ -197,6 +197,7 @@ public class CommentsFragment extends Fragment
                 mPost = post;
                 mCommentAdapter.addHeader(mPost);
                 getComments(mPost.getKids());
+                ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
             }
 
             @Override

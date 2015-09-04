@@ -25,10 +25,11 @@ import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 
 public class CommentsActivity extends AppCompatActivity implements
-        SharedPreferences.OnSharedPreferenceChangeListener,OnRecyclerViewCreateListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener {
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
-    private Post mPost;
+    private String mUrl;
+    private long mPostId;
     private SharedPreferences prefs;
 
     @Override
@@ -63,14 +64,17 @@ public class CommentsActivity extends AppCompatActivity implements
         Bundle bundle = intent.getExtras();
         CommentsFragment commentsFragment = null;
         if (bundle != null) {
-            mPost = intent.getParcelableExtra(Constants.KEY_POST);
-            commentsFragment = CommentsFragment.newInstance(mPost);
+            Post post = intent.getParcelableExtra(Constants.KEY_POST);
+            commentsFragment = CommentsFragment.newInstance(post);
+            mUrl = post.getUrl();
+            mPostId = post.getId();
         }
 
         final Uri data = intent.getData();
         if (data != null) {
             long storyId = Long.parseLong(data.getQueryParameter("id"));
             commentsFragment = CommentsFragment.newInstance(storyId);
+            mPostId = storyId;
         }
 
         if (savedInstanceState == null) {
@@ -109,11 +113,11 @@ public class CommentsActivity extends AppCompatActivity implements
                 break;
 
             case R.id.action_open_post:
-                mPost.getUrl();
-                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                String url = mPost.getUrl();
-                urlIntent.setData(Uri.parse(url));
-                startActivity(urlIntent);
+                if (mUrl != null) {
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                    urlIntent.setData(Uri.parse(mUrl));
+                    startActivity(urlIntent);
+                }
                 break;
 
             case R.id.action_refresh:
@@ -126,16 +130,16 @@ public class CommentsActivity extends AppCompatActivity implements
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
                 String commentUrl = "https://news.ycombinator.com/item?id="
-                        + mPost.getId();
+                        + mPostId;
                 sendIntent.putExtra(Intent.EXTRA_TEXT, commentUrl);
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
                 break;
 
             case R.id.action_display:
-                if(!mWindow.isWindowShowing()){
+                if (!mWindow.isWindowShowing()) {
                     mWindow.show();
-                }else{
+                } else {
                     mWindow.dismiss();
                 }
                 break;
@@ -154,6 +158,10 @@ public class CommentsActivity extends AppCompatActivity implements
         } else {
             mFab.setVisibility(View.GONE);
         }
+    }
+
+    public void setUrl(String url) {
+        mUrl = url;
     }
 
     @Override
