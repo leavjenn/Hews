@@ -36,4 +36,8 @@
     <string name="pref_title_show_post_summary">Show post summary (experiment)</string>
     <string name="summary_show_post_summary">If there exists comment contains \"summary\" or \"tl;dr\"
         in first words, show it under post title</string>
+
+    <!-- Open link Browser option -->
+    <string name="pref_title_open_link">Open link in external browser</string>
+    <string name="pref_key_open_link">key_open_link</string>
 </resources>

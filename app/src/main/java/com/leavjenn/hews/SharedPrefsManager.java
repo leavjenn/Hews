@@ -106,4 +106,8 @@ public class SharedPrefsManager {
         return sp.getBoolean(context.getResources().getString(R.string.pref_key_show_post_summary),
                 false);
     }
+
+    public static Boolean getIsOpenLinkInBrowser(SharedPreferences sp, Context context) {
+        return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link), false);
+    }
 }

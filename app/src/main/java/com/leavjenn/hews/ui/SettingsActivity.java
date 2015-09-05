@@ -4,13 +4,16 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
+import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 
@@ -83,12 +86,29 @@ public class SettingsActivity extends AppCompatActivity
 
     public static class SettingsFragment extends PreferenceFragment {
 
-        public SettingsFragment() {}
+        public SettingsFragment() {
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            if (ChromeCustomTabsHelper.getPackageNameToUse(getActivity()) != null) {
+                addOpenLinkPreference();
+            }
+        }
+
+        void addOpenLinkPreference() {
+            CheckBoxPreference openLinkPref = new CheckBoxPreference(getActivity());
+            openLinkPref.setTitle(getActivity().getResources().getString(R.string.pref_title_open_link));
+            openLinkPref.setKey(getActivity().getResources().getString(R.string.pref_key_open_link));
+            openLinkPref.setDefaultValue(false);
+            getPreferenceScreen().addPreference(openLinkPref);
         }
     }
 }

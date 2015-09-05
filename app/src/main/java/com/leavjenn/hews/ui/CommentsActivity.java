@@ -3,9 +3,11 @@ package com.leavjenn.hews.ui;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.firebase.client.Firebase;
+import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
@@ -31,6 +34,7 @@ public class CommentsActivity extends AppCompatActivity implements
     private String mUrl;
     private long mPostId;
     private SharedPreferences prefs;
+    private ChromeCustomTabsHelper mChromeCustomTabsHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,11 +90,28 @@ public class CommentsActivity extends AppCompatActivity implements
         }
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!SharedPrefsManager.getIsOpenLinkInBrowser(prefs, this)
+                && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
+            mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
+            mChromeCustomTabsHelper.bindCustomTabsService(this);
+            if (mUrl != null) {
+                mChromeCustomTabsHelper.mayLaunchUrl(Uri.parse(mUrl), null, null);
+            }
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
         if (mWindow.isWindowShowing()) {
             mWindow.dismiss();
+        }
+        if (mChromeCustomTabsHelper != null) {
+            mChromeCustomTabsHelper.unbindCustomTabsService(this);
         }
     }
 
@@ -114,9 +135,26 @@ public class CommentsActivity extends AppCompatActivity implements
 
             case R.id.action_open_post:
                 if (mUrl != null) {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    urlIntent.setData(Uri.parse(mUrl));
-                    startActivity(urlIntent);
+                    if (mChromeCustomTabsHelper != null) {
+                        // build CustomTabs UI
+                        CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
+                            intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
+                        } else {
+                            intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_600));
+                        }
+
+                        intentBuilder.setShowTitle(true);
+                        intentBuilder.setCloseButtonIcon(
+                                BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
+
+                        ChromeCustomTabsHelper.openCustomTab(this, intentBuilder.build(),
+                                Uri.parse(mUrl), null);
+                    } else {
+                        Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                        urlIntent.setData(Uri.parse(mUrl));
+                        startActivity(urlIntent);
+                    }
                 }
                 break;
 
