@@ -6,18 +6,23 @@
         <item
             android:id="@+id/nav_top_story"
             android:checked="true"
+            android:icon="@drawable/drawer_story_top"
             android:title="@string/nav_top_story" />
         <item
             android:id="@+id/nav_new_story"
+            android:icon="@drawable/drawer_story_new"
             android:title="@string/nav_new_story" />
         <item
             android:id="@+id/nav_ask_hn"
+            android:icon="@drawable/drawer_story_ask"
             android:title="@string/nav_ask_hn" />
         <item
             android:id="@+id/nav_show_hn"
+            android:icon="@drawable/drawer_story_show"
             android:title="@string/nav_show_hn" />
         <item
             android:id="@+id/nav_popular"
+            android:icon="@drawable/drawer_popular"
             android:title="@string/nav_popular" />
     </group>
 
@@ -26,6 +31,7 @@
         android:checkableBehavior="none">
         <item
             android:id="@+id/nav_settings"
+            android:icon="@drawable/drawer_setting"
             android:title="@string/nav_settings" />
     </group>
 </menu>
