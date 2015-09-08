@@ -42,6 +42,7 @@ import com.leavjenn.hews.ui.adapter.PostAdapter;
 import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
 import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
+import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import java.util.Calendar;
@@ -354,6 +355,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     setUpSpinnerPopularDateRange();
                                 } else if (type == R.id.nav_login) {
                                     //TODO login
+                                    LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+                                    loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
                                 } else if (type == R.id.nav_logout) {
                                     //TODO logout
                                 } else {
