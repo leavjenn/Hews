@@ -27,6 +27,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private LinearLayout layoutLogin;
+    private ImageView ivExpander;
+    private boolean isLoginMenuExpanded;
     private int mDrawerSelectedItem;
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
@@ -106,6 +111,15 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
+        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
+        layoutLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickLogin();
+            }
+        });
+        ivExpander = (ImageView) findViewById(R.id.iv_expander);
+
         mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
 
         mWindow = new PopupFloatingWindow(this, mAppbar);
@@ -290,6 +304,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     public boolean onNavigationItemSelected(final MenuItem menuItem) {
                         final int type = menuItem.getItemId();
                         switch (type) {
+                            case R.id.nav_login:
+                                break;
+                            case R.id.nav_logout:
+                                break;
                             case R.id.nav_top_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
                                 mDrawerSelectedItem = 0;
@@ -334,6 +352,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
 
                                     setUpSpinnerPopularDateRange();
+                                } else if (type == R.id.nav_login) {
+                                    //TODO login
+                                } else if (type == R.id.nav_logout) {
+                                    //TODO logout
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getFragmentManager()
@@ -350,6 +372,20 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     }
                 }
         );
+    }
+
+    void clickLogin() {
+        isLoginMenuExpanded = !isLoginMenuExpanded;
+        Menu menu = mNavigationView.getMenu();
+        if (isLoginMenuExpanded) {
+            menu.setGroupVisible(R.id.group_login, true);
+            ivExpander.setImageResource(R.drawable.expander_close);
+            //TODO if already logged in
+            //menu.findItem(R.id.nav_login).setVisible(false);
+        } else {
+            menu.setGroupVisible(R.id.group_login, false);
+            ivExpander.setImageResource(R.drawable.expander_open);
+        }
     }
 
     public void setUpSpinnerPopularDateRange() {

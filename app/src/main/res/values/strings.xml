@@ -13,6 +13,8 @@
     <string name="no_comment_promt">No comment yet</string>
 
     <!-- Nav drawer -->
+    <string name="nav_login">Login</string>
+    <string name="nav_logout">Logout</string>
     <string name="nav_top_story">Top</string>
     <string name="nav_new_story">New</string>
     <string name="nav_ask_hn">Ask HN</string>

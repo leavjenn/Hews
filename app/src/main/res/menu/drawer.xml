@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group
+        android:id="@+id/group_login"
+        android:checkableBehavior="none"
+        android:visible="false">
+        <item
+            android:id="@+id/nav_login"
+            android:title="@string/nav_login"
+            android:icon="@drawable/ic_add"
+            android:checkable="false" />
+        <item
+            android:id="@+id/nav_logout"
+            android:title="@string/nav_logout"
+            android:icon="@drawable/ic_remove"
+            android:visible="false"
+            android:checkable="false" />
+    </group>
+    <group
         android:id="@+id/group_story"
         android:checkableBehavior="single">
         <item
