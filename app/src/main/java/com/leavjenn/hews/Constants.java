@@ -33,8 +33,9 @@ public final class Constants {
 
     public final static int NUM_LOADING_ITEM = 25;
 
-    public final static int LOADING_IN_PROGRESS = 0;
-    public final static int LOADING_FINISH = 1;
-    public final static int LOADING_ERROR = 2;
-    public final static int LOADING_PROMPT_NO_CONTENT = 3;
+    public final static int LOADING_IDLE = 0;
+    public final static int LOADING_IN_PROGRESS = 1;
+    public final static int LOADING_FINISH = 2;
+    public final static int LOADING_ERROR = 3;
+    public final static int LOADING_PROMPT_NO_CONTENT = 4;
 }
