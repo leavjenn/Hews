@@ -43,7 +43,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
 
     static int LOADING_TIME = 1;
-    static Boolean IS_LOADING = false;
+    private int mLoadingState = Constants.LOADING_IDLE;
     static Boolean SHOW_POST_SUMMARY = false;
 
     private int mLastTimeListPosition;
@@ -141,7 +141,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         refresh(mStoryType, mStoryTypeSpec);
         if (mStoryType.equals(Constants.TYPE_SEARCH)) {
             ((MainActivity) getActivity()).
-                    setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0,1)));
+                    setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
         }
         //Log.d("postfragActivityCreated", mStoryType);
         //Log.d("postfragActivityCreated", mStoryTypeSpec);
@@ -196,7 +196,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         mPostIdList = longs;
 //                        Toast.makeText(getActivity(), "Feed list loaded", Toast.LENGTH_SHORT).show();
                         loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
-                        IS_LOADING = true;
+                        mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
                 }));
     }
@@ -225,7 +225,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         }
                         //Toast.makeText(getActivity(), "Search list loaded", Toast.LENGTH_SHORT).show();
                         loadPostFromList(list);
-                        IS_LOADING = true;
+                        mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
                 }));
     }
@@ -237,7 +237,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 .subscribe(new Subscriber<Post>() {
                     @Override
                     public void onCompleted() {
-                        IS_LOADING = false;
+                        mLoadingState = Constants.LOADING_IDLE;
                     }
 
                     @Override
@@ -342,22 +342,23 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     @Override
     public void OnReachBottom() {
-        if (!IS_LOADING) {
+        if (mLoadingState == Constants.LOADING_IDLE) {
             if (mStoryType.equals(Constants.TYPE_STORY)
                     && Constants.NUM_LOADING_ITEM * (LOADING_TIME + 1) < mPostIdList.size()) {
                 int start = Constants.NUM_LOADING_ITEM * LOADING_TIME,
                         end = Constants.NUM_LOADING_ITEM * (++LOADING_TIME);
                 loadPostFromList(mPostIdList.subList(start, end));
-                IS_LOADING = true;
+                mLoadingState = Constants.LOADING_IN_PROGRESS;
                 //Toast.makeText(getActivity(), "Loading more", Toast.LENGTH_SHORT).show();
                 Log.i("loading", String.valueOf(start) + " - " + end);
             } else if (mStoryType.equals(Constants.TYPE_SEARCH)
                     && LOADING_TIME < searchResultTotalPages) {
                 Log.i(String.valueOf(searchResultTotalPages), String.valueOf(LOADING_TIME));
                 loadPostListFromSearch(mStoryTypeSpec, LOADING_TIME++);
-                IS_LOADING = true;
+                mLoadingState = Constants.LOADING_IN_PROGRESS;
             } else {
                 Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();
+                mLoadingState = Constants.LOADING_FINISH;
             }
         }
     }

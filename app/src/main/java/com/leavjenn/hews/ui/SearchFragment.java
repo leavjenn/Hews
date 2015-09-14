@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
@@ -44,7 +45,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     private boolean mIsSortByDate;
 
     static int LOADING_TIME = 1;
-    static Boolean IS_LOADING = false;
+    private int mLoadingState = Constants.LOADING_IDLE;
     static Boolean SHOW_POST_SUMMARY = false;
 
     private int mLastTimeListPosition;
@@ -164,7 +165,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
                             list.add(searchResult.getHits()[i].getObjectID());
                         }
                         loadPostFromList(list);
-                        IS_LOADING = true;
+                        mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
                 }));
     }
@@ -176,7 +177,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
                 .subscribe(new Subscriber<Post>() {
                     @Override
                     public void onCompleted() {
-                        IS_LOADING = false;
+                        mLoadingState = Constants.LOADING_IDLE;
                     }
 
                     @Override
@@ -284,7 +285,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mIsSortByDate = isSortByDate;
     }
 
-    public void setSwipeRefreshLayoutState(boolean isEnable){
+    public void setSwipeRefreshLayoutState(boolean isEnable) {
         mSwipeRefreshLayout.setEnabled(isEnable);
     }
 
@@ -302,13 +303,14 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     @Override
     public void OnReachBottom() {
-        if (!IS_LOADING) {
+        if (mLoadingState == Constants.LOADING_IDLE) {
             if (LOADING_TIME < searchResultTotalPages) {
                 Log.i(String.valueOf(searchResultTotalPages), String.valueOf(LOADING_TIME));
                 loadPostListFromSearch(mKeyword, mDateRange, LOADING_TIME++, mIsSortByDate);
-                IS_LOADING = true;
+                mLoadingState = Constants.LOADING_IN_PROGRESS;
             } else {
                 Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();
+                mLoadingState = Constants.LOADING_FINISH;
             }
         }
 
