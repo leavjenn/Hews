@@ -70,7 +70,8 @@ public class CommentsActivity extends AppCompatActivity implements
         if (bundle != null) {
             Post post = intent.getParcelableExtra(Constants.KEY_POST);
             commentsFragment = CommentsFragment.newInstance(post);
-            mUrl = post.getUrl();
+            //TODO how the url could be null?!
+            mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
             mPostId = post.getId();
         }
 
