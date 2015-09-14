@@ -189,7 +189,7 @@ public class CommentsFragment extends Fragment
 
     public void getPostInfo(long postId) {
         mCommentAdapter.addFooter(new HNItem.Footer());
-        mCommentAdapter.updateFooter(Constants.COMMENTS_LOADING_IN_PROGRESS);
+        mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
         mService = new RetrofitHelper().getHackerNewsService();
         mService.getItem(String.valueOf(postId), new Callback<Post>() {
             @Override
@@ -219,12 +219,12 @@ public class CommentsFragment extends Fragment
                     .subscribe(new Subscriber<Comment>() {
                         @Override
                         public void onCompleted() {
-                            mCommentAdapter.updateFooter(Constants.COMMENTS_LOADING_FINISH);
+                            mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            mCommentAdapter.updateFooter(Constants.COMMENTS_LOADING_ERROR);
+                            mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
                             Toast.makeText(getActivity(), "Comments loading error",
                                     Toast.LENGTH_LONG).show();
                             Log.e("error", "There was an error retrieving the comments " + e);
@@ -238,7 +238,7 @@ public class CommentsFragment extends Fragment
                         }
                     });
         } else {
-            mCommentAdapter.updateFooter(Constants.COMMENTS_LOADING_NO_COMMENT);
+            mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
         }
     }
 

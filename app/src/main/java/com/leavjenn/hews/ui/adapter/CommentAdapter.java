@@ -230,15 +230,15 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         } else if (viewHolder instanceof CommentFooterViewHolder) {
             CommentFooterViewHolder commentFooterViewHolder = (CommentFooterViewHolder) viewHolder;
-            if (mLoadingState == Constants.COMMENTS_LOADING_FINISH
-                    || mLoadingState == Constants.COMMENTS_LOADING_ERROR) {
+            if (mLoadingState == Constants.LOADING_FINISH
+                    || mLoadingState == Constants.LOADING_ERROR) {
                 commentFooterViewHolder.progressBar.setVisibility(View.GONE);
                 commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
-            } else if (mLoadingState == Constants.COMMENTS_LOADING_NO_COMMENT) {
+            } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
                 commentFooterViewHolder.progressBar.setVisibility(View.GONE);
                 commentFooterViewHolder.tvNoCommentPromt.setText(
                         mContext.getResources().getString(R.string.no_comment_promt));
-            } else if (mLoadingState == Constants.COMMENTS_LOADING_IN_PROGRESS) {
+            } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
                 commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
                 commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
             }
