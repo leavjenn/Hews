@@ -1,5 +1,6 @@
 package com.leavjenn.hews.network;
 
+import android.content.SharedPreferences;
 import android.text.Html;
 
 import com.firebase.client.DataSnapshot;
@@ -7,12 +8,22 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.leavjenn.hews.Constants;
+import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.ResponseBody;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +35,13 @@ import rx.Subscriber;
 import rx.functions.Func1;
 
 public class DataManager {
+    public static final String HACKER_NEWS_BASE_URL = "https://news.ycombinator.com/";
+    public static final String HACKER_NEWS_ITEM_URL = "https://news.ycombinator.com/item?id=";
+    public static final int OPERATE_SUCCESS = 0;
+    public static final int OPERATE_ERROR_NO_COOKIE = 1;
+    public static final int OPERATE_ERROR_COOKIE_EXPIRED = 2;
+    public static final int OPERATE_ERROR_HAVE_VOTED = 3;
+    public static final int OPERATE_ERROR_UNKNOWN = 3;
     private static final int MINIMUM_STRING = 20;
     HackerNewsService mHackerNewsService, mSearchService;
     private Scheduler mScheduler;
@@ -348,14 +366,14 @@ public class DataManager {
             @Override
             public void call(Subscriber<? super String> subscriber) {
                 try {
-                    Connection login = Jsoup.connect("https://news.ycombinator.com/login");
+                    Connection login = Jsoup.connect(HACKER_NEWS_BASE_URL + "login");
                     login.header("Accept-Encoding", "gzip")
                             .data("go_to", "news")
                             .data("acct", username)
                             .data("pw", password)
                             .header("Origin", "https://news.ycombinator.com")
                             .followRedirects(true)
-                            .referrer("https://news.ycombinator.com/login?go_to=news")
+                            .referrer(HACKER_NEWS_BASE_URL + "login?go_to=news")
                             .method(Connection.Method.POST);
                     Connection.Response response = login.execute();
                     String cookie = response.cookie("user");
@@ -363,6 +381,120 @@ public class DataManager {
                         subscriber.onNext("");
                     } else {
                         subscriber.onNext(cookie);
+                    }
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Integer> vote(final long itemId, final SharedPreferences sp) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(Subscriber<? super Integer> subscriber) {
+                String cookieLogin = SharedPrefsManager.getLoginCookie(sp);
+                if (cookieLogin.isEmpty()) {
+                    subscriber.onNext(OPERATE_ERROR_NO_COOKIE);
+                    subscriber.onCompleted();
+                }
+                try {
+                    Connection vote = Jsoup.connect(HACKER_NEWS_ITEM_URL + itemId)
+                            .header("Accept-Encoding", "gzip")
+                            .cookie("user", cookieLogin);
+                    Document commentsDocument = vote.get();
+                    /*
+                    votable element:
+                    <a id="up_10276091"
+                     href="vote?for=10276091&dir=up&auth=3ecc4be748d7cc412223ea906b559ce72ccdc262&goto=news"
+                     onclick="return vote(this)">
+
+                     url:
+                    https://news.ycombinator.com/vote?for=10276091&dir=up
+                     &auth=3ecc4be748d7cc412223ea906b559ce72ccdc262&goto=news
+
+                    logout element:
+                    <a id="up_10276091" href="vote?for=10276091&dir=up&goto=item%3Fid%3D10276091">
+
+                    url:
+                    https://news.ycombinator.com/vote?for=10276091&dir=up&goto=item%3Fid%3D10276091
+                    */
+                    Elements links = commentsDocument.select("a[id=up_" + itemId + "]");
+                    Element voteElement = links.get(0).select("a[href^=vote]").first();
+
+                    if (links.size() > 0 && voteElement.attr("href").contains("auth=")) {
+                        String url = (voteElement.attr("href"));
+                        Request voteRequest = new Request.Builder()
+                                .addHeader("cookie", "user=" + cookieLogin)
+                                .url(HACKER_NEWS_BASE_URL + url)
+                                .build();
+                        Response response = new OkHttpClient().newCall(voteRequest).execute();
+                        if (response.code() == 200) {
+                            if (response.body() == null) {
+                                subscriber.onError(new Throwable(""));
+                            }
+//                            Document doc = response.parse();
+//                            String text = doc.text();
+                            ResponseBody body = response.body();
+                            String text = body.string();
+                            if (text.equals("Can't make that vote.")) {
+                                subscriber.onNext(OPERATE_ERROR_UNKNOWN);
+                            } else {
+                                subscriber.onNext(OPERATE_SUCCESS);
+                            }
+                        } else {
+                            subscriber.onNext(OPERATE_ERROR_UNKNOWN);
+                        }
+                    } else if (!voteElement.attr("href").contains("auth=")) {
+                        subscriber.onNext(OPERATE_ERROR_COOKIE_EXPIRED);
+                    } else if (links.size() == 0) {
+                        subscriber.onNext(OPERATE_ERROR_HAVE_VOTED);
+                    }
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        });
+    }
+
+
+    Observable<Integer> reply(final String itemId, final String replyText, final SharedPreferences sp) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(Subscriber<? super Integer> subscriber) {
+                String cookieLogin = SharedPrefsManager.getLoginCookie(sp);
+                if (cookieLogin.isEmpty()) {
+                    subscriber.onNext(OPERATE_ERROR_NO_COOKIE);
+                    subscriber.onCompleted();
+                }
+                try {
+                    Connection reply = Jsoup.connect(HACKER_NEWS_ITEM_URL + itemId)
+                            .header("Accept-Encoding", "gzip")
+                            .cookie("user", cookieLogin);
+                    Document replyDocument = reply.get();
+                    Element element = replyDocument.select("input[name=hmac]").first();
+
+                    if (element != null) {
+                        String replyHmac = element.attr("value");
+                        RequestBody requestBody = (new FormEncodingBuilder())
+                                .add("parent", itemId)
+                                .add("goto", (new StringBuilder()).append("item?id=").append(itemId).toString())
+                                .add("text", replyText)
+                                .add("hmac", replyHmac)
+                                .build();
+
+                        Request request = new Request.Builder()
+                                .addHeader("cookie", "user=" + cookieLogin)
+                                .url(HACKER_NEWS_BASE_URL + "/comment")
+                                .post(requestBody)
+                                .build();
+
+                        Response response = new OkHttpClient().newCall(request).execute();
+                        if (response.code() == 200) {
+                            subscriber.onNext(OPERATE_SUCCESS);
+                        }
+                    } else {
+                        subscriber.onNext(OPERATE_ERROR_COOKIE_EXPIRED);
                     }
                 } catch (Exception e) {
                     subscriber.onError(e);
