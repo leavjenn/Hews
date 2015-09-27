@@ -25,12 +25,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
@@ -38,6 +40,7 @@ import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
+import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
 import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
 import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
@@ -47,6 +50,12 @@ import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+
+import rx.Subscriber;
+import rx.android.app.AppObservable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 
 public class MainActivity extends AppCompatActivity implements PostAdapter.OnItemClickListener,
@@ -75,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private FloatingScrollDownButton mFab;
     private String mStoryType, mStoryTypeSpec;
     private SharedPreferences prefs;
+    private DataManager mDataManager;
+    private CompositeSubscription mCompositeSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
+        updateLoginState(SharedPrefsManager.getLoginCookie(prefs).isEmpty() ?
+                Constants.LOGIN_STATE_OUT : Constants.LOGIN_STATE_IN);
         layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
         layoutLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,6 +144,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
+
+            mDataManager = new DataManager(Schedulers.io());
+            mCompositeSubscription = new CompositeSubscription();
         }
     }
 
@@ -139,7 +155,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         super.onRestoreInstanceState(savedInstanceState);
         mDrawerSelectedItem = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ITEM, 0);
         Menu menu = mNavigationView.getMenu();
-        menu.getItem(mDrawerSelectedItem).setChecked(true);
+        //mDrawerSelectedItem + 2 to skip login and logout
+        menu.getItem(mDrawerSelectedItem + 2).setChecked(true);
+        //TODO bug: item including login part
         Log.i("mDrawerSelectedItem", String.valueOf(mDrawerSelectedItem));
         if (mDrawerSelectedItem == 4) { // popular
             Log.i("mDrawerSelectedItem", "DateRange");
@@ -163,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         super.onDestroy();
         mAppbar.removeOnOffsetChangedListener(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
+        }
     }
 
     @Override
@@ -305,10 +326,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     public boolean onNavigationItemSelected(final MenuItem menuItem) {
                         final int type = menuItem.getItemId();
                         switch (type) {
-                            case R.id.nav_login:
-                                break;
-                            case R.id.nav_logout:
-                                break;
+//                            case R.id.nav_login:
+//                                break;
+//                            case R.id.nav_logout:
+//                                break;
                             case R.id.nav_top_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
                                 mDrawerSelectedItem = 0;
@@ -354,11 +375,56 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
                                     setUpSpinnerPopularDateRange();
                                 } else if (type == R.id.nav_login) {
-                                    //TODO login
-                                    LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+                                    final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+                                    LoginDialogFragment.OnLoginListener onLoginListener =
+                                            new LoginDialogFragment.OnLoginListener() {
+                                                @Override
+                                                public void onLogin(final String username, String password) {
+                                                    mCompositeSubscription.add(AppObservable.bindActivity(MainActivity.this,
+                                                            mDataManager.login(username, password))
+                                                            .subscribeOn(Schedulers.io())
+                                                            .observeOn(AndroidSchedulers.mainThread())
+                                                            .subscribe(new Subscriber<String>() {
+                                                                @Override
+                                                                public void onCompleted() {
+                                                                }
+
+                                                                @Override
+                                                                public void onError(Throwable e) {
+                                                                    Log.e("login err", e.toString());
+                                                                }
+
+                                                                @Override
+                                                                public void onNext(String s) {
+                                                                    if (s.isEmpty()) {// login failed
+                                                                        loginDialogFragment.resetLogin();
+                                                                    } else {
+                                                                        loginDialogFragment.getDialog().dismiss();
+                                                                        Toast.makeText(MainActivity.this, "login secceed",
+                                                                                Toast.LENGTH_LONG).show();
+                                                                        SharedPrefsManager.setUsername(prefs, username);
+                                                                        SharedPrefsManager.setLoginCookie(prefs, s);
+                                                                        updateLoginState(Constants.LOGIN_STATE_IN);
+                                                                    }
+                                                                }
+                                                            }));
+                                                }
+                                            };
+                                    loginDialogFragment.setListener(onLoginListener);
                                     loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
+                                    // guarantee getDialog() will not return null
+                                    getFragmentManager().executePendingTransactions();
+                                    // show keyboard when dialog shows
+                                    loginDialogFragment.getDialog().getWindow()
+                                            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
                                 } else if (type == R.id.nav_logout) {
-                                    //TODO logout
+                                    Toast.makeText(MainActivity.this, "logout secceed",
+                                            Toast.LENGTH_LONG).show();
+                                    SharedPrefsManager.setUsername(prefs,
+                                            MainActivity.this.getResources().getString(R.string.nav_logout));
+                                    SharedPrefsManager.setLoginCookie(prefs, "");
+                                    updateLoginState(Constants.LOGIN_STATE_OUT);
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getFragmentManager()
@@ -366,7 +432,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
                                     mSpinnerDateRange.setVisibility(View.GONE);
                                 }
-
+                                mNavigationView.getMenu().setGroupVisible(R.id.group_login, false);
+                                ivExpander.setImageResource(R.drawable.expander_open);
                             }
                         };
 
@@ -382,13 +449,27 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         Menu menu = mNavigationView.getMenu();
         if (isLoginMenuExpanded) {
             menu.setGroupVisible(R.id.group_login, true);
+            MenuItem menuLogin = menu.findItem(R.id.nav_login);
+            MenuItem menuLogout = menu.findItem(R.id.nav_logout);
+            if (SharedPrefsManager.getLoginCookie(prefs).isEmpty()) {
+                menuLogin.setVisible(true);
+                menuLogout.setVisible(false);
+            } else {
+                menuLogin.setVisible(false);
+                menuLogout.setVisible(true);
+            }
             ivExpander.setImageResource(R.drawable.expander_close);
-            //TODO if already logged in
-            //menu.findItem(R.id.nav_login).setVisible(false);
         } else {
             menu.setGroupVisible(R.id.group_login, false);
             ivExpander.setImageResource(R.drawable.expander_open);
         }
+    }
+
+    void updateLoginState(boolean isLogin) {
+        TextView tvAccount = (TextView) findViewById(R.id.tv_account);
+        String username = SharedPrefsManager.getUsername(prefs, this);
+        tvAccount.setText(username);
+        Log.i("usename", tvAccount.getText().toString());
     }
 
     public void setUpSpinnerPopularDateRange() {

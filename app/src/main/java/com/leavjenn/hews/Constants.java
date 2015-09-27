@@ -37,4 +37,7 @@ public final class Constants {
     public final static int COMMENTS_LOADING_FINISH = 1;
     public final static int COMMENTS_LOADING_ERROR = 2;
     public final static int COMMENTS_LOADING_NO_COMMENT = 3;
+
+    public static final boolean LOGIN_STATE_IN = true;
+    public static final boolean LOGIN_STATE_OUT = false;
 }

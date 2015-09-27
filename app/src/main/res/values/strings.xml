@@ -52,7 +52,15 @@
         <item>Send comment text to&#8230;</item>
     </string-array>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!--Login dialog-->
+    <string name="login_hint_privacy">* Your password will NOT be saved</string>
+    <string name="login_hint_logging_in">Logging in...</string>
+    <string name="login_hint_error_empty_username">Catch you, anonymous!</string>
+    <string name="login_hint_error_short_password">You got a short...password</string>
+    <string name="login_hint_error_offline">Where\'s the Internet? Can\'t get it</string>
+    <string name="login_hint_error_wrong_info">Arrr...wrong username/password</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

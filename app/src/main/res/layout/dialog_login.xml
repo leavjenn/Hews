@@ -5,12 +5,13 @@
     android:orientation="vertical">
 
     <android.support.design.widget.TextInputLayout
-        android:layout_marginTop="16dp"
+        android:id="@+id/tilayout_user_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_marginTop="16dp">
 
         <EditText
             android:id="@+id/et_user_name"
@@ -21,12 +22,13 @@
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
-        android:layout_marginTop="8dp"
+        android:id="@+id/tilayout_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_marginTop="8dp">
 
         <EditText
             android:id="@+id/et_password"
@@ -35,4 +37,20 @@
             android:hint="Password"
             android:inputType="textPassword" />
     </android.support.design.widget.TextInputLayout>
+
+    <ProgressBar
+        android:id="@+id/progressbar_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/login_hint_privacy" />
 </LinearLayout>

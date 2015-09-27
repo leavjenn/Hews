@@ -11,6 +11,9 @@ import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -338,6 +341,34 @@ public class DataManager {
         } else {
             return mSearchService.search(keyword, timeRange, page, Constants.NUM_LOADING_ITEM);
         }
+    }
+
+    public Observable<String> login(final String username, final String password) {
+        return Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                try {
+                    Connection login = Jsoup.connect("https://news.ycombinator.com/login");
+                    login.header("Accept-Encoding", "gzip")
+                            .data("go_to", "news")
+                            .data("acct", username)
+                            .data("pw", password)
+                            .header("Origin", "https://news.ycombinator.com")
+                            .followRedirects(true)
+                            .referrer("https://news.ycombinator.com/login?go_to=news")
+                            .method(Connection.Method.POST);
+                    Connection.Response response = login.execute();
+                    String cookie = response.cookie("user");
+                    if (cookie == null) {
+                        subscriber.onNext("");
+                    } else {
+                        subscriber.onNext(cookie);
+                    }
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        });
     }
 
     public Scheduler getScheduler() {

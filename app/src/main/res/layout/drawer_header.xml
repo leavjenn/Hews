@@ -35,6 +35,7 @@
             android:id="@+id/tv_account"
             android:layout_width="0dp"
             android:text="@string/nav_logout"
+            android:textColor="@color/grey_200"
             android:layout_height="wrap_content"
             android:layout_weight="9" />
 

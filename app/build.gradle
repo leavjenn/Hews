@@ -34,6 +34,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.4.0'
     compile 'com.squareup.okhttp:okhttp:2.4.0'
     compile 'io.reactivex:rxandroid:0.25.0'
+    compile 'org.jsoup:jsoup:1.7.3'
     compile 'com.android.support:support-v4:23.0.0'
     compile 'com.android.support:design:22.2.1'
     compile 'com.android.support:customtabs:23.0.0'
