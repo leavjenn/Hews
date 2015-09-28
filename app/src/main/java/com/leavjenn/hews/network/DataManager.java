@@ -37,11 +37,6 @@ import rx.functions.Func1;
 public class DataManager {
     public static final String HACKER_NEWS_BASE_URL = "https://news.ycombinator.com/";
     public static final String HACKER_NEWS_ITEM_URL = "https://news.ycombinator.com/item?id=";
-    public static final int OPERATE_SUCCESS = 0;
-    public static final int OPERATE_ERROR_NO_COOKIE = 1;
-    public static final int OPERATE_ERROR_COOKIE_EXPIRED = 2;
-    public static final int OPERATE_ERROR_HAVE_VOTED = 3;
-    public static final int OPERATE_ERROR_UNKNOWN = 3;
     private static final int MINIMUM_STRING = 20;
     HackerNewsService mHackerNewsService, mSearchService;
     private Scheduler mScheduler;
@@ -395,7 +390,7 @@ public class DataManager {
             public void call(Subscriber<? super Integer> subscriber) {
                 String cookieLogin = SharedPrefsManager.getLoginCookie(sp);
                 if (cookieLogin.isEmpty()) {
-                    subscriber.onNext(OPERATE_ERROR_NO_COOKIE);
+                    subscriber.onNext(Constants.OPERATE_ERROR_NO_COOKIE);
                     subscriber.onCompleted();
                 }
                 try {
@@ -438,17 +433,17 @@ public class DataManager {
                             ResponseBody body = response.body();
                             String text = body.string();
                             if (text.equals("Can't make that vote.")) {
-                                subscriber.onNext(OPERATE_ERROR_UNKNOWN);
+                                subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
                             } else {
-                                subscriber.onNext(OPERATE_SUCCESS);
+                                subscriber.onNext(Constants.OPERATE_SUCCESS);
                             }
                         } else {
-                            subscriber.onNext(OPERATE_ERROR_UNKNOWN);
+                            subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
                         }
                     } else if (!voteElement.attr("href").contains("auth=")) {
-                        subscriber.onNext(OPERATE_ERROR_COOKIE_EXPIRED);
+                        subscriber.onNext(Constants.OPERATE_ERROR_COOKIE_EXPIRED);
                     } else if (links.size() == 0) {
-                        subscriber.onNext(OPERATE_ERROR_HAVE_VOTED);
+                        subscriber.onNext(Constants.OPERATE_ERROR_HAVE_VOTED);
                     }
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -464,7 +459,7 @@ public class DataManager {
             public void call(Subscriber<? super Integer> subscriber) {
                 String cookieLogin = SharedPrefsManager.getLoginCookie(sp);
                 if (cookieLogin.isEmpty()) {
-                    subscriber.onNext(OPERATE_ERROR_NO_COOKIE);
+                    subscriber.onNext(Constants.OPERATE_ERROR_NO_COOKIE);
                     subscriber.onCompleted();
                 }
                 try {
@@ -491,10 +486,10 @@ public class DataManager {
 
                         Response response = new OkHttpClient().newCall(request).execute();
                         if (response.code() == 200) {
-                            subscriber.onNext(OPERATE_SUCCESS);
+                            subscriber.onNext(Constants.OPERATE_SUCCESS);
                         }
                     } else {
-                        subscriber.onNext(OPERATE_ERROR_COOKIE_EXPIRED);
+                        subscriber.onNext(Constants.OPERATE_ERROR_COOKIE_EXPIRED);
                     }
                 } catch (Exception e) {
                     subscriber.onError(e);

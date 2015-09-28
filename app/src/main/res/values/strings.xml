@@ -5,8 +5,9 @@
     <string name="close_drawer">Close drawer</string>
     <string name="menu_search">Search</string>
     <string name="menu_open_post">Open post</string>
-    <string name="menu_share_link">Share link</string>
+    <string name="menu_upvote">Upvote</string>
     <string name="menu_refresh">Refresh</string>
+    <string name="menu_share_link">Share link</string>
     <string name="menu_display">Display</string>
     <string name="send_to">Send to</string>
     <string name="share_link_to">Share link to</string>

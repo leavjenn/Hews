@@ -375,49 +375,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
                                     setUpSpinnerPopularDateRange();
                                 } else if (type == R.id.nav_login) {
-                                    final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
-                                    LoginDialogFragment.OnLoginListener onLoginListener =
-                                            new LoginDialogFragment.OnLoginListener() {
-                                                @Override
-                                                public void onLogin(final String username, String password) {
-                                                    mCompositeSubscription.add(AppObservable.bindActivity(MainActivity.this,
-                                                            mDataManager.login(username, password))
-                                                            .subscribeOn(Schedulers.io())
-                                                            .observeOn(AndroidSchedulers.mainThread())
-                                                            .subscribe(new Subscriber<String>() {
-                                                                @Override
-                                                                public void onCompleted() {
-                                                                }
-
-                                                                @Override
-                                                                public void onError(Throwable e) {
-                                                                    Log.e("login err", e.toString());
-                                                                }
-
-                                                                @Override
-                                                                public void onNext(String s) {
-                                                                    if (s.isEmpty()) {// login failed
-                                                                        loginDialogFragment.resetLogin();
-                                                                    } else {
-                                                                        loginDialogFragment.getDialog().dismiss();
-                                                                        Toast.makeText(MainActivity.this, "login secceed",
-                                                                                Toast.LENGTH_LONG).show();
-                                                                        SharedPrefsManager.setUsername(prefs, username);
-                                                                        SharedPrefsManager.setLoginCookie(prefs, s);
-                                                                        updateLoginState(Constants.LOGIN_STATE_IN);
-                                                                    }
-                                                                }
-                                                            }));
-                                                }
-                                            };
-                                    loginDialogFragment.setListener(onLoginListener);
-                                    loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
-                                    // guarantee getDialog() will not return null
-                                    getFragmentManager().executePendingTransactions();
-                                    // show keyboard when dialog shows
-                                    loginDialogFragment.getDialog().getWindow()
-                                            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-
+                                    login();
                                 } else if (type == R.id.nav_logout) {
                                     Toast.makeText(MainActivity.this, "logout secceed",
                                             Toast.LENGTH_LONG).show();
@@ -442,6 +400,51 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     }
                 }
         );
+    }
+
+    void login() {
+        final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+        LoginDialogFragment.OnLoginListener onLoginListener =
+                new LoginDialogFragment.OnLoginListener() {
+                    @Override
+                    public void onLogin(final String username, String password) {
+                        mCompositeSubscription.add(AppObservable.bindActivity(MainActivity.this,
+                                mDataManager.login(username, password))
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Subscriber<String>() {
+                                    @Override
+                                    public void onCompleted() {
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        Log.e("login err", e.toString());
+                                    }
+
+                                    @Override
+                                    public void onNext(String s) {
+                                        if (s.isEmpty()) {// login failed
+                                            loginDialogFragment.resetLogin();
+                                        } else {
+                                            loginDialogFragment.getDialog().dismiss();
+                                            Toast.makeText(MainActivity.this, "login secceed",
+                                                    Toast.LENGTH_LONG).show();
+                                            SharedPrefsManager.setUsername(prefs, username);
+                                            SharedPrefsManager.setLoginCookie(prefs, s);
+                                            updateLoginState(Constants.LOGIN_STATE_IN);
+                                        }
+                                    }
+                                }));
+                    }
+                };
+        loginDialogFragment.setListener(onLoginListener);
+        loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
+        // guarantee getDialog() will not return null
+        getFragmentManager().executePendingTransactions();
+        // show keyboard when dialog shows
+        loginDialogFragment.getDialog().getWindow()
+                .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     void clickLogin() {

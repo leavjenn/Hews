@@ -9,15 +9,21 @@
     android:title="@string/menu_open_post"
     app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/action_upvote"
+        android:icon="@drawable/ic_upvote"
+        android:orderInCategory="2"
+        android:title="@string/menu_upvote"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_refresh"
         android:icon="@drawable/ic_refresh"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         android:title="@string/menu_refresh"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share"
-        android:orderInCategory="5"
+        android:orderInCategory="6"
         android:title="@string/menu_share_link"
         app:showAsAction="ifRoom" />
     <item

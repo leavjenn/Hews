@@ -8,23 +8,36 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
+import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
+import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
+
+import rx.Subscriber;
+import rx.android.app.AppObservable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 
 public class CommentsActivity extends AppCompatActivity implements
@@ -35,6 +48,8 @@ public class CommentsActivity extends AppCompatActivity implements
     private long mPostId;
     private SharedPreferences prefs;
     private ChromeCustomTabsHelper mChromeCustomTabsHelper;
+    DataManager mDataManager;
+    CompositeSubscription mCompositeSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +103,9 @@ public class CommentsActivity extends AppCompatActivity implements
                         .commit();
             }
         }
+
+        mDataManager = new DataManager(Schedulers.io());
+        mCompositeSubscription = new CompositeSubscription();
     }
 
 
@@ -113,6 +131,9 @@ public class CommentsActivity extends AppCompatActivity implements
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
         }
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
+        }
     }
 
     @Override
@@ -131,6 +152,9 @@ public class CommentsActivity extends AppCompatActivity implements
                 } else {
                     finish();
                 }
+                break;
+            case R.id.action_upvote:
+                vote();
                 break;
 
             case R.id.action_open_post:
@@ -200,6 +224,101 @@ public class CommentsActivity extends AppCompatActivity implements
 
     public void setUrl(String url) {
         mUrl = url;
+    }
+
+    void vote() {
+        if (!Utils.isOnline(this)) {
+            Utils.showOfflineToast(this);
+        } else {
+            mCompositeSubscription.add(AppObservable.bindActivity(this, mDataManager.vote(mPostId, prefs))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<Integer>() {
+                        @Override
+                        public void onCompleted() {
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e("post vote err", e.toString());
+                        }
+
+                        @Override
+                        public void onNext(Integer integer) {
+                            switch (integer) {
+                                case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
+                                case Constants.OPERATE_ERROR_NO_COOKIE:
+                                    Snackbar.make(null, "Not login.", Snackbar.LENGTH_INDEFINITE)
+                                            .setAction("Login", new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    login();
+                                                }
+                                            }).show();
+                                    break;
+                                case Constants.OPERATE_ERROR_HAVE_VOTED:
+                                    Toast.makeText(CommentsActivity.this, "already voted", Toast.LENGTH_LONG).show();
+                                    break;
+                                case Constants.OPERATE_SUCCESS:
+                                    Toast.makeText(CommentsActivity.this, "vote secceed", Toast.LENGTH_LONG).show();
+                                    break;
+                                case Constants.OPERATE_ERROR_UNKNOWN:
+                                    Snackbar.make(null, "vote failed.", Snackbar.LENGTH_INDEFINITE)
+                                            .setAction("Vote again", new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    vote();
+                                                }
+                                            }).show();
+                                    break;
+                            }
+                        }
+                    }));
+        }
+    }
+
+    void login() {
+        final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+        LoginDialogFragment.OnLoginListener onLoginListener =
+                new LoginDialogFragment.OnLoginListener() {
+                    @Override
+                    public void onLogin(final String username, String password) {
+                        mCompositeSubscription.add(AppObservable.bindActivity(CommentsActivity.this,
+                                mDataManager.login(username, password))
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Subscriber<String>() {
+                                    @Override
+                                    public void onCompleted() {
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        Log.e("login err", e.toString());
+                                    }
+
+                                    @Override
+                                    public void onNext(String s) {
+                                        if (s.isEmpty()) {// login failed
+                                            loginDialogFragment.resetLogin();
+                                        } else {
+                                            loginDialogFragment.getDialog().dismiss();
+                                            Toast.makeText(CommentsActivity.this, "login secceed",
+                                                    Toast.LENGTH_LONG).show();
+                                            SharedPrefsManager.setUsername(prefs, username);
+                                            SharedPrefsManager.setLoginCookie(prefs, s);
+                                        }
+                                    }
+                                }));
+                    }
+                };
+        loginDialogFragment.setListener(onLoginListener);
+        loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
+        // guarantee getDialog() will not return null
+        getFragmentManager().executePendingTransactions();
+        // show keyboard when dialog shows
+        loginDialogFragment.getDialog().getWindow()
+                .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     @Override

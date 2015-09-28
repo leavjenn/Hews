@@ -40,4 +40,10 @@ public final class Constants {
 
     public static final boolean LOGIN_STATE_IN = true;
     public static final boolean LOGIN_STATE_OUT = false;
+
+    public static final int OPERATE_SUCCESS = 0;
+    public static final int OPERATE_ERROR_NO_COOKIE = 1;
+    public static final int OPERATE_ERROR_COOKIE_EXPIRED = 2;
+    public static final int OPERATE_ERROR_HAVE_VOTED = 3;
+    public static final int OPERATE_ERROR_UNKNOWN = 4;
 }
