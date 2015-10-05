@@ -58,8 +58,8 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                setFABPosition(aLocation, event);
                 if (mScrollDownMode == FAB_DRAG_MODE) {
-                    setFABPosition(aLocation, event);
                     scrollDownWhenDragging(event);
                 }
                 break;
