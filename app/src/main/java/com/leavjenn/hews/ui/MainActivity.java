@@ -588,7 +588,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         case 0: // All time
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             // the time of first post
-                            secStart = "1160418111";
+                            secStart = "1160418110";
                             if (((SearchFragment) currentFrag).getKeyword() != null
                                     && isSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
