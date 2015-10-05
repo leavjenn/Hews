@@ -146,8 +146,15 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
 
             mDataManager = new DataManager(Schedulers.io());
-            mCompositeSubscription = new CompositeSubscription();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //init mCompositeSubscription here due to onCreate() will not be called
+//        when theme changed (call recreate())
+        mCompositeSubscription = new CompositeSubscription();
     }
 
     @Override
@@ -181,7 +188,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         super.onDestroy();
         mAppbar.removeOnOffsetChangedListener(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
-        //TODO bug there, the mCompositeSubscription may not be init
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
@@ -747,6 +753,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
             setupFAB();
+        }
+        if (key.equals(SharedPrefsManager.KEY_THEME)) {
+            recreate();
         }
     }
 

@@ -371,9 +371,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mPostAdapter.updatePostPrefs();
             reformatListStyle();
         }
-        if (key.equals(SharedPrefsManager.KEY_THEME)) {
-            getActivity().recreate();
-        }
     }
 
 }
