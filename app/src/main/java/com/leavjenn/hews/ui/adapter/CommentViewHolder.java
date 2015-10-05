@@ -52,9 +52,9 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
         ShapeDrawable bg = new ShapeDrawable(new RectShape());
         int[] pixels = new int[indentWidth];
         for (int i = 0; i < indentWidth / 3; i++) {
-            pixels[i] = colorOrange;
-            pixels[i + indentWidth / 3] = colorOrange;
-            pixels[i + indentWidth / 3 * 2 - 1] = colorBg;
+            pixels[i] = colorBg;
+            pixels[i + indentWidth / 3] = colorBg;
+            pixels[i + indentWidth / 3 * 2] = colorOrange;
         }
         Bitmap bm = Bitmap.createBitmap(pixels, indentWidth, 1, Bitmap.Config.ARGB_8888);
         Shader shader = new BitmapShader(bm,
