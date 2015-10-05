@@ -364,19 +364,6 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 login();
                                             }
                                         }).create().show();
-//                                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Login cookie expired", Snackbar.LENGTH_LONG)
-//                                        .setAction("Login again", new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                login();
-//                                            }
-//                                        })
-//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
-//
-//                                TextView tvSnackbarText = (TextView) snackbar.getView()
-//                                        .findViewById(android.support.design.R.id.snackbar_text);
-//                                tvSnackbarText.setTextColor(Color.WHITE);
-//                                snackbar.show();
                                 break;
                             case Constants.OPERATE_ERROR_NO_COOKIE:
                                 builder.setTitle("Not login")
@@ -387,18 +374,6 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 login();
                                             }
                                         }).create().show();
-//                                snackbar = Snackbar.make(coordinatorLayout, "Not login", Snackbar.LENGTH_LONG)
-//                                        .setAction("Login", new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                login();
-//                                            }
-//                                        })
-//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
-//                                tvSnackbarText = (TextView) snackbar.getView()
-//                                        .findViewById(android.support.design.R.id.snackbar_text);
-//                                tvSnackbarText.setTextColor(Color.WHITE);
-//                                snackbar.show();
                                 break;
                             case Constants.OPERATE_ERROR_HAVE_VOTED:
                                 Utils.showLongToast(CommentsActivity.this, "Already upvoted");
@@ -415,18 +390,6 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 vote(itemId);
                                             }
                                         }).create().show();
-//                                snackbar = Snackbar.make(coordinatorLayout, "Upvote failed", Snackbar.LENGTH_LONG)
-//                                        .setAction("Upvote again", new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                vote(itemId);
-//                                            }
-//                                        })
-//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
-//                                tvSnackbarText = (TextView) snackbar.getView()
-//                                        .findViewById(android.support.design.R.id.snackbar_text);
-//                                tvSnackbarText.setTextColor(Color.WHITE);
-//                                snackbar.show();
                                 break;
                         }
                     }
@@ -525,19 +488,6 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 login();
                                             }
                                         }).create().show();
-//                                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Login cookie expired", Snackbar.LENGTH_LONG)
-//                                        .setAction("Login again", new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                login();
-//                                            }
-//                                        })
-//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
-//
-//                                TextView tvSnackbarText = (TextView) snackbar.getView()
-//                                        .findViewById(android.support.design.R.id.snackbar_text);
-//                                tvSnackbarText.setTextColor(Color.WHITE);
-//                                snackbar.show();
                                 break;
                             case Constants.OPERATE_ERROR_NO_COOKIE:
                                 builder.setTitle("Not login")
@@ -548,19 +498,6 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 login();
                                             }
                                         }).create().show();
-//                                snackbar = Snackbar.make(coordinatorLayout, "Not login", Snackbar.LENGTH_LONG)
-//                                        .setAction("Login", new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                login();
-//                                            }
-//                                        })
-//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
-//
-//                                tvSnackbarText = (TextView) snackbar.getView()
-//                                        .findViewById(android.support.design.R.id.snackbar_text);
-//                                tvSnackbarText.setTextColor(Color.WHITE);
-//                                snackbar.show();
                                 break;
                             case Constants.OPERATE_SUCCESS:
                                 Utils.showLongToast(CommentsActivity.this, "Reply succeed");
@@ -575,19 +512,6 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 reply(itemId, etReply.getText().toString());
                                             }
                                         }).create().show();
-//                                snackbar = Snackbar.make(coordinatorLayout, "Reply failed", Snackbar.LENGTH_LONG)
-//                                        .setAction("Reply again", new View.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(View v) {
-//                                                reply(itemId, etReply.getText().toString());
-//                                            }
-//                                        })
-//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
-//
-//                                tvSnackbarText = (TextView) snackbar.getView()
-//                                        .findViewById(android.support.design.R.id.snackbar_text);
-//                                tvSnackbarText.setTextColor(Color.WHITE);
-//                                snackbar.show();
                                 break;
                         }
                     }
