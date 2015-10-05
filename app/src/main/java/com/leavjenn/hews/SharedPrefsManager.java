@@ -13,6 +13,7 @@ public class SharedPrefsManager {
     public static final String KEY_THEME = "themekey";
     public static final String KEY_USERNAME = "user_name";
     public static final String KEY_LOGIN_COOKIE = "login_cookie";
+    public static final String KEY_REPLY_TEXT = "replying_text";
     public static final String THEME_DARK = "0";
     public static final String THEME_SEPIA = "1";
     public static final String THEME_LIGHT = "2";
@@ -133,4 +134,13 @@ public class SharedPrefsManager {
         return sp.getString(KEY_USERNAME, context.getResources().getString(R.string.nav_logout));
     }
 
+    public static void setReplyText(SharedPreferences sp, String replyText) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SharedPrefsManager.KEY_REPLY_TEXT, replyText);
+        editor.apply();
+    }
+
+    public static String getReplyText(SharedPreferences sp) {
+        return sp.getString(KEY_REPLY_TEXT, "");
+    }
 }

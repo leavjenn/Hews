@@ -46,4 +46,8 @@ public class Utils {
     public static void showOfflineToast(Context context) {
         Toast.makeText(context, "No connection:)", Toast.LENGTH_LONG).show();
     }
+
+    public static void showLongToast(Context context,CharSequence text){
+        Toast.makeText(context,text,Toast.LENGTH_LONG).show();
+    }
 }

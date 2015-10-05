@@ -32,12 +32,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         super.onDestroy();
         mAppbar.removeOnOffsetChangedListener(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
+        //TODO bug there, the mCompositeSubscription may not be init
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
@@ -326,10 +327,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     public boolean onNavigationItemSelected(final MenuItem menuItem) {
                         final int type = menuItem.getItemId();
                         switch (type) {
-//                            case R.id.nav_login:
-//                                break;
-//                            case R.id.nav_logout:
-//                                break;
                             case R.id.nav_top_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
                                 mDrawerSelectedItem = 0;
@@ -377,8 +374,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 } else if (type == R.id.nav_login) {
                                     login();
                                 } else if (type == R.id.nav_logout) {
-                                    Toast.makeText(MainActivity.this, "logout secceed",
-                                            Toast.LENGTH_LONG).show();
+                                    Utils.showLongToast(MainActivity.this, "Logout succeed");
                                     SharedPrefsManager.setUsername(prefs,
                                             MainActivity.this.getResources().getString(R.string.nav_logout));
                                     SharedPrefsManager.setLoginCookie(prefs, "");
@@ -428,8 +424,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             loginDialogFragment.resetLogin();
                                         } else {
                                             loginDialogFragment.getDialog().dismiss();
-                                            Toast.makeText(MainActivity.this, "login secceed",
-                                                    Toast.LENGTH_LONG).show();
+                                            Utils.showLongToast(MainActivity.this, "Login succeed");
                                             SharedPrefsManager.setUsername(prefs, username);
                                             SharedPrefsManager.setLoginCookie(prefs, s);
                                             updateLoginState(Constants.LOGIN_STATE_IN);

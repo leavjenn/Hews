@@ -1,13 +1,19 @@
 package com.leavjenn.hews.ui;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +24,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.ChromeCustomTabsHelper;
@@ -51,6 +60,12 @@ public class CommentsActivity extends AppCompatActivity implements
     DataManager mDataManager;
     CompositeSubscription mCompositeSubscription;
 
+    private boolean isReplyEnabled;
+    private CoordinatorLayout coordinatorLayout;
+    private EditText etReply;
+    private FloatingActionButton btnReplySend;
+    private LinearLayout layoutReply;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +93,10 @@ public class CommentsActivity extends AppCompatActivity implements
 
         mWindow = new PopupFloatingWindow(this, toolbar);
         mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
-
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+        layoutReply = (LinearLayout) findViewById(R.id.layout_reply);
+        btnReplySend = (FloatingActionButton) findViewById(R.id.btn_reply_send);
+        etReply = (EditText) findViewById(R.id.et_reply);
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         CommentsFragment commentsFragment = null;
@@ -134,6 +152,9 @@ public class CommentsActivity extends AppCompatActivity implements
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
+        if (isReplyEnabled && !etReply.getText().toString().isEmpty()) {
+            SharedPrefsManager.setReplyText(prefs, etReply.getText().toString());
+        }
     }
 
     @Override
@@ -146,15 +167,16 @@ public class CommentsActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                if (isReplyEnabled) {
+                    showDiscardReplyAlert();
+                    return true;
+                }
                 FragmentManager fm = getFragmentManager();
                 if (fm.getBackStackEntryCount() > 0) {
                     fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 } else {
                     finish();
                 }
-                break;
-            case R.id.action_upvote:
-                vote();
                 break;
 
             case R.id.action_open_post:
@@ -180,6 +202,18 @@ public class CommentsActivity extends AppCompatActivity implements
                         startActivity(urlIntent);
                     }
                 }
+                break;
+
+            case R.id.action_upvote:
+                vote(mPostId);
+                break;
+
+            case R.id.action_reply:
+                if (!Utils.isOnline(this)) {
+                    Utils.showOfflineToast(this);
+                    return false;
+                }
+                enableReplyMode(true, mPostId);
                 break;
 
             case R.id.action_refresh:
@@ -209,6 +243,66 @@ public class CommentsActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    public void enableReplyMode(boolean isEnabled, final long itemId) {
+        if (isEnabled) {
+            isReplyEnabled = true;
+//                view.setSelected(true);
+            layoutReply.setVisibility(View.VISIBLE);
+            etReply.requestFocus();
+            //the soft keyborad will not show without this drity hack
+            //https://stackoverflow.com/questions/5105354/how-to-show-soft-keyboard-when-edittext-is-focused#
+            //https://stackoverflow.com/questions/13694995/android-softkeyboard-showsoftinput-vs-togglesoftinput
+            etReply.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(etReply, InputMethodManager.SHOW_IMPLICIT);
+                }
+            }, 200);
+            etReply.setText(SharedPrefsManager.getReplyText(prefs));
+            mFab.setVisibility(View.GONE);
+
+            btnReplySend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    reply(itemId, etReply.getText().toString());
+                }
+            });
+        } else {
+            isReplyEnabled = false;
+            layoutReply.setVisibility(View.GONE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(etReply.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+            if (!SharedPrefsManager.getFabMode(prefs).equals(SharedPrefsManager.FAB_DISABLE)) {
+                mFab.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void showDiscardReplyAlert() {
+        if (etReply.getText().toString().isEmpty()) {
+            enableReplyMode(false, mPostId);
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this);
+        builder.setTitle("Discard")
+                .setMessage("Discard your reply?")
+                .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        enableReplyMode(false, mPostId);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
     private void setupFAB() {
         String mode = SharedPrefsManager.getFabMode(prefs);
         if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
@@ -226,55 +320,117 @@ public class CommentsActivity extends AppCompatActivity implements
         mUrl = url;
     }
 
-    void vote() {
+    public void vote(final long itemId) {
         if (!Utils.isOnline(this)) {
             Utils.showOfflineToast(this);
-        } else {
-            mCompositeSubscription.add(AppObservable.bindActivity(this, mDataManager.vote(mPostId, prefs))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<Integer>() {
-                        @Override
-                        public void onCompleted() {
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.e("post vote err", e.toString());
-                        }
-
-                        @Override
-                        public void onNext(Integer integer) {
-                            switch (integer) {
-                                case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
-                                case Constants.OPERATE_ERROR_NO_COOKIE:
-                                    Snackbar.make(null, "Not login.", Snackbar.LENGTH_INDEFINITE)
-                                            .setAction("Login", new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    login();
-                                                }
-                                            }).show();
-                                    break;
-                                case Constants.OPERATE_ERROR_HAVE_VOTED:
-                                    Toast.makeText(CommentsActivity.this, "already voted", Toast.LENGTH_LONG).show();
-                                    break;
-                                case Constants.OPERATE_SUCCESS:
-                                    Toast.makeText(CommentsActivity.this, "vote secceed", Toast.LENGTH_LONG).show();
-                                    break;
-                                case Constants.OPERATE_ERROR_UNKNOWN:
-                                    Snackbar.make(null, "vote failed.", Snackbar.LENGTH_INDEFINITE)
-                                            .setAction("Vote again", new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    vote();
-                                                }
-                                            }).show();
-                                    break;
-                            }
-                        }
-                    }));
+            return;
         }
+        final Snackbar snackbarProcessing = Snackbar.make(coordinatorLayout, "Upvoting...", Snackbar.LENGTH_INDEFINITE);
+        TextView tvSnackbarText = (TextView) snackbarProcessing.getView()
+                .findViewById(android.support.design.R.id.snackbar_text);
+        tvSnackbarText.setTextColor(Color.WHITE);
+        snackbarProcessing.show();
+        mCompositeSubscription.add(AppObservable.bindActivity(this, mDataManager.vote(itemId, prefs))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        snackbarProcessing.dismiss();
+                        Log.e("post vote err", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        snackbarProcessing.dismiss();
+                        AlertDialog.Builder builder=
+                                new AlertDialog.Builder(CommentsActivity.this)
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        });
+                        switch (integer) {
+                            case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
+                                builder.setTitle("Login cookie expired")
+                                        .setMessage("Would you like to login again?")
+                                        .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                login();
+                                            }
+                                        }).create().show();
+//                                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Login cookie expired", Snackbar.LENGTH_LONG)
+//                                        .setAction("Login again", new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                login();
+//                                            }
+//                                        })
+//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
+//
+//                                TextView tvSnackbarText = (TextView) snackbar.getView()
+//                                        .findViewById(android.support.design.R.id.snackbar_text);
+//                                tvSnackbarText.setTextColor(Color.WHITE);
+//                                snackbar.show();
+                                break;
+                            case Constants.OPERATE_ERROR_NO_COOKIE:
+                                builder.setTitle("Not login")
+                                        .setMessage("Would you like to login?")
+                                        .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                login();
+                                            }
+                                        }).create().show();
+//                                snackbar = Snackbar.make(coordinatorLayout, "Not login", Snackbar.LENGTH_LONG)
+//                                        .setAction("Login", new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                login();
+//                                            }
+//                                        })
+//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
+//                                tvSnackbarText = (TextView) snackbar.getView()
+//                                        .findViewById(android.support.design.R.id.snackbar_text);
+//                                tvSnackbarText.setTextColor(Color.WHITE);
+//                                snackbar.show();
+                                break;
+                            case Constants.OPERATE_ERROR_HAVE_VOTED:
+                                Utils.showLongToast(CommentsActivity.this, "Already upvoted");
+                                break;
+                            case Constants.OPERATE_SUCCESS:
+                                Utils.showLongToast(CommentsActivity.this, "Upvote succeed");
+                                break;
+                            case Constants.OPERATE_ERROR_UNKNOWN:
+                                builder.setTitle("Upvote failed")
+                                        .setMessage("Would you like to upvote again?")
+                                        .setPositiveButton("Upvote again", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                vote(itemId);
+                                            }
+                                        }).create().show();
+//                                snackbar = Snackbar.make(coordinatorLayout, "Upvote failed", Snackbar.LENGTH_LONG)
+//                                        .setAction("Upvote again", new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                vote(itemId);
+//                                            }
+//                                        })
+//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
+//                                tvSnackbarText = (TextView) snackbar.getView()
+//                                        .findViewById(android.support.design.R.id.snackbar_text);
+//                                tvSnackbarText.setTextColor(Color.WHITE);
+//                                snackbar.show();
+                                break;
+                        }
+                    }
+                }));
     }
 
     void login() {
@@ -303,8 +459,7 @@ public class CommentsActivity extends AppCompatActivity implements
                                             loginDialogFragment.resetLogin();
                                         } else {
                                             loginDialogFragment.getDialog().dismiss();
-                                            Toast.makeText(CommentsActivity.this, "login secceed",
-                                                    Toast.LENGTH_LONG).show();
+                                            Utils.showLongToast(CommentsActivity.this, "Login succeed");
                                             SharedPrefsManager.setUsername(prefs, username);
                                             SharedPrefsManager.setLoginCookie(prefs, s);
                                         }
@@ -319,6 +474,133 @@ public class CommentsActivity extends AppCompatActivity implements
         // show keyboard when dialog shows
         loginDialogFragment.getDialog().getWindow()
                 .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+    }
+
+    void reply(final long itemId, String replyText) {
+        if (!Utils.isOnline(this)) {
+            Utils.showOfflineToast(this);
+            return;
+        }
+        if (etReply.getText().toString().isEmpty()) {
+            Utils.showLongToast(this, "Sound of slience...");
+            return;
+        }
+        final Snackbar snackbarProcessing = Snackbar.make(coordinatorLayout, "Replying...", Snackbar.LENGTH_INDEFINITE);
+        TextView tvSnackbarText = (TextView) snackbarProcessing.getView()
+                .findViewById(android.support.design.R.id.snackbar_text);
+        tvSnackbarText.setTextColor(Color.WHITE);
+        snackbarProcessing.show();
+        mCompositeSubscription.add(AppObservable
+                .bindActivity(this, mDataManager.reply(itemId, replyText,
+                        SharedPrefsManager.getLoginCookie(prefs)))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        snackbarProcessing.dismiss();
+                        Log.e("post reply err", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Integer integer) {
+                        snackbarProcessing.dismiss();
+                        AlertDialog.Builder builder= new AlertDialog.Builder(CommentsActivity.this)
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                            }
+                                        });
+                        switch (integer) {
+                            case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
+                                builder.setTitle("Login cookie expired")
+                                        .setMessage("Would you like to login again?")
+                                        .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                login();
+                                            }
+                                        }).create().show();
+//                                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Login cookie expired", Snackbar.LENGTH_LONG)
+//                                        .setAction("Login again", new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                login();
+//                                            }
+//                                        })
+//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
+//
+//                                TextView tvSnackbarText = (TextView) snackbar.getView()
+//                                        .findViewById(android.support.design.R.id.snackbar_text);
+//                                tvSnackbarText.setTextColor(Color.WHITE);
+//                                snackbar.show();
+                                break;
+                            case Constants.OPERATE_ERROR_NO_COOKIE:
+                                builder.setTitle("Not login")
+                                        .setMessage("Would you like to login?")
+                                        .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                login();
+                                            }
+                                        }).create().show();
+//                                snackbar = Snackbar.make(coordinatorLayout, "Not login", Snackbar.LENGTH_LONG)
+//                                        .setAction("Login", new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                login();
+//                                            }
+//                                        })
+//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
+//
+//                                tvSnackbarText = (TextView) snackbar.getView()
+//                                        .findViewById(android.support.design.R.id.snackbar_text);
+//                                tvSnackbarText.setTextColor(Color.WHITE);
+//                                snackbar.show();
+                                break;
+                            case Constants.OPERATE_SUCCESS:
+                                Utils.showLongToast(CommentsActivity.this, "Reply succeed");
+                                enableReplyMode(false, mPostId);
+                                break;
+                            case Constants.OPERATE_ERROR_UNKNOWN:
+                                builder.setTitle("Reply failed")
+                                        .setMessage("Would you like to reply again?")
+                                        .setPositiveButton("Reply again", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                reply(itemId, etReply.getText().toString());
+                                            }
+                                        }).create().show();
+//                                snackbar = Snackbar.make(coordinatorLayout, "Reply failed", Snackbar.LENGTH_LONG)
+//                                        .setAction("Reply again", new View.OnClickListener() {
+//                                            @Override
+//                                            public void onClick(View v) {
+//                                                reply(itemId, etReply.getText().toString());
+//                                            }
+//                                        })
+//                                        .setActionTextColor(CommentsActivity.this.getResources().getColor(R.color.orange_600));
+//
+//                                tvSnackbarText = (TextView) snackbar.getView()
+//                                        .findViewById(android.support.design.R.id.snackbar_text);
+//                                tvSnackbarText.setTextColor(Color.WHITE);
+//                                snackbar.show();
+                                break;
+                        }
+                    }
+                }));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isReplyEnabled) {
+            showDiscardReplyAlert();
+            return;
+        }
+        super.onBackPressed();
     }
 
     @Override

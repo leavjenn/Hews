@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +23,7 @@ import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
+import com.leavjenn.hews.ui.CommentsActivity;
 import com.leavjenn.hews.ui.widget.ListDialogFragment;
 
 import java.util.ArrayList;
@@ -89,57 +89,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                             @Override
                             public void onLongClick(int position) {
-                                final Comment comment = (Comment) mItemList.get(position);
-                                final Post post = (Post) mItemList.get(0);
-                                ListDialogFragment dialog = new ListDialogFragment();
-                                dialog.show(((FragmentActivity) mContext)
-                                        .getSupportFragmentManager(), "ListDialog");
-                                dialog.setOnListDialogClickListner
-                                        (new ListDialogFragment.OnListDialogClickListner() {
-                                            @Override
-                                            public void onReplyViaBrowserClick(DialogFragment dialog) {
-                                                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                                                String url = "https://news.ycombinator.com/reply?id="
-                                                        + comment.getId()
-                                                        + "&goto=item?id="
-                                                        + post.getId();
-                                                urlIntent.setData(Uri.parse(url));
-                                                mContext.startActivity(urlIntent);
-                                            }
-
-                                            @Override
-                                            public void onAuthorProfileClick(DialogFragment dialog) {
-                                                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                                                String url = "https://news.ycombinator.com/user?id="
-                                                        + comment.getBy();
-                                                urlIntent.setData(Uri.parse(url));
-                                                mContext.startActivity(urlIntent);
-                                            }
-
-                                            @Override
-                                            public void onShareClick(DialogFragment dialog) {
-                                                Intent sendIntent = new Intent();
-                                                sendIntent.setAction(Intent.ACTION_SEND);
-                                                String url = "https://news.ycombinator.com/item?id="
-                                                        + comment.getId();
-                                                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
-                                                sendIntent.setType("text/plain");
-                                                mContext.startActivity(Intent.createChooser(sendIntent,
-                                                        mContext.getString(R.string.share_link_to)));
-                                            }
-
-                                            @Override
-                                            public void onShareCommentTextToClick(DialogFragment dialog) {
-                                                Intent sendIntent = new Intent();
-                                                sendIntent.setAction(Intent.ACTION_SEND);
-                                                String text = comment.getBy() + ":\n"
-                                                        + Html.fromHtml(comment.getText());
-                                                sendIntent.putExtra(Intent.EXTRA_TEXT, text);
-                                                sendIntent.setType("text/plain");
-                                                mContext.startActivity(Intent.createChooser(sendIntent,
-                                                        mContext.getString(R.string.send_to)));
-                                            }
-                                        });
+                                showDialog(position);
                             }
                         });
 
@@ -163,7 +113,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
         return viewHolder;
     }
-
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
@@ -374,6 +323,60 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public boolean isInBetweenCommentsCollapsed(int position) {
         Comment Comment = (Comment) mItemList.get(position);
         return mCollapsedOlderCommentsIndex.containsKey(Comment.getId());
+    }
+
+
+    private void showDialog(final int position) {
+        final Comment comment = (Comment) mItemList.get(position);
+        final Post post = (Post) mItemList.get(0);
+        ListDialogFragment dialog = new ListDialogFragment();
+        dialog.show(((FragmentActivity) mContext)
+                .getSupportFragmentManager(), "ListDialog");
+        dialog.setOnListDialogClickListener
+                (new ListDialogFragment.OnListDialogClickListener() {
+                    @Override
+                    public void onUpvote() {
+                        ((CommentsActivity) mContext).vote(comment.getId());
+                    }
+
+                    @Override
+                    public void onReply() {
+                        ((CommentsActivity) mContext).enableReplyMode(true, comment.getId());
+                    }
+
+                    @Override
+                    public void onAuthorProfile() {
+                        Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                        String url = "https://news.ycombinator.com/user?id="
+                                + comment.getBy();
+                        urlIntent.setData(Uri.parse(url));
+                        mContext.startActivity(urlIntent);
+                    }
+
+                    @Override
+                    public void onShare() {
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        String url = "https://news.ycombinator.com/item?id="
+                                + comment.getId();
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                        sendIntent.setType("text/plain");
+                        mContext.startActivity(Intent.createChooser(sendIntent,
+                                mContext.getString(R.string.share_link_to)));
+                    }
+
+                    @Override
+                    public void onShareCommentTextTo() {
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        String text = comment.getBy() + ":\n"
+                                + Html.fromHtml(comment.getText());
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+                        sendIntent.setType("text/plain");
+                        mContext.startActivity(Intent.createChooser(sendIntent,
+                                mContext.getString(R.string.send_to)));
+                    }
+                });
     }
 
     public void updateCommentPrefs() {

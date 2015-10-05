@@ -11,7 +11,7 @@ import android.support.v4.app.DialogFragment;
 import com.leavjenn.hews.R;
 
 public class ListDialogFragment extends DialogFragment {
-    OnListDialogClickListner mListener;
+    OnListDialogClickListener mListener;
 
     public ListDialogFragment() {
         // Required empty public constructor
@@ -26,16 +26,19 @@ public class ListDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
-                        mListener.onReplyViaBrowserClick(ListDialogFragment.this);
+                        mListener.onUpvote();
                         break;
                     case 1:
-                        mListener.onAuthorProfileClick(ListDialogFragment.this);
+                        mListener.onReply();
                         break;
                     case 2:
-                        mListener.onShareClick(ListDialogFragment.this);
+                        mListener.onAuthorProfile();
                         break;
                     case 3:
-                        mListener.onShareCommentTextToClick(ListDialogFragment.this);
+                        mListener.onShare();
+                        break;
+                    case 4:
+                        mListener.onShareCommentTextTo();
                         break;
                 }
             }
@@ -43,17 +46,19 @@ public class ListDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    public void setOnListDialogClickListner(OnListDialogClickListner listener) {
+    public void setOnListDialogClickListener(OnListDialogClickListener listener) {
         mListener = listener;
     }
 
-    public interface OnListDialogClickListner {
-        void onReplyViaBrowserClick(DialogFragment dialog);
+    public interface OnListDialogClickListener {
+        void onUpvote();
 
-        void onShareClick(DialogFragment dialog);
+        void onReply();
 
-        void onAuthorProfileClick(DialogFragment dialog);
+        void onAuthorProfile();
 
-        void onShareCommentTextToClick(DialogFragment dialog);
+        void onShare();
+
+        void onShareCommentTextTo();
     }
 }

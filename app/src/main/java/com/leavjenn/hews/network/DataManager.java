@@ -17,7 +17,6 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -415,35 +414,32 @@ public class DataManager {
                     https://news.ycombinator.com/vote?for=10276091&dir=up&goto=item%3Fid%3D10276091
                     */
                     Elements links = commentsDocument.select("a[id=up_" + itemId + "]");
-                    Element voteElement = links.get(0).select("a[href^=vote]").first();
-
-                    if (links.size() > 0 && voteElement.attr("href").contains("auth=")) {
-                        String url = (voteElement.attr("href"));
-                        Request voteRequest = new Request.Builder()
-                                .addHeader("cookie", "user=" + cookieLogin)
-                                .url(HACKER_NEWS_BASE_URL + url)
-                                .build();
-                        Response response = new OkHttpClient().newCall(voteRequest).execute();
-                        if (response.code() == 200) {
-                            if (response.body() == null) {
-                                subscriber.onError(new Throwable(""));
-                            }
-//                            Document doc = response.parse();
-//                            String text = doc.text();
-                            ResponseBody body = response.body();
-                            String text = body.string();
-                            if (text.equals("Can't make that vote.")) {
-                                subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
-                            } else {
-                                subscriber.onNext(Constants.OPERATE_SUCCESS);
-                            }
-                        } else {
-                            subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
-                        }
-                    } else if (!voteElement.attr("href").contains("auth=")) {
-                        subscriber.onNext(Constants.OPERATE_ERROR_COOKIE_EXPIRED);
-                    } else if (links.size() == 0) {
+                    if (links.size() == 0) {
                         subscriber.onNext(Constants.OPERATE_ERROR_HAVE_VOTED);
+                        subscriber.onCompleted();
+                    } else {
+                        Element voteElement = links.get(0).select("a[href^=vote]").first();
+                        if (!voteElement.attr("href").contains("auth=")) {
+                            subscriber.onNext(Constants.OPERATE_ERROR_COOKIE_EXPIRED);
+                            subscriber.onCompleted();
+                        }
+                        if (voteElement.attr("href").contains("auth=")) {
+                            String url = (voteElement.attr("href"));
+                            Request voteRequest = new Request.Builder()
+                                    .addHeader("cookie", "user=" + cookieLogin)
+                                    .url(HACKER_NEWS_BASE_URL + url)
+                                    .build();
+                            Response response = new OkHttpClient().newCall(voteRequest).execute();
+                            if (response.code() == 200) {
+                                if (response.body() == null) {
+                                    subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
+                                } else {
+                                    subscriber.onNext(Constants.OPERATE_SUCCESS);
+                                }
+                            } else {
+                                subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -453,11 +449,10 @@ public class DataManager {
     }
 
 
-    Observable<Integer> reply(final String itemId, final String replyText, final SharedPreferences sp) {
+    public Observable<Integer> reply(final long itemId, final String replyText, final String cookieLogin) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
-                String cookieLogin = SharedPrefsManager.getLoginCookie(sp);
                 if (cookieLogin.isEmpty()) {
                     subscriber.onNext(Constants.OPERATE_ERROR_NO_COOKIE);
                     subscriber.onCompleted();
@@ -468,25 +463,25 @@ public class DataManager {
                             .cookie("user", cookieLogin);
                     Document replyDocument = reply.get();
                     Element element = replyDocument.select("input[name=hmac]").first();
-
                     if (element != null) {
                         String replyHmac = element.attr("value");
                         RequestBody requestBody = (new FormEncodingBuilder())
-                                .add("parent", itemId)
+                                .add("parent", String.valueOf(itemId))
                                 .add("goto", (new StringBuilder()).append("item?id=").append(itemId).toString())
-                                .add("text", replyText)
                                 .add("hmac", replyHmac)
+                                .add("text", replyText)
                                 .build();
-
                         Request request = new Request.Builder()
                                 .addHeader("cookie", "user=" + cookieLogin)
-                                .url(HACKER_NEWS_BASE_URL + "/comment")
+                                .url(HACKER_NEWS_BASE_URL + "comment")
                                 .post(requestBody)
                                 .build();
 
                         Response response = new OkHttpClient().newCall(request).execute();
                         if (response.code() == 200) {
                             subscriber.onNext(Constants.OPERATE_SUCCESS);
+                        } else {
+                            subscriber.onNext(Constants.OPERATE_ERROR_UNKNOWN);
                         }
                     } else {
                         subscriber.onNext(Constants.OPERATE_ERROR_COOKIE_EXPIRED);

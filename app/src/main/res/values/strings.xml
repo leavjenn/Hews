@@ -6,6 +6,7 @@
     <string name="menu_search">Search</string>
     <string name="menu_open_post">Open post</string>
     <string name="menu_upvote">Upvote</string>
+    <string name="menu_reply">Reply</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_share_link">Share link</string>
     <string name="menu_display">Display</string>
@@ -47,7 +48,8 @@
 
     <!-- Dialog -->
     <string-array name="dialog">
-        <item>Reply via browser</item>
+        <item>Upvote</item>
+        <item>Reply</item>
         <item>Author profile</item>
         <item>Share link to&#8230;</item>
         <item>Send comment text to&#8230;</item>

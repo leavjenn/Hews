@@ -9,16 +9,22 @@
     android:title="@string/menu_open_post"
     app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:orderInCategory="2"
+        android:title="@string/menu_refresh"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_upvote"
         android:icon="@drawable/ic_upvote"
-        android:orderInCategory="2"
+        android:orderInCategory="4"
         android:title="@string/menu_upvote"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_refresh"
-        android:icon="@drawable/ic_refresh"
-        android:orderInCategory="3"
-        android:title="@string/menu_refresh"
+        android:id="@+id/action_reply"
+        android:icon="@drawable/ic_reply"
+        android:orderInCategory="5"
+        android:title="@string/menu_reply"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_share"
