@@ -11,6 +11,9 @@ public class SharedPrefsManager {
     public static final String KEY_COMMENT_FONT_SIZE = "key_comment_font_size";
     public static final String KEY_COMMENT_LINE_HEIGHT = "key_comment_line_height";
     public static final String KEY_THEME = "themekey";
+    public static final String KEY_USERNAME = "user_name";
+    public static final String KEY_LOGIN_COOKIE = "login_cookie";
+    public static final String KEY_REPLY_TEXT = "replying_text";
     public static final String THEME_DARK = "0";
     public static final String THEME_SEPIA = "1";
     public static final String THEME_LIGHT = "2";
@@ -109,5 +112,35 @@ public class SharedPrefsManager {
 
     public static Boolean getIsOpenLinkInBrowser(SharedPreferences sp, Context context) {
         return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link), false);
+    }
+
+    public static void setLoginCookie(SharedPreferences sp, String cookie) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SharedPrefsManager.KEY_LOGIN_COOKIE, cookie);
+        editor.apply();
+    }
+
+    public static String getLoginCookie(SharedPreferences sp) {
+        return sp.getString(KEY_LOGIN_COOKIE, "");
+    }
+
+    public static void setUsername(SharedPreferences sp, String username) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SharedPrefsManager.KEY_USERNAME, username);
+        editor.apply();
+    }
+
+    public static String getUsername(SharedPreferences sp, Context context) {
+        return sp.getString(KEY_USERNAME, context.getResources().getString(R.string.nav_logout));
+    }
+
+    public static void setReplyText(SharedPreferences sp, String replyText) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(SharedPrefsManager.KEY_REPLY_TEXT, replyText);
+        editor.apply();
+    }
+
+    public static String getReplyText(SharedPreferences sp) {
+        return sp.getString(KEY_REPLY_TEXT, "");
     }
 }

@@ -7,6 +7,7 @@ import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class Utils {
     public static CharSequence formatTime(long timeStamp) {
@@ -16,19 +17,19 @@ public class Utils {
         return timeAgo;
     }
 
-    public static float convertPixelsToDp(float px, Context context){
+    public static float convertPixelsToDp(float px, Context context) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         return px / (metrics.densityDpi / 160f);
     }
 
-    public static int convertDpToPixels(int dp, Context context){
+    public static int convertDpToPixels(int dp, Context context) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
         return px;
     }
 
 
-    public static int getScreenHeight(Context context){
+    public static int getScreenHeight(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         Point size = new Point();
@@ -40,5 +41,13 @@ public class Utils {
         ConnectivityManager connectivityManager = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         return connectivityManager.getActiveNetworkInfo() != null;
+    }
+
+    public static void showOfflineToast(Context context) {
+        Toast.makeText(context, "No connection:)", Toast.LENGTH_LONG).show();
+    }
+
+    public static void showLongToast(Context context,CharSequence text){
+        Toast.makeText(context,text,Toast.LENGTH_LONG).show();
     }
 }

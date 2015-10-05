@@ -1,13 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="192dp"
     android:background="?attr/colorPrimaryDark"
     android:gravity="bottom"
-    android:orientation="vertical"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
-<ImageView
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@drawable/nav_header"/>
-</LinearLayout>
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/nav_header" />
+
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="64dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/logo" />
+
+    <LinearLayout
+        android:id="@+id/layout_login"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_gravity="left|bottom"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <TextView
+            android:id="@+id/tv_account"
+            android:layout_width="0dp"
+            android:text="@string/nav_logout"
+            android:textColor="@color/grey_200"
+            android:layout_height="wrap_content"
+            android:layout_weight="9" />
+
+        <ImageView
+            android:id="@+id/iv_expander"
+            android:src="@drawable/expander_open"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+</FrameLayout>
