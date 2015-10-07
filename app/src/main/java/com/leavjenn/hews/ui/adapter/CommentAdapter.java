@@ -341,6 +341,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                     @Override
                     public void onReply() {
+                        // scrollToPosition() not working
+                        ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                                .scrollToPositionWithOffset(position, 0);
                         ((CommentsActivity) mContext).enableReplyMode(true, comment.getId());
                     }
 
