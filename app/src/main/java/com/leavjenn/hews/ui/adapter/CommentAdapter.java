@@ -24,7 +24,7 @@ import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.ui.CommentsActivity;
-import com.leavjenn.hews.ui.widget.ListDialogFragment;
+import com.leavjenn.hews.ui.widget.CommentDialogFragment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -329,11 +329,11 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void showDialog(final int position) {
         final Comment comment = (Comment) mItemList.get(position);
         final Post post = (Post) mItemList.get(0);
-        ListDialogFragment dialog = new ListDialogFragment();
+        CommentDialogFragment dialog = new CommentDialogFragment();
         dialog.show(((FragmentActivity) mContext)
                 .getSupportFragmentManager(), "ListDialog");
         dialog.setOnListDialogClickListener
-                (new ListDialogFragment.OnListDialogClickListener() {
+                (new CommentDialogFragment.OnCommentDialogClickListener() {
                     @Override
                     public void onUpvote() {
                         ((CommentsActivity) mContext).vote(comment.getId());

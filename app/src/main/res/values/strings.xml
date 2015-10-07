@@ -23,6 +23,7 @@
     <string name="nav_show_hn">Show HN</string>
     <string name="nav_popular">Popular by time range</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_feedback">Feedback</string>
 
     <!--Time Range Popular Spinner-->
     <string-array name="time_range_popular">
@@ -46,13 +47,22 @@
         <item>Date</item>
     </string-array>
 
-    <!-- Dialog -->
-    <string-array name="dialog">
+    <!-- Comment Dialog -->
+    <string-array name="dialog_comment">
         <item>Upvote</item>
         <item>Reply</item>
         <item>Author profile</item>
         <item>Share link to&#8230;</item>
         <item>Send comment text to&#8230;</item>
+    </string-array>
+
+    <!-- Feedback Dialog -->
+    <string name="feedback_dialog_title">Feedback via&#8230;</string>
+    <string-array name="dialog_feedback">
+        <item>Twitter</item>
+        <item>Google+</item>
+        <item>Email</item>
+        <item>Review on Google Play</item>
     </string-array>
 
     <!--Login dialog-->

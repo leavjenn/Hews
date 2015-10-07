@@ -7,6 +7,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -44,6 +45,7 @@ import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
 import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
 import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
+import com.leavjenn.hews.ui.widget.FeedbackDialogFragment;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
@@ -385,6 +387,46 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             MainActivity.this.getResources().getString(R.string.nav_logout));
                                     SharedPrefsManager.setLoginCookie(prefs, "");
                                     updateLoginState(Constants.LOGIN_STATE_OUT);
+                                } else if (type == R.id.nav_feedback) {
+                                    FeedbackDialogFragment feedbackDialog = new FeedbackDialogFragment();
+                                    feedbackDialog.setOnFeedbackListClickListener(
+                                            new FeedbackDialogFragment.OnFeedbackListClickListener() {
+                                                @Override
+                                                public void onTwitter() {
+                                                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                                                    String url = "https://twitter.com/leavjenn";
+                                                    urlIntent.setData(Uri.parse(url));
+                                                    startActivity(urlIntent);
+                                                }
+
+                                                @Override
+                                                public void onGooglePlus() {
+                                                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                                                    String url = "https://plus.google.com/u/0/101572751825365377306";
+                                                    urlIntent.setData(Uri.parse(url));
+                                                    startActivity(urlIntent);
+                                                }
+
+                                                @Override
+                                                public void onEmail() {
+                                                    Intent intent = new Intent(Intent.ACTION_SENDTO,
+                                                            Uri.fromParts("mailto", "", null));
+                                                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"leavjenn@gmail.com"});
+                                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Hews");
+                                                    startActivity(Intent.createChooser(intent, "Send Email"));
+                                                }
+
+                                                @Override
+                                                public void onGooglePlayReview() {
+                                                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                                                    String url =
+                                                            "https://play.google.com/store/apps/details?id=com.leavjenn.hews";
+                                                    urlIntent.setData(Uri.parse(url));
+                                                    startActivity(urlIntent);
+                                                }
+                                            });
+                                    feedbackDialog.show(getFragmentManager(), "feedbackFrag");
+
                                 } else {
                                     menuItem.setChecked(true);
                                     PostFragment currentFrag = (PostFragment) getFragmentManager()

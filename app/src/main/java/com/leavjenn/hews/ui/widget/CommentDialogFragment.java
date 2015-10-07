@@ -10,10 +10,10 @@ import android.support.v4.app.DialogFragment;
 
 import com.leavjenn.hews.R;
 
-public class ListDialogFragment extends DialogFragment {
-    OnListDialogClickListener mListener;
+public class CommentDialogFragment extends DialogFragment {
+    OnCommentDialogClickListener mListener;
 
-    public ListDialogFragment() {
+    public CommentDialogFragment() {
         // Required empty public constructor
     }
 
@@ -21,7 +21,7 @@ public class ListDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setItems(R.array.dialog, new DialogInterface.OnClickListener() {
+        builder.setItems(R.array.dialog_comment, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -46,11 +46,11 @@ public class ListDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    public void setOnListDialogClickListener(OnListDialogClickListener listener) {
+    public void setOnListDialogClickListener(OnCommentDialogClickListener listener) {
         mListener = listener;
     }
 
-    public interface OnListDialogClickListener {
+    public interface OnCommentDialogClickListener {
         void onUpvote();
 
         void onReply();
