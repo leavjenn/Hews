@@ -48,7 +48,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-
 public class CommentsActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener {
     private PopupFloatingWindow mWindow;
@@ -98,10 +97,10 @@ public class CommentsActivity extends AppCompatActivity implements
         btnReplySend = (FloatingActionButton) findViewById(R.id.btn_reply_send);
         etReply = (EditText) findViewById(R.id.et_reply);
         Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
         CommentsFragment commentsFragment = null;
-        if (bundle != null) {
-            Post post = intent.getParcelableExtra(Constants.KEY_POST);
+
+        Post post = intent.getParcelableExtra(Constants.KEY_POST);
+        if (post != null) {
             commentsFragment = CommentsFragment.newInstance(post);
             //TODO how the url could be null?!
             mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
