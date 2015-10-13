@@ -135,7 +135,7 @@ public class CommentsActivity extends AppCompatActivity implements
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
             mChromeCustomTabsHelper.bindCustomTabsService(this);
             if (mUrl != null) {
-                mChromeCustomTabsHelper.mayLaunchUrl(Uri.parse(mUrl), null, null);
+                mChromeCustomTabsHelper.mayLaunchUrl(Utils.validateAndParseUri(mUrl, mPostId), null, null);
             }
         }
     }
@@ -195,10 +195,10 @@ public class CommentsActivity extends AppCompatActivity implements
                                 BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
 
                         ChromeCustomTabsHelper.openCustomTab(this, intentBuilder.build(),
-                                Uri.parse(mUrl), null);
+                                Utils.validateAndParseUri(mUrl, mPostId), null);
                     } else {
                         Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                        urlIntent.setData(Uri.parse(mUrl));
+                        urlIntent.setData(Utils.validateAndParseUri(mUrl, mPostId));
                         startActivity(urlIntent);
                     }
                 }
@@ -347,7 +347,7 @@ public class CommentsActivity extends AppCompatActivity implements
                     @Override
                     public void onNext(Integer integer) {
                         snackbarProcessing.dismiss();
-                        AlertDialog.Builder builder=
+                        AlertDialog.Builder builder =
                                 new AlertDialog.Builder(CommentsActivity.this)
                                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                             @Override
@@ -472,12 +472,12 @@ public class CommentsActivity extends AppCompatActivity implements
                     @Override
                     public void onNext(Integer integer) {
                         snackbarProcessing.dismiss();
-                        AlertDialog.Builder builder= new AlertDialog.Builder(CommentsActivity.this)
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                            }
-                                        });
+                        AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                });
                         switch (integer) {
                             case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
                                 builder.setTitle("Login cookie expired")

@@ -3,10 +3,13 @@ package com.leavjenn.hews;
 import android.content.Context;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+import android.webkit.URLUtil;
 import android.widget.Toast;
 
 public class Utils {
@@ -47,7 +50,23 @@ public class Utils {
         Toast.makeText(context, "No connection:)", Toast.LENGTH_LONG).show();
     }
 
-    public static void showLongToast(Context context,CharSequence text){
-        Toast.makeText(context,text,Toast.LENGTH_LONG).show();
+    public static void showLongToast(Context context, CharSequence text) {
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+    }
+
+    // uri scheme can only lower case char
+    public static Uri validateAndParseUri(String uriString, long postId) {
+        if (URLUtil.isValidUrl(uriString)) {
+//        if (Patterns.WEB_URL.matcher(uriString).matches()) {
+            if (uriString.startsWith("Http")) {
+                Log.i("validateAndParseUri", "http" + uriString.substring(4));
+                return Uri.parse("http" + uriString.substring(4));
+            } else { // TODO other conditions
+                return Uri.parse(uriString);
+            }
+        } else {
+            return Uri.parse("https://news.ycombinator.com/item?id=" + postId);
+        }
+//        }
     }
 }
