@@ -122,13 +122,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             CommentViewHolder commentViewHolder = (CommentViewHolder) viewHolder;
             Comment comment = (Comment) mItemList.get(position);
             commentViewHolder.setCommentIndent(comment.getLevel());
-            if (comment.getDeleted()) {
-                commentViewHolder.tvComment.setText("[deleted]");
-            } else {
-                commentViewHolder.tvComment.setText(Html.fromHtml(comment.getText()));
+            String text = comment.getDeleted() ? "[deleted]"
+                    : Html.fromHtml(comment.getText().replace("<p>", "<br /><br />")).toString();
+            commentViewHolder.tvComment.setText(text);
+            commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
+            if (!comment.getDeleted()) {
                 commentViewHolder.tvAuthor.setText(comment.getBy());
             }
-            commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
 
             if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
                 commentViewHolder.tvComment.setText(
@@ -137,7 +137,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 commentViewHolder.tvComment.setMinLines(2);
                 commentViewHolder.tvComment.setGravity(Gravity.CENTER);
             } else {
-                commentViewHolder.tvComment.setText(Html.fromHtml(comment.getText()));
+                commentViewHolder.tvComment.setText(text);
                 commentViewHolder.tvComment.setMinLines(Integer.MIN_VALUE);
                 commentViewHolder.tvComment.setGravity(Gravity.LEFT);
             }
