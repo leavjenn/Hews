@@ -123,7 +123,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             Comment comment = (Comment) mItemList.get(position);
             commentViewHolder.setCommentIndent(comment.getLevel());
             String text = comment.getDeleted() ? "[deleted]"
-                    : Html.fromHtml(comment.getText().replace("<p>", "<br /><br />")).toString();
+                    : Html.fromHtml(comment.getText()
+                    .replace("<p>", "<br /><br />").replace("\n", "<br />")).toString();
             commentViewHolder.tvComment.setText(text);
             commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
             if (!comment.getDeleted()) {
