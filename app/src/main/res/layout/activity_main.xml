@@ -31,21 +31,21 @@
                     android:fitsSystemWindows="true"
                     android:theme="@style/ToolBarTheme"
                     app:layout_scrollFlags="scroll|enterAlways"
-                    app:popupTheme="?attr/toolbar_poptheme"/>
+                    app:popupTheme="?attr/toolbar_poptheme" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?toolbar_bg_color"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:background="?toolbar_bg_color"
                     app:layout_scrollFlags="scroll|enterAlways">
 
                     <com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner
                         android:id="@+id/spinner_time_range"
+                        style="@style/Widget.AppCompat.Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="56dp"
-                        style="@style/Widget.AppCompat.Spinner"
                         android:layout_alignParentLeft="true"
                         android:layout_alignParentTop="true"
                         android:gravity="bottom"
@@ -65,17 +65,17 @@
             </android.support.design.widget.AppBarLayout>
 
             <!--<fragment-->
-                <!--android:id="@+id/frag_post_list"-->
-                <!--android:name="com.leavjenn.hews.ui.PostFragment"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
-                <!--tools:context="com.leavjenn.hews.ui.MainActivity" />-->
+            <!--android:id="@+id/frag_post_list"-->
+            <!--android:name="com.leavjenn.hews.ui.PostFragment"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+            <!--tools:context="com.leavjenn.hews.ui.MainActivity" />-->
             <FrameLayout
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
         </android.support.design.widget.CoordinatorLayout>
 
         <include layout="@layout/include_fab" />

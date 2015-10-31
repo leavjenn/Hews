@@ -69,7 +69,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
+    private View drawerHeader;
     private LinearLayout layoutLogin;
+    private TextView tvAccount;
     private ImageView ivExpander;
     private boolean isLoginMenuExpanded;
     private int mDrawerSelectedItem;
@@ -125,9 +127,14 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
+        //TODO inflate drawerHeader due to a bug:
+        // https://code.google.com/p/android/issues/detail?id=192001
+        drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, mNavigationView);
+        layoutLogin = (LinearLayout) drawerHeader.findViewById(R.id.layout_login);
+        tvAccount = (TextView) drawerHeader.findViewById(R.id.tv_account);
         updateLoginState(SharedPrefsManager.getLoginCookie(prefs).isEmpty() ?
                 Constants.LOGIN_STATE_OUT : Constants.LOGIN_STATE_IN);
-        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
+//        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
         layoutLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -512,7 +519,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     void updateLoginState(boolean isLogin) {
-        TextView tvAccount = (TextView) findViewById(R.id.tv_account);
         String username = SharedPrefsManager.getUsername(prefs, this);
         tvAccount.setText(username);
         Log.i("usename", tvAccount.getText().toString());
