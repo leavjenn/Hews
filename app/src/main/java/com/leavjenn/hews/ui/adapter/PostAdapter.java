@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.leavjenn.hews.R;
@@ -75,7 +74,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         } else {
             viewHolder.tvSummary.setVisibility(View.GONE);
         }
-        viewHolder.layoutFrame.setOnClickListener(new View.OnClickListener() {
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mOnItemClickListener.onItemClick(mPostArrayList.get(i));
@@ -107,7 +106,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        RelativeLayout layoutFrame;
         TextView tvTitle;
         TextView tvScore;
         TextView tvDescendants;
@@ -117,7 +115,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
         public ViewHolder(View v) {
             super(v);
-            layoutFrame = (RelativeLayout) v.findViewById(R.id.layout_post_frame);
             tvTitle = (TextView) v.findViewById(R.id.tv_post_title);
             tvScore = (TextView) v.findViewById(R.id.tv_post_point);
             tvTime = (TextView) v.findViewById(R.id.tv_post_time);
