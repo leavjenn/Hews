@@ -105,13 +105,13 @@ public class CommentsActivity extends AppCompatActivity implements
             //TODO how the url could be null?!
             mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
             mPostId = post.getId();
-        }
-
-        final Uri data = intent.getData();
-        if (data != null) {
-            long storyId = Long.parseLong(data.getQueryParameter("id"));
-            commentsFragment = CommentsFragment.newInstance(storyId);
-            mPostId = storyId;
+        } else {
+            final Uri data = intent.getData();
+            if (data != null && data.getQueryParameter("id") != null) {
+                long storyId = Long.parseLong(data.getQueryParameter("id"));
+                commentsFragment = CommentsFragment.newInstance(storyId);
+                mPostId = storyId;
+            }
         }
 
         if (savedInstanceState == null) {
@@ -187,7 +187,8 @@ public class CommentsActivity extends AppCompatActivity implements
                         if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
                             intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
                         } else {
-                            intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_600));
+                            //TODO use darker orange color here so chrome toolbar will fit dark theme
+                            intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_800));
                         }
 
                         intentBuilder.setShowTitle(true);

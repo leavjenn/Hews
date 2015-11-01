@@ -3,14 +3,18 @@ package com.leavjenn.hews.ui;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -35,6 +39,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
+import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
@@ -90,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private SharedPreferences prefs;
     private DataManager mDataManager;
     private CompositeSubscription mCompositeSubscription;
+    private ChromeCustomTabsHelper mChromeCustomTabsHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,6 +170,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         //init mCompositeSubscription here due to onCreate() will not be called
 //        when theme changed (call recreate())
         mCompositeSubscription = new CompositeSubscription();
+        if (!SharedPrefsManager.getIsOpenLinkInBrowser(prefs, this)
+                && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
+            mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
+            mChromeCustomTabsHelper.bindCustomTabsService(this);
+        }
     }
 
     @Override
@@ -193,13 +204,21 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
+        }
+        if (mChromeCustomTabsHelper != null) {
+            mChromeCustomTabsHelper.unbindCustomTabsService(this);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mAppbar.removeOnOffsetChangedListener(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
-        if (mCompositeSubscription.hasSubscriptions()) {
-            mCompositeSubscription.unsubscribe();
-        }
     }
 
     @Override
@@ -790,10 +809,54 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     @Override
-    public void onItemClick(Post post) {
+    public void onOpenComment(Post post) {
         Intent intent = new Intent(this, CommentsActivity.class);
         intent.putExtra(Constants.KEY_POST, post);
         startActivity(intent);
+    }
+
+    @Override
+    public void onOpenLink(Post post) {
+        if (mChromeCustomTabsHelper != null) {
+            // build CustomTabs UI
+            CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+            if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
+                intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
+            } else {
+                //TODO use darker orange color here so chrome toolbar will fit dark theme
+                intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_800));
+            }
+            intentBuilder.enableUrlBarHiding();
+            intentBuilder.setShowTitle(true);
+            intentBuilder.setCloseButtonIcon(
+                    BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
+
+            String shareLabel = getString(R.string.share_link_to);
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            String postUrl = post.getUrl();
+            shareIntent.putExtra(Intent.EXTRA_TEXT, postUrl);
+            shareIntent.setType("text/plain");
+            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.share_link_to)));
+            PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(), 0,
+                    shareIntent, 0);
+            intentBuilder.addMenuItem(shareLabel, pendingIntent);
+
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_comment);
+            Intent goToCommentIntent = new Intent(this, CommentsActivity.class);
+            goToCommentIntent.putExtra(Constants.KEY_POST, post);
+            PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
+                    goToCommentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            intentBuilder.setActionButton(icon, getString(R.string.go_to_comment), pi);
+
+            ChromeCustomTabsHelper.openCustomTab(this, intentBuilder.build(),
+                    Utils.validateAndParseUri(post.getUrl(), post.getId()), null);
+        } else {
+            Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+            urlIntent.setData(Utils.validateAndParseUri(post.getUrl(), post.getId()));
+            startActivity(urlIntent);
+        }
     }
 
 

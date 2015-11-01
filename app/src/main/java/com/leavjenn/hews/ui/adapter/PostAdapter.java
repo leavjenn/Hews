@@ -77,7 +77,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mOnItemClickListener.onItemClick(mPostArrayList.get(i));
+                mOnItemClickListener.onOpenComment(mPostArrayList.get(i));
+            }
+        });
+        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mOnItemClickListener.onOpenLink(mPostArrayList.get(i));
+                return true;
             }
         });
     }
@@ -130,7 +137,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Post post);
+        void onOpenComment(Post post);
+        void onOpenLink(Post post);
     }
 
 }
