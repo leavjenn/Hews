@@ -211,6 +211,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
+            //TODO if ChromeCustomTabsHelper was not null and called unbind, erroe would occur
+            mChromeCustomTabsHelper = null;
         }
     }
 
