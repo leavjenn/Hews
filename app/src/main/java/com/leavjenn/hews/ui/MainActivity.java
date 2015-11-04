@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private NavigationView mNavigationView;
     private View drawerHeader;
     private LinearLayout layoutLogin;
-    private TextView tvAccount;
+    private TextView tvLoginName;
     private ImageView ivExpander;
     private boolean isLoginMenuExpanded;
     private int mDrawerSelectedItem;
@@ -133,14 +133,14 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
                 R.string.close_drawer);
-        //TODO inflate drawerHeader due to a bug:
-        // https://code.google.com/p/android/issues/detail?id=192001
-        drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, mNavigationView);
+        // TODO inflate drawerHeader due to a bug:
+        // https://code.google.com/p/android/issues/detail?id=190226
+        drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, null);
+        mNavigationView.addHeaderView(drawerHeader);
         layoutLogin = (LinearLayout) drawerHeader.findViewById(R.id.layout_login);
-        tvAccount = (TextView) drawerHeader.findViewById(R.id.tv_account);
-        updateLoginState(SharedPrefsManager.getLoginCookie(prefs).isEmpty() ?
-                Constants.LOGIN_STATE_OUT : Constants.LOGIN_STATE_IN);
-//        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
+        tvLoginName = (TextView) drawerHeader.findViewById(R.id.tv_account);
+        updateLoginName();
+        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
         layoutLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -414,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     SharedPrefsManager.setUsername(prefs,
                                             MainActivity.this.getResources().getString(R.string.nav_logout));
                                     SharedPrefsManager.setLoginCookie(prefs, "");
-                                    updateLoginState(Constants.LOGIN_STATE_OUT);
+                                    updateLoginName();
                                 } else if (type == R.id.nav_feedback) {
                                     FeedbackDialogFragment feedbackDialog = new FeedbackDialogFragment();
                                     feedbackDialog.setOnFeedbackListClickListener(
@@ -503,7 +503,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             Utils.showLongToast(MainActivity.this, "Login succeed");
                                             SharedPrefsManager.setUsername(prefs, username);
                                             SharedPrefsManager.setLoginCookie(prefs, s);
-                                            updateLoginState(Constants.LOGIN_STATE_IN);
+                                            updateLoginName();
                                         }
                                     }
                                 }));
@@ -539,10 +539,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
     }
 
-    void updateLoginState(boolean isLogin) {
-        String username = SharedPrefsManager.getUsername(prefs, this);
-        tvAccount.setText(username);
-        Log.i("usename", tvAccount.getText().toString());
+    void updateLoginName() {
+        tvLoginName.setText(SharedPrefsManager.getUsername(prefs, this));
+        Log.i("usename", tvLoginName.getText().toString());
     }
 
     public void setUpSpinnerPopularDateRange() {
@@ -841,7 +840,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             shareIntent.setType("text/plain");
             shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(Intent.createChooser(shareIntent, getString(R.string.share_link_to)));
-            PendingIntent pendingIntent=PendingIntent.getActivity(getApplicationContext(), 0,
+            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
                     shareIntent, 0);
             intentBuilder.addMenuItem(shareLabel, pendingIntent);
 
