@@ -26,7 +26,8 @@ public class SharedPrefsManager {
     static String[] fontsForComment = {"PT Sans", "Roboto", "Lato",
             "Open Sans", "Muli", "Slabo 27px", "Crimson Text", "Roboto Slab",
             "Vollkorn", "Merriweather"};
-    static String[] fontsForPost = {"Open Sans", "Dosis SemiBold", "Roboto Slab", "Merriweather"};
+    static String[] fontsForPost = {"Open Sans", "Dosis SemiBold", "Roboto Slab", "Merriweather",
+            "RobotoMono"};
 
     public static String[] getPostFontsList() {
         return fontsForPost;
