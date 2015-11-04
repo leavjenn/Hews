@@ -42,6 +42,7 @@ import com.firebase.client.Firebase;
 import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
+import com.leavjenn.hews.ShareBroadcastReceiver;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
@@ -832,17 +833,24 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             intentBuilder.setCloseButtonIcon(
                     BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
 
-            String shareLabel = getString(R.string.share_link_to);
-            Intent shareIntent = new Intent();
-            shareIntent.setAction(Intent.ACTION_SEND);
-            String postUrl = post.getUrl();
-            shareIntent.putExtra(Intent.EXTRA_TEXT, postUrl);
-            shareIntent.setType("text/plain");
-            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(Intent.createChooser(shareIntent, getString(R.string.share_link_to)));
-            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
-                    shareIntent, 0);
-            intentBuilder.addMenuItem(shareLabel, pendingIntent);
+            // TODO Use this way, it will show share to option when long click
+//            String shareLabel = getString(R.string.share_link_to);
+//            Intent shareIntent = new Intent();
+//            shareIntent.setAction(Intent.ACTION_SEND);
+//            String postUrl = post.getUrl();
+//            shareIntent.putExtra(Intent.EXTRA_TEXT, postUrl);
+//            shareIntent.setType("text/plain");
+//            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            Intent chooserIntent = Intent.createChooser(shareIntent, getString(R.string.share_link_to));
+//            startActivity(chooserIntent);
+//            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+//                    shareIntent, 0);
+//            intentBuilder.addMenuItem(shareLabel, pendingIntent);
+
+
+            String menuItemTitle = getString(R.string.share_link_to);
+            PendingIntent menuItemPendingIntent = createPendingIntent();
+            intentBuilder.addMenuItem(menuItemTitle, menuItemPendingIntent);
 
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_comment);
             Intent goToCommentIntent = new Intent(this, CommentsActivity.class);
@@ -860,6 +868,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
     }
 
+    private PendingIntent createPendingIntent() {
+        Intent actionIntent = new Intent(
+                this.getApplicationContext(), ShareBroadcastReceiver.class);
+        return PendingIntent.getBroadcast(getApplicationContext(), 0, actionIntent, 0);
+    }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
