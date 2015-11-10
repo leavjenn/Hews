@@ -100,7 +100,8 @@ public class LoginDialogFragment extends DialogFragment {
                             tvHint.setText(R.string.login_hint_logging_in);
                         } else if (username.isEmpty()) {
                             tvHint.setText(R.string.login_hint_error_empty_username);
-                        } else if (password.length() < 8) {
+                        } else if (password.length() < 6) {
+                            // according to a user report, the password may less than 8 characters
                             tvHint.setText(R.string.login_hint_error_short_password);
                         }
                     } else {
