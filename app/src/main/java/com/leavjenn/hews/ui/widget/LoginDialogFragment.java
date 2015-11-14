@@ -89,8 +89,10 @@ public class LoginDialogFragment extends DialogFragment {
             positiveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String username = tiLayoutName.getEditText().getText().toString();
-                    String password = tiLayoutPassword.getEditText().getText().toString();
+                    String username;
+                    username = tiLayoutName.getEditText().getText().toString();
+                    String password;
+                    password = tiLayoutPassword.getEditText().getText().toString();
                     if (Utils.isOnline(LoginDialogFragment.this.getActivity())) {
                         if (!username.isEmpty() && password.length() >= 8) {
                             mListener.onLogin(username, password);
