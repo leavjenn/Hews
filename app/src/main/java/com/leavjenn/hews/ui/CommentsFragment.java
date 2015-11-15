@@ -32,7 +32,6 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.android.app.AppObservable;
 import rx.schedulers.Schedulers;
 
 public class CommentsFragment extends Fragment
@@ -153,8 +152,7 @@ public class CommentsFragment extends Fragment
     }
 
     void getPost(long postId) {
-        mSubscription = (AppObservable.bindActivity(getActivity(),
-                mService.getStory(String.valueOf(postId)))
+        mSubscription = (mService.getStory(String.valueOf(postId))
                 .subscribeOn(mDataManager.getScheduler())
                 .subscribe(new Subscriber<Post>() {
                     @Override
@@ -212,9 +210,9 @@ public class CommentsFragment extends Fragment
             if (mSubscription != null) {
                 mSubscription.unsubscribe();
             }
-            mSubscription = AppObservable.bindActivity(getActivity(),
+            mSubscription =
 //                    mDataManager.getComments(commentIds, 0))
-                    mDataManager.getCommentsFromFirebase(commentIds, 0))
+                    mDataManager.getCommentsFromFirebase(commentIds, 0)
                     .subscribeOn(mDataManager.getScheduler())
                     .subscribe(new Subscriber<Comment>() {
                         @Override

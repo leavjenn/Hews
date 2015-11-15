@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Subscriber;
-import rx.android.app.AppObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -159,7 +158,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCompositeSubscription.unsubscribe();
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
+        }
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
@@ -177,8 +178,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     void loadPostListFromFirebase(String storyTypeUrl) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                mDataManager.getPostListFromFirebase(storyTypeUrl))
+        mCompositeSubscription.add(mDataManager.getPostListFromFirebase(storyTypeUrl)
                 .subscribeOn(mDataManager.getScheduler())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Long>>() {
@@ -202,64 +202,63 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     void loadPostListFromSearch(String timeRangeCombine, int page) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
+        mCompositeSubscription.add(
                 mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(1, 11)
-                        + "," + "created_at_i<" + timeRangeCombine.substring(11), page))
-                .subscribeOn(mDataManager.getScheduler())
-                .subscribe(new Subscriber<HNItem.SearchResult>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+                        + "," + "created_at_i<" + timeRangeCombine.substring(11), page)
+                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribe(new Subscriber<HNItem.SearchResult>() {
+                            @Override
+                            public void onCompleted() {
+                            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.i("search", e.toString());
-                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.i("search", e.toString());
+                            }
 
-                    @Override
-                    public void onNext(HNItem.SearchResult searchResult) {
-                        List<Long> list = new ArrayList<>();
-                        searchResultTotalPages = searchResult.getNbPages();
-                        for (int i = 0; i < searchResult.getHits().length; i++) {
-                            list.add(searchResult.getHits()[i].getObjectID());
-                        }
-                        //Toast.makeText(getActivity(), "Search list loaded", Toast.LENGTH_SHORT).show();
-                        loadPostFromList(list);
-                        mLoadingState = Constants.LOADING_IN_PROGRESS;
-                    }
-                }));
+                            @Override
+                            public void onNext(HNItem.SearchResult searchResult) {
+                                List<Long> list = new ArrayList<>();
+                                searchResultTotalPages = searchResult.getNbPages();
+                                for (int i = 0; i < searchResult.getHits().length; i++) {
+                                    list.add(searchResult.getHits()[i].getObjectID());
+                                }
+                                //Toast.makeText(getActivity(), "Search list loaded", Toast.LENGTH_SHORT).show();
+                                loadPostFromList(list);
+                                mLoadingState = Constants.LOADING_IN_PROGRESS;
+                            }
+                        }));
     }
 
     void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                mDataManager.getPostFromList(list))
-                .subscribeOn(mDataManager.getScheduler())
-                .subscribe(new Subscriber<Post>() {
-                    @Override
-                    public void onCompleted() {
-                        mLoadingState = Constants.LOADING_IDLE;
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("loadPostFromList", e.toString());
-                    }
-
-                    @Override
-                    public void onNext(Post post) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mRecyclerView.setVisibility(View.VISIBLE);
-                        if (post != null) {
-                            mPostAdapter.add(post);
-                            post.setIndex(mPostAdapter.getItemCount() - 1);
-                            if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_URL
-                                    && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_URL
-                                    && SHOW_POST_SUMMARY && post.getKids() != null) {
-                                loadSummary(post);
+        mCompositeSubscription.add(mDataManager.getPostFromList(list)
+                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribe(new Subscriber<Post>() {
+                            @Override
+                            public void onCompleted() {
+                                mLoadingState = Constants.LOADING_IDLE;
                             }
-                        }
-                    }
-                }));
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.e("loadPostFromList", e.toString());
+                            }
+
+                            @Override
+                            public void onNext(Post post) {
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                mRecyclerView.setVisibility(View.VISIBLE);
+                                if (post != null) {
+                                    mPostAdapter.add(post);
+                                    post.setIndex(mPostAdapter.getItemCount() - 1);
+                                    if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_URL
+                                            && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_URL
+                                            && SHOW_POST_SUMMARY && post.getKids() != null) {
+                                        loadSummary(post);
+                                    }
+                                }
+                            }
+                        }));
     }
 
     public void refresh(String type, String spec) {
@@ -310,8 +309,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     void loadSummary(final Post post) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                        mDataManager.getSummary(post.getKids()))
+        mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
                         .subscribeOn(mDataManager.getScheduler())
                         .subscribe(new Subscriber<Comment>() {
                             @Override

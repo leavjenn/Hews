@@ -43,7 +43,6 @@ import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import rx.Subscriber;
-import rx.android.app.AppObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -331,7 +330,7 @@ public class CommentsActivity extends AppCompatActivity implements
                 .findViewById(android.support.design.R.id.snackbar_text);
         tvSnackbarText.setTextColor(Color.WHITE);
         snackbarProcessing.show();
-        mCompositeSubscription.add(AppObservable.bindActivity(this, mDataManager.vote(itemId, prefs))
+        mCompositeSubscription.add(mDataManager.vote(itemId, prefs)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Integer>() {
@@ -403,8 +402,7 @@ public class CommentsActivity extends AppCompatActivity implements
                 new LoginDialogFragment.OnLoginListener() {
                     @Override
                     public void onLogin(final String username, String password) {
-                        mCompositeSubscription.add(AppObservable.bindActivity(CommentsActivity.this,
-                                mDataManager.login(username, password))
+                        mCompositeSubscription.add(mDataManager.login(username, password)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Subscriber<String>() {
@@ -454,69 +452,68 @@ public class CommentsActivity extends AppCompatActivity implements
                 .findViewById(android.support.design.R.id.snackbar_text);
         tvSnackbarText.setTextColor(Color.WHITE);
         snackbarProcessing.show();
-        mCompositeSubscription.add(AppObservable
-                .bindActivity(this, mDataManager.reply(itemId, replyText,
-                        SharedPrefsManager.getLoginCookie(prefs)))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<Integer>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+        mCompositeSubscription.add(
+                mDataManager.reply(itemId, replyText, SharedPrefsManager.getLoginCookie(prefs))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(new Subscriber<Integer>() {
+                            @Override
+                            public void onCompleted() {
+                            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        snackbarProcessing.dismiss();
-                        Log.e("post reply err", e.toString());
-                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                snackbarProcessing.dismiss();
+                                Log.e("post reply err", e.toString());
+                            }
 
-                    @Override
-                    public void onNext(Integer integer) {
-                        snackbarProcessing.dismiss();
-                        AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
-                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                });
-                        switch (integer) {
-                            case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
-                                builder.setTitle("Login cookie expired")
-                                        .setMessage("Would you like to login again?")
-                                        .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onNext(Integer integer) {
+                                snackbarProcessing.dismiss();
+                                AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                login();
                                             }
-                                        }).create().show();
-                                break;
-                            case Constants.OPERATE_ERROR_NO_COOKIE:
-                                builder.setTitle("Not login")
-                                        .setMessage("Would you like to login?")
-                                        .setPositiveButton("Login", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                login();
-                                            }
-                                        }).create().show();
-                                break;
-                            case Constants.OPERATE_SUCCESS:
-                                Utils.showLongToast(CommentsActivity.this, "Reply succeed");
-                                enableReplyMode(false, mPostId);
-                                break;
-                            case Constants.OPERATE_ERROR_UNKNOWN:
-                                builder.setTitle("Reply failed")
-                                        .setMessage("Would you like to reply again?")
-                                        .setPositiveButton("Reply again", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                reply(itemId, etReply.getText().toString());
-                                            }
-                                        }).create().show();
-                                break;
-                        }
-                    }
-                }));
+                                        });
+                                switch (integer) {
+                                    case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
+                                        builder.setTitle("Login cookie expired")
+                                                .setMessage("Would you like to login again?")
+                                                .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        login();
+                                                    }
+                                                }).create().show();
+                                        break;
+                                    case Constants.OPERATE_ERROR_NO_COOKIE:
+                                        builder.setTitle("Not login")
+                                                .setMessage("Would you like to login?")
+                                                .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        login();
+                                                    }
+                                                }).create().show();
+                                        break;
+                                    case Constants.OPERATE_SUCCESS:
+                                        Utils.showLongToast(CommentsActivity.this, "Reply succeed");
+                                        enableReplyMode(false, mPostId);
+                                        break;
+                                    case Constants.OPERATE_ERROR_UNKNOWN:
+                                        builder.setTitle("Reply failed")
+                                                .setMessage("Would you like to reply again?")
+                                                .setPositiveButton("Reply again", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        reply(itemId, etReply.getText().toString());
+                                                    }
+                                                }).create().show();
+                                        break;
+                                }
+                            }
+                        }));
     }
 
     @Override

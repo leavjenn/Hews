@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Subscriber;
-import rx.android.app.AppObservable;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -138,41 +137,42 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCompositeSubscription.unsubscribe();
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
+        }
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     void loadPostListFromSearch(String keyword, String dateRange, int page, boolean isSortByDate) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
+        mCompositeSubscription.add(
                 mDataManager.getSearchResult(keyword, "created_at_i>" + dateRange.substring(0, 10)
-                        + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate))
-                .subscribeOn(mDataManager.getScheduler())
-                .subscribe(new Subscriber<HNItem.SearchResult>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+                        + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate)
+                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribe(new Subscriber<HNItem.SearchResult>() {
+                            @Override
+                            public void onCompleted() {
+                            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.i("search", e.toString());
-                    }
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.i("search", e.toString());
+                            }
 
-                    @Override
-                    public void onNext(HNItem.SearchResult searchResult) {
-                        List<Long> list = new ArrayList<>();
-                        searchResultTotalPages = searchResult.getNbPages();
-                        for (int i = 0; i < searchResult.getHits().length; i++) {
-                            list.add(searchResult.getHits()[i].getObjectID());
-                        }
-                        loadPostFromList(list);
-                        mLoadingState = Constants.LOADING_IN_PROGRESS;
-                    }
-                }));
+                            @Override
+                            public void onNext(HNItem.SearchResult searchResult) {
+                                List<Long> list = new ArrayList<>();
+                                searchResultTotalPages = searchResult.getNbPages();
+                                for (int i = 0; i < searchResult.getHits().length; i++) {
+                                    list.add(searchResult.getHits()[i].getObjectID());
+                                }
+                                loadPostFromList(list);
+                                mLoadingState = Constants.LOADING_IN_PROGRESS;
+                            }
+                        }));
     }
 
     void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                mDataManager.getPostFromList(list))
+        mCompositeSubscription.add(mDataManager.getPostFromList(list)
                 .subscribeOn(mDataManager.getScheduler())
                 .subscribe(new Subscriber<Post>() {
                     @Override
@@ -201,8 +201,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     }
 
     void loadSummary(final Post post) {
-        mCompositeSubscription.add(AppObservable.bindActivity(getActivity(),
-                        mDataManager.getSummary(post.getKids()))
+        mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
                         .subscribeOn(mDataManager.getScheduler())
                         .subscribe(new Subscriber<Comment>() {
                             @Override

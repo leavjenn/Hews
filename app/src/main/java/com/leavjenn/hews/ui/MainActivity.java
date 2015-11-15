@@ -60,7 +60,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import rx.Subscriber;
-import rx.android.app.AppObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -481,8 +480,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 new LoginDialogFragment.OnLoginListener() {
                     @Override
                     public void onLogin(final String username, String password) {
-                        mCompositeSubscription.add(AppObservable.bindActivity(MainActivity.this,
-                                mDataManager.login(username, password))
+                        mCompositeSubscription.add(mDataManager.login(username, password)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Subscriber<String>() {
