@@ -94,7 +94,7 @@ public class LoginDialogFragment extends DialogFragment {
                     String password;
                     password = tiLayoutPassword.getEditText().getText().toString();
                     if (Utils.isOnline(LoginDialogFragment.this.getActivity())) {
-                        if (!username.isEmpty() && password.length() >= 8) {
+                        if (!username.isEmpty() && password.length() >= 6) {
                             mListener.onLogin(username, password);
                             tiLayoutName.setVisibility(View.GONE);
                             tiLayoutPassword.setVisibility(View.GONE);
