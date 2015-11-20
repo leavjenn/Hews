@@ -25,6 +25,9 @@ import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
+import com.nhaarman.supertooltips.ToolTip;
+import com.nhaarman.supertooltips.ToolTipRelativeLayout;
+import com.nhaarman.supertooltips.ToolTipView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +62,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     int searchResultTotalPages = 0;
     private DataManager mDataManager;
     private CompositeSubscription mCompositeSubscription;
+    private ToolTipRelativeLayout tooltipLayout;
+    private ToolTip toolTip;
 
     public static PostFragment newInstance(String storyType, String storyTypeSpec) {
         PostFragment fragment = new PostFragment();
@@ -131,6 +136,15 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
         mDataManager = new DataManager(Schedulers.io());
         mCompositeSubscription = new CompositeSubscription();
+
+        if (SharedPrefsManager.getIsShowTooltip(prefs)) {
+            tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
+            toolTip = new ToolTip()
+                    .withText("Click item: open comment\nLong click: open post link\n\n\nGot it")
+                    .withTextColor(getResources().getColor(android.R.color.white))
+                    .withColor(getResources().getColor(R.color.orange_600))
+                    .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW);
+        }
         return rootView;
     }
 
@@ -232,33 +246,46 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadPostFromList(List<Long> list) {
         mCompositeSubscription.add(mDataManager.getPostFromList(list)
-                        .subscribeOn(mDataManager.getScheduler())
-                        .subscribe(new Subscriber<Post>() {
-                            @Override
-                            public void onCompleted() {
-                                mLoadingState = Constants.LOADING_IDLE;
+                .subscribeOn(mDataManager.getScheduler())
+                .subscribe(new Subscriber<Post>() {
+                    @Override
+                    public void onCompleted() {
+                        mLoadingState = Constants.LOADING_IDLE;
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("loadPostFromList", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Post post) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mRecyclerView.setVisibility(View.VISIBLE);
+                        if (post != null) {
+                            mPostAdapter.add(post);
+                            post.setIndex(mPostAdapter.getItemCount() - 1);
+                            if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_URL
+                                    && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_URL
+                                    && SHOW_POST_SUMMARY && post.getKids() != null) {
+                                loadSummary(post);
+                            }
+                            if (SharedPrefsManager.getIsShowTooltip(prefs) && mPostAdapter.getItemCount() == 6) {
+                                final ToolTipView myToolTipView = tooltipLayout
+                                        .showToolTipForView(toolTip, mRecyclerView.getLayoutManager().getChildAt(3));
+                                myToolTipView.setOnToolTipViewClickedListener(
+                                        new ToolTipView.OnToolTipViewClickedListener() {
+                                            @Override
+                                            public void onToolTipViewClicked(ToolTipView toolTipView) {
+                                                myToolTipView.remove();
+                                            }
+                                        });
+                                SharedPrefsManager.setIsShowTooltip(prefs, false);
                             }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e("loadPostFromList", e.toString());
-                            }
-
-                            @Override
-                            public void onNext(Post post) {
-                                mSwipeRefreshLayout.setRefreshing(false);
-                                mRecyclerView.setVisibility(View.VISIBLE);
-                                if (post != null) {
-                                    mPostAdapter.add(post);
-                                    post.setIndex(mPostAdapter.getItemCount() - 1);
-                                    if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_URL
-                                            && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_URL
-                                            && SHOW_POST_SUMMARY && post.getKids() != null) {
-                                        loadSummary(post);
-                                    }
-                                }
-                            }
-                        }));
+                        }
+                    }
+                }));
     }
 
     public void refresh(String type, String spec) {

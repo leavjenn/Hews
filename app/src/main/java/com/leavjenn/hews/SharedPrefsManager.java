@@ -14,6 +14,7 @@ public class SharedPrefsManager {
     public static final String KEY_USERNAME = "user_name";
     public static final String KEY_LOGIN_COOKIE = "login_cookie";
     public static final String KEY_REPLY_TEXT = "replying_text";
+    public static final String KEY_SHOW_TOOLTIP = "key_show_tooltip";
     public static final String THEME_DARK = "0";
     public static final String THEME_SEPIA = "1";
     public static final String THEME_LIGHT = "2";
@@ -97,24 +98,6 @@ public class SharedPrefsManager {
         editor.apply();
     }
 
-    //Settings
-    public static String getTheme(SharedPreferences sp) {
-        return sp.getString(KEY_THEME, THEME_LIGHT);
-    }
-
-    public static String getFabMode(SharedPreferences sp) {
-        return sp.getString(KEY_FAB_MODE, FAB_PRESS_SCROLL_DOWN);
-    }
-
-    public static Boolean getShowPostSummary(SharedPreferences sp, Context context) {
-        return sp.getBoolean(context.getResources().getString(R.string.pref_key_show_post_summary),
-                false);
-    }
-
-    public static Boolean getIsOpenLinkInBrowser(SharedPreferences sp, Context context) {
-        return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link), false);
-    }
-
     public static void setLoginCookie(SharedPreferences sp, String cookie) {
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(SharedPrefsManager.KEY_LOGIN_COOKIE, cookie);
@@ -143,5 +126,33 @@ public class SharedPrefsManager {
 
     public static String getReplyText(SharedPreferences sp) {
         return sp.getString(KEY_REPLY_TEXT, "");
+    }
+
+    public static void setIsShowTooltip(SharedPreferences sp, boolean isShowTooltip) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(SharedPrefsManager.KEY_SHOW_TOOLTIP, isShowTooltip);
+        editor.apply();
+    }
+
+    public static boolean getIsShowTooltip(SharedPreferences sp) {
+        return sp.getBoolean(KEY_SHOW_TOOLTIP, true);
+    }
+
+    //Settings
+    public static String getTheme(SharedPreferences sp) {
+        return sp.getString(KEY_THEME, THEME_LIGHT);
+    }
+
+    public static String getFabMode(SharedPreferences sp) {
+        return sp.getString(KEY_FAB_MODE, FAB_PRESS_SCROLL_DOWN);
+    }
+
+    public static Boolean getShowPostSummary(SharedPreferences sp, Context context) {
+        return sp.getBoolean(context.getResources().getString(R.string.pref_key_show_post_summary),
+                false);
+    }
+
+    public static Boolean getIsOpenLinkInBrowser(SharedPreferences sp, Context context) {
+        return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link), false);
     }
 }
