@@ -270,9 +270,11 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                                     && SHOW_POST_SUMMARY && post.getKids() != null) {
                                 loadSummary(post);
                             }
-                            if (SharedPrefsManager.getIsShowTooltip(prefs) && mPostAdapter.getItemCount() == 6) {
+                            if (SharedPrefsManager.getIsShowTooltip(prefs)
+                                    && mRecyclerView.getLayoutManager().getChildCount() == 4) {
                                 final ToolTipView myToolTipView = tooltipLayout
-                                        .showToolTipForView(toolTip, mRecyclerView.getLayoutManager().getChildAt(3));
+                                        .showToolTipForView(toolTip,
+                                                mRecyclerView.getLayoutManager().getChildAt(3));
                                 myToolTipView.setOnToolTipViewClickedListener(
                                         new ToolTipView.OnToolTipViewClickedListener() {
                                             @Override
