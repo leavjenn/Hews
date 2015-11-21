@@ -25,4 +25,10 @@
         android:key="@string/pref_key_show_post_summary"
         android:summary="@string/summary_show_post_summary"
         android:title="@string/pref_title_show_post_summary" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/pref_key_open_link_option"
+        android:summary="@string/summary_open_link_option_available"
+        android:title="@string/pref_title_open_link_option" />
 </PreferenceScreen>

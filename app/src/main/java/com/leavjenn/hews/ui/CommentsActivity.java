@@ -129,7 +129,7 @@ public class CommentsActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if (!SharedPrefsManager.getIsOpenLinkInBrowser(prefs, this)
+        if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
                 && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
             mChromeCustomTabsHelper.bindCustomTabsService(this);

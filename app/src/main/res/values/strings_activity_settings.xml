@@ -38,6 +38,9 @@
         in first words, show it under post title</string>
 
     <!-- Open link Browser option -->
-    <string name="pref_title_open_link">Open link in external browser</string>
-    <string name="pref_key_open_link">key_open_link</string>
+    <string name="pref_title_open_link_option">Open link with in-app browser</string>
+    <string name="summary_open_link_option_available">In-app browser is based on Google Chrome</string>
+    <string name="summary_open_link_option_unavailable">In-app browser needs Google Chrome support. Or you
+        could try Firefox(v>42) with opening link in background feature</string>
+    <string name="pref_key_open_link_option">key_open_link</string>
 </resources>

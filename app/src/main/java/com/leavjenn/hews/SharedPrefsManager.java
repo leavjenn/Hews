@@ -152,7 +152,7 @@ public class SharedPrefsManager {
                 false);
     }
 
-    public static Boolean getIsOpenLinkInBrowser(SharedPreferences sp, Context context) {
-        return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link), false);
+    public static Boolean getIsOpenLinkInApp(SharedPreferences sp, Context context) {
+        return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link_option), true);
     }
 }

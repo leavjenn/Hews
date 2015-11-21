@@ -11,7 +11,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.R;
@@ -93,22 +92,17 @@ public class SettingsActivity extends AppCompatActivity
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
-        }
-
-        @Override
-        public void onViewCreated(View view, Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-            if (ChromeCustomTabsHelper.getPackageNameToUse(getActivity()) != null) {
-                addOpenLinkPreference();
+            if (ChromeCustomTabsHelper.getPackageNameToUse(getActivity()) == null) {
+                disableOpenLinkOptionPreference();
             }
         }
 
-        void addOpenLinkPreference() {
-            CheckBoxPreference openLinkPref = new CheckBoxPreference(getActivity());
-            openLinkPref.setTitle(getActivity().getResources().getString(R.string.pref_title_open_link));
-            openLinkPref.setKey(getActivity().getResources().getString(R.string.pref_key_open_link));
-            openLinkPref.setDefaultValue(false);
-            getPreferenceScreen().addPreference(openLinkPref);
+        private void disableOpenLinkOptionPreference() {
+            CheckBoxPreference openLinkOptionPref = (CheckBoxPreference) findPreference(
+                    getString(R.string.pref_key_open_link_option));
+            openLinkOptionPref.setEnabled(false);
+            openLinkOptionPref.setChecked(false);
+            openLinkOptionPref.setSummary(R.string.summary_open_link_option_unavailable);
         }
     }
 }
