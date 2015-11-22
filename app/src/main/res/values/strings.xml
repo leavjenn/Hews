@@ -74,7 +74,8 @@
     <string name="login_hint_error_offline">Where\'s the Internet? Can\'t get it</string>
     <string name="login_hint_error_wrong_info">Arrr...wrong username/password</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tooltip_post_action">\u0020Click item: open comment\u0020\n
+        Long click: open post link\u0020\n\n\n
+        Got it</string>
 
 </resources>

@@ -140,7 +140,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         if (SharedPrefsManager.getIsShowTooltip(prefs)) {
             tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
             toolTip = new ToolTip()
-                    .withText("Click item: open comment\nLong click: open post link\n\n\nGot it")
+                    .withText(getString(R.string.tooltip_post_action))
                     .withTextColor(getResources().getColor(android.R.color.white))
                     .withColor(getResources().getColor(R.color.orange_600))
                     .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW);
