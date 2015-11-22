@@ -271,7 +271,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                                 loadSummary(post);
                             }
                             if (SharedPrefsManager.getIsShowTooltip(prefs)
-                                    && mRecyclerView.getLayoutManager().getChildCount() == 4) {
+                                    && mRecyclerView.getLayoutManager().getChildCount() > 4) {
                                 final ToolTipView myToolTipView = tooltipLayout
                                         .showToolTipForView(toolTip,
                                                 mRecyclerView.getLayoutManager().getChildAt(3));
