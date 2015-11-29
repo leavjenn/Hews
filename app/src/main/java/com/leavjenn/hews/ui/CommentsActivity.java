@@ -232,6 +232,10 @@ public class CommentsActivity extends AppCompatActivity implements
                 startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
                 break;
 
+            case R.id.action_bookmark:
+
+                break;
+
             case R.id.action_display:
                 if (!mWindow.isWindowShowing()) {
                     mWindow.show();
