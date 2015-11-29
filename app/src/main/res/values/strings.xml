@@ -23,6 +23,7 @@
     <string name="nav_ask_hn">Ask HN</string>
     <string name="nav_show_hn">Show HN</string>
     <string name="nav_popular">Popular by time range</string>
+    <string name="nav_read_laer">Read later</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_feedback">Feedback</string>
 
