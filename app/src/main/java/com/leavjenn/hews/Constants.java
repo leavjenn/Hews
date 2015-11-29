@@ -17,7 +17,7 @@ public final class Constants {
     public static final String KEY_POST = "post";
     public static final String YCOMBINATOR_ITEM_URL = "https://news.ycombinator.com/item?id=";
     public static final String TYPE_SEARCH = "search";
-    public static final String TYPE_READ_LATER = "tepe_read_later";
+    public static final String TYPE_BOOKMARK = "type_bookmark";
     public static final String TYPE_STORY = "type_story";
     public static final String STORY_TYPE_TOP_URL
             = "https://hacker-news.firebaseio.com/v0/topstories";

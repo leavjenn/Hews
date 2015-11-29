@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 mStoryTypeSpec = Constants.TYPE_SEARCH;
                                 mDrawerSelectedItem = 4;
                             case R.id.nav_bookmark:
-                                mStoryTypeSpec = Constants.TYPE_READ_LATER;
+                                mStoryTypeSpec = Constants.TYPE_BOOKMARK;
                                 mDrawerSelectedItem = 5;
                                 break;
                             case R.id.nav_settings:
