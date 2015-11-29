@@ -382,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             case R.id.nav_popular:
                                 mStoryTypeSpec = Constants.TYPE_SEARCH;
                                 mDrawerSelectedItem = 4;
-                            case R.id.nav_bookmark:
+                            case R.id.nav_read_later:
                                 mStoryTypeSpec = Constants.TYPE_READ_LATER;
                                 mDrawerSelectedItem = 5;
                                 break;
@@ -410,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
 
                                     setUpSpinnerPopularDateRange();
-                                }else if (type == R.id.nav_bookmark) {
+                                }else if (type == R.id.nav_read_later) {
                                     //TODO
                                 } else if (type == R.id.nav_login) {
                                     login();

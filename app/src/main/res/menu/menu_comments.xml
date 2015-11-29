@@ -33,12 +33,6 @@
         android:title="@string/menu_share_link"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_bookmark"
-        android:icon="@drawable/ic_bookmark"
-        android:orderInCategory="7"
-        android:title="@string/menu_bookmark"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/action_display"
         android:icon="@drawable/ic_text_format"
         android:orderInCategory="9"
