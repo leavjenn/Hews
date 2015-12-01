@@ -3,22 +3,53 @@ package com.leavjenn.hews.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteColumn;
+import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
+
 import java.util.ArrayList;
 
+@StorIOSQLiteType(table = "post")
 public class Post extends HNItem implements Parcelable {
-    private int index;
-    private String by;
-    private long descendants;
-    private long id;
-    private ArrayList<Long> kids;
-    private long score;
-    private String text;
-    private long time;
-    private String title;
-    private String type;
-    private String url;
-    private String prettyUrl;
-    private String summary;
+
+    @StorIOSQLiteColumn(name = "id", key = true)
+    long id;
+
+    int index;
+
+    @StorIOSQLiteColumn(name = "by")
+    String by;
+
+    @StorIOSQLiteColumn(name = "descendants")
+    long descendants;
+
+    ArrayList<Long> kids;
+
+    @StorIOSQLiteColumn(name = "score")
+    long score;
+
+    @StorIOSQLiteColumn(name = "text")
+    String text;
+
+    @StorIOSQLiteColumn(name = "time")
+    long time;
+
+    @StorIOSQLiteColumn(name = "title")
+    String title;
+
+    @StorIOSQLiteColumn(name = "type")
+    String type;
+
+    @StorIOSQLiteColumn(name = "url")
+    String url;
+
+    @StorIOSQLiteColumn(name = "prettyUrl")
+    String prettyUrl;
+
+    @StorIOSQLiteColumn(name = "summary")
+    String summary;
+
+    public Post() {
+    }
 
     public Post(Long id) {
         this.id = id;
