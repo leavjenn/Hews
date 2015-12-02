@@ -399,17 +399,27 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 if (type == R.id.nav_settings) {
                                     Intent i = new Intent(getBaseContext(), SettingsActivity.class);
                                     startActivity(i);
-//                                } else if (type == R.id.nav_popular) {
-//                                    menuItem.setChecked(true);
-//                                    PostFragment currentFrag = (PostFragment) getFragmentManager()
-//                                            .findFragmentById(R.id.container);
-//                                    Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-//                                    String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-//                                    c.add(Calendar.DAY_OF_YEAR, -1);
-//                                    String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-//                                    currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
-//
-//                                    setUpSpinnerPopularDateRange();
+                                } else if (type == R.id.nav_popular) {
+                                    menuItem.setChecked(true);
+                                    setUpSpinnerPopularDateRange();
+                                    Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                                    String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                                    c.add(Calendar.DAY_OF_YEAR, -1);
+                                    String secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                                    if (getFragmentManager().findFragmentById(R.id.container)
+                                            instanceof PostFragment) {
+                                        PostFragment currentFrag = (PostFragment) getFragmentManager()
+                                                .findFragmentById(R.id.container);
+                                        currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
+                                    } else {
+                                        PostFragment postFragment = PostFragment
+                                                .newInstance(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
+                                        FragmentTransaction transaction = getFragmentManager()
+                                                .beginTransaction();
+                                        transaction.replace(R.id.container, postFragment);
+                                        transaction.addToBackStack(null);
+                                        transaction.commit();
+                                    }
                                 } else if (type == R.id.nav_bookmark) {
                                     //TODO
                                     menuItem.setChecked(true);
@@ -470,47 +480,20 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
                                 } else {
                                     menuItem.setChecked(true);
+                                    mSpinnerDateRange.setVisibility(View.GONE);
                                     if (getFragmentManager().findFragmentById(R.id.container)
                                             instanceof PostFragment) {
                                         PostFragment currentFrag = (PostFragment) getFragmentManager()
                                                 .findFragmentById(R.id.container);
-                                        if (type == R.id.nav_popular) {
-                                            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-                                            String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                                            c.add(Calendar.DAY_OF_YEAR, -1);
-                                            String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                                            currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
-                                            setUpSpinnerPopularDateRange();
-                                        } else {
-                                            currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
-                                            mSpinnerDateRange.setVisibility(View.GONE);
-                                        }
+                                        currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
                                     } else {
-                                        if (type == R.id.nav_popular) {
-                                            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-                                            String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                                            c.add(Calendar.DAY_OF_YEAR, -1);
-                                            String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                                            PostFragment postFragment = PostFragment
-                                                            .newInstance(Constants.TYPE_SEARCH,
-                                                                    "0" + secStart + secEnd);
-                                            FragmentTransaction transaction = getFragmentManager()
-                                                    .beginTransaction();
-                                            transaction.replace(R.id.container, postFragment);
-                                            transaction.addToBackStack(null);
-                                            transaction.commit();
-                                            setUpSpinnerPopularDateRange();
-                                        } else {
-                                            PostFragment postFragment =
-                                                    PostFragment.newInstance(Constants.TYPE_STORY, mStoryTypeSpec);
-                                            FragmentTransaction transaction = getFragmentManager()
-                                                    .beginTransaction();
-                                            transaction.replace(R.id.container, postFragment);
-                                            transaction.addToBackStack(null);
-                                            transaction.commit();
-                                            mSpinnerDateRange.setVisibility(View.GONE);
-                                        }
-//                                    getFragmentManager().executePendingTransactions();
+                                        PostFragment postFragment =
+                                                PostFragment.newInstance(Constants.TYPE_STORY, mStoryTypeSpec);
+                                        FragmentTransaction transaction = getFragmentManager()
+                                                .beginTransaction();
+                                        transaction.replace(R.id.container, postFragment);
+                                        transaction.addToBackStack(null);
+                                        transaction.commit();
                                     }
                                 }
                                 mNavigationView.getMenu().setGroupVisible(R.id.group_login, false);
