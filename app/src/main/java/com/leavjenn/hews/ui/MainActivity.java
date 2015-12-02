@@ -439,45 +439,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     SharedPrefsManager.setLoginCookie(prefs, "");
                                     updateLoginName();
                                 } else if (type == R.id.nav_feedback) {
-                                    FeedbackDialogFragment feedbackDialog = new FeedbackDialogFragment();
-                                    feedbackDialog.setOnFeedbackListClickListener(
-                                            new FeedbackDialogFragment.OnFeedbackListClickListener() {
-                                                @Override
-                                                public void onTwitter() {
-                                                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                                                    String url = "https://twitter.com/leavjenn";
-                                                    urlIntent.setData(Uri.parse(url));
-                                                    startActivity(urlIntent);
-                                                }
-
-                                                @Override
-                                                public void onGooglePlus() {
-                                                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                                                    String url = "https://plus.google.com/u/0/101572751825365377306";
-                                                    urlIntent.setData(Uri.parse(url));
-                                                    startActivity(urlIntent);
-                                                }
-
-                                                @Override
-                                                public void onEmail() {
-                                                    Intent intent = new Intent(Intent.ACTION_SENDTO,
-                                                            Uri.fromParts("mailto", "", null));
-                                                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"leavjenn@gmail.com"});
-                                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Hews");
-                                                    startActivity(Intent.createChooser(intent, "Send Email"));
-                                                }
-
-                                                @Override
-                                                public void onGooglePlayReview() {
-                                                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                                                    String url =
-                                                            "https://play.google.com/store/apps/details?id=com.leavjenn.hews";
-                                                    urlIntent.setData(Uri.parse(url));
-                                                    startActivity(urlIntent);
-                                                }
-                                            });
-                                    feedbackDialog.show(getFragmentManager(), "feedbackFrag");
-
+                                    feedback();
                                 } else {
                                     menuItem.setChecked(true);
                                     mSpinnerDateRange.setVisibility(View.GONE);
@@ -550,6 +512,48 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         loginDialogFragment.getDialog().getWindow()
                 .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
+
+    private void feedback() {
+        FeedbackDialogFragment feedbackDialog = new FeedbackDialogFragment();
+        feedbackDialog.setOnFeedbackListClickListener(
+                new FeedbackDialogFragment.OnFeedbackListClickListener() {
+                    @Override
+                    public void onTwitter() {
+                        Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                        String url = "https://twitter.com/leavjenn";
+                        urlIntent.setData(Uri.parse(url));
+                        startActivity(urlIntent);
+                    }
+
+                    @Override
+                    public void onGooglePlus() {
+                        Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                        String url = "https://plus.google.com/u/0/101572751825365377306";
+                        urlIntent.setData(Uri.parse(url));
+                        startActivity(urlIntent);
+                    }
+
+                    @Override
+                    public void onEmail() {
+                        Intent intent = new Intent(Intent.ACTION_SENDTO,
+                                Uri.fromParts("mailto", "", null));
+                        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"leavjenn@gmail.com"});
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Hews");
+                        startActivity(Intent.createChooser(intent, "Send Email"));
+                    }
+
+                    @Override
+                    public void onGooglePlayReview() {
+                        Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                        String url =
+                                "https://play.google.com/store/apps/details?id=com.leavjenn.hews";
+                        urlIntent.setData(Uri.parse(url));
+                        startActivity(urlIntent);
+                    }
+                });
+        feedbackDialog.show(getFragmentManager(), "feedbackFrag");
+    }
+
 
     void clickLogin() {
         isLoginMenuExpanded = !isLoginMenuExpanded;
