@@ -1,7 +1,9 @@
 package com.leavjenn.hews.network;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.Html;
+import android.util.Log;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -9,9 +11,12 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.data.StorIOHelper;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
+import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
+import com.pushtorefresh.storio.sqlite.queries.Query;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -31,6 +36,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 
 public class DataManager {
@@ -491,6 +497,23 @@ public class DataManager {
                 }
             }
         });
+    }
+
+    public Observable<PutResult> putPostBookmark(Context context, Post post) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .put()
+                .object(post)
+                .prepare()
+                .createObservable();
+    }
+
+    public Observable<List<Post>> getAllPostBookmarks(Context context) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .get()
+                .listOfObjects(Post.class)
+                .withQuery(Query.builder().table("post").build())
+                .prepare()
+                .createObservable();
     }
 
     public Scheduler getScheduler() {

@@ -3,7 +3,7 @@ package com.leavjenn.hews.data.tables;
 public class PostTable {
 
     public static final String TABLE = "post";
-    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_ID = "id";
     public static final String COLUMN_BY = "by";
     public static final String COLUMN_DESCENDANTS = "descendants";
     public static final String COLUMN_KIDS = "kids";
@@ -30,7 +30,7 @@ public class PostTable {
                 + COLUMN_TYPE + " TEXT, "
                 + COLUMN_URL + " TEXT, "
                 + COLUMN_PRETTY_URL + " TEXT, "
-                + COLUMN_SUMMARY + " TEXT, "
+                + COLUMN_SUMMARY + " TEXT"
                 + ");";
     }
 }

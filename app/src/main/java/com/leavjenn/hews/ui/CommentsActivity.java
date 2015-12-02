@@ -234,6 +234,9 @@ public class CommentsActivity extends AppCompatActivity implements
 
             case R.id.action_bookmark:
                 //TODO bookmark
+                CommentsFragment commentsFragment =
+                        (CommentsFragment) getFragmentManager().findFragmentByTag("CommentFragTag");
+                commentsFragment.addBookmark();
                 break;
 
             case R.id.action_display:

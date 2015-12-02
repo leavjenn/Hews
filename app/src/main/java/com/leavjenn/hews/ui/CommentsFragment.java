@@ -24,6 +24,7 @@ import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.network.HackerNewsService;
 import com.leavjenn.hews.network.RetrofitHelper;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
+import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
 
 import java.util.List;
 
@@ -32,10 +33,13 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class CommentsFragment extends Fragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private boolean isFetchingCompleted, isWaitingBookmark;
     private Post mPost;
     private long mPostId;
     private RecyclerView mRecyclerView;
@@ -44,6 +48,7 @@ public class CommentsFragment extends Fragment
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
     private DataManager mDataManager;
+    private CompositeSubscription mCompositeSubscription;
     private Subscription mSubscription;
     private HackerNewsService mService;
     OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
@@ -95,6 +100,9 @@ public class CommentsFragment extends Fragment
         //setupFab(rootView);
 
         mDataManager = new DataManager(Schedulers.io());
+        mCompositeSubscription = new CompositeSubscription();
+        isFetchingCompleted = false;
+        isWaitingBookmark = false;
         if (mPost != null) {
             mCommentAdapter.addFooter(new HNItem.Footer());
             mCommentAdapter.addHeader(mPost);
@@ -140,6 +148,9 @@ public class CommentsFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
+        }
     }
 
     private void initRecyclerView(View rootView) {
@@ -178,6 +189,7 @@ public class CommentsFragment extends Fragment
         }
         mCommentAdapter.clear();
         mCommentAdapter.notifyDataSetChanged();
+        isFetchingCompleted = false;
         if (mPost != null) {
             getPostInfo(mPost.getId());
         } else {
@@ -213,28 +225,32 @@ public class CommentsFragment extends Fragment
             mSubscription =
 //                    mDataManager.getComments(commentIds, 0))
                     mDataManager.getCommentsFromFirebase(commentIds, 0)
-                    .subscribeOn(mDataManager.getScheduler())
-                    .subscribe(new Subscriber<Comment>() {
-                        @Override
-                        public void onCompleted() {
-                            mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
-                        }
+                            .subscribeOn(mDataManager.getScheduler())
+                            .subscribe(new Subscriber<Comment>() {
+                                @Override
+                                public void onCompleted() {
+                                    mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                                    isFetchingCompleted = true;
+                                    if (isWaitingBookmark) {
+                                        addBookmark(mPost);
+                                    }
+                                }
 
-                        @Override
-                        public void onError(Throwable e) {
-                            mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
-                            Toast.makeText(getActivity(), "Comments loading error",
-                                    Toast.LENGTH_LONG).show();
-                            Log.e("error", "There was an error retrieving the comments " + e);
-                        }
+                                @Override
+                                public void onError(Throwable e) {
+                                    mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
+                                    Toast.makeText(getActivity(), "Comments loading error",
+                                            Toast.LENGTH_LONG).show();
+                                    Log.e("error", "There was an error retrieving the comments " + e);
+                                }
 
-                        @Override
-                        public void onNext(Comment comment) {
-                            if (comment.getText() != null) {
-                                mCommentAdapter.addComment(comment);
-                            }
-                        }
-                    });
+                                @Override
+                                public void onNext(Comment comment) {
+                                    if (comment.getText() != null) {
+                                        mCommentAdapter.addComment(comment);
+                                    }
+                                }
+                            });
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
         }
@@ -252,6 +268,58 @@ public class CommentsFragment extends Fragment
             mRecyclerView.setAdapter(newAdapter);
             mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
         }
+    }
+
+    public void addBookmark() {
+        if (isFetchingCompleted) {
+            addBookmark(mPost);
+        } else {
+            isWaitingBookmark = true;
+        }
+
+//                mCompositeSubscription.add(mDataManager.getBookmarks(this)
+//                                .observeOn(AndroidSchedulers.mainThread())
+//                                .subscribe(new Subscriber<List<Post>>() {
+//                                    @Override
+//                                    public void onCompleted() {
+//
+//                                    }
+//
+//                                    @Override
+//                                    public void onError(Throwable e) {
+//                                        Log.e("---getBookmarks", e.toString());
+//                                    }
+//
+//                                    @Override
+//                                    public void onNext(List<Post> posts) {
+//                                        for (Post post : posts) {
+//                                            Log.i("----post title", post.getTitle());
+//                                        }
+//                                    }
+//                                })
+//
+//                );
+    }
+
+    private void addBookmark(Post post) {
+        mCompositeSubscription.add(mDataManager.putPostBookmark(getActivity(), post)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<PutResult>() {
+                    @Override
+                    public void onCompleted() {
+                        isWaitingBookmark = false;
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("---addBookmark", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(PutResult putResult) {
+                        //TODO bookmark succeed
+                    }
+                }));
     }
 
     @Override
