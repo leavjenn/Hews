@@ -2,6 +2,10 @@ package com.leavjenn.hews.data;
 
 import android.content.Context;
 
+import com.leavjenn.hews.model.Comment;
+import com.leavjenn.hews.model.CommentStorIOSQLiteDeleteResolver;
+import com.leavjenn.hews.model.CommentStorIOSQLiteGetResolver;
+import com.leavjenn.hews.model.CommentStorIOSQLitePutResolver;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.model.PostStorIOSQLiteDeleteResolver;
 import com.leavjenn.hews.model.PostStorIOSQLiteGetResolver;
@@ -26,6 +30,11 @@ public class StorIOHelper {
                         .getResolver(new PostStorIOSQLiteGetResolver())
                                 // object that knows how to perform Delete Operation
                         .deleteResolver(new PostStorIOSQLiteDeleteResolver())
+                        .build())
+                .addTypeMapping(Comment.class, SQLiteTypeMapping.<Comment>builder()
+                        .putResolver(new CommentStorIOSQLitePutResolver())
+                        .getResolver(new CommentStorIOSQLiteGetResolver())
+                        .deleteResolver(new CommentStorIOSQLiteDeleteResolver())
                         .build())
                 .build();
 

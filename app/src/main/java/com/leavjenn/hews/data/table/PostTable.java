@@ -1,4 +1,4 @@
-package com.leavjenn.hews.data.tables;
+package com.leavjenn.hews.data.table;
 
 public class PostTable {
 

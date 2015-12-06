@@ -302,7 +302,7 @@ public class CommentsFragment extends Fragment
     }
 
     private void addBookmark(Post post) {
-        mCompositeSubscription.add(mDataManager.putPostBookmark(getActivity(), post)
+        mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<PutResult>() {
                     @Override

@@ -3,7 +3,6 @@ package com.leavjenn.hews.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.Html;
-import android.util.Log;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -36,7 +35,6 @@ import java.util.List;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 
 public class DataManager {
@@ -499,7 +497,7 @@ public class DataManager {
         });
     }
 
-    public Observable<PutResult> putPostBookmark(Context context, Post post) {
+    public Observable<PutResult> putPostToDb(Context context, Post post) {
         return StorIOHelper.getStorIOSQLite(context)
                 .put()
                 .object(post)
@@ -507,11 +505,32 @@ public class DataManager {
                 .createObservable();
     }
 
-    public Observable<List<Post>> getAllPostBookmarks(Context context) {
+    public Observable<List<Post>> getAllPostsFromDb(Context context) {
         return StorIOHelper.getStorIOSQLite(context)
                 .get()
                 .listOfObjects(Post.class)
                 .withQuery(Query.builder().table("post").build())
+                .prepare()
+                .createObservable();
+    }
+
+    public Observable<PutResult> putCommentToDb(Context context, Comment comment) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .put()
+                .object(comment)
+                .prepare()
+                .createObservable();
+    }
+
+    public Observable<List<Comment>> getStoryCommentsFromDb(Context context, long parent) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .get()
+                .listOfObjects(Comment.class)
+                .withQuery(Query.builder()
+                        .table("comment")
+                        .where("parent = " + String.valueOf(parent))
+                        .orderBy("index DESC")
+                        .build())
                 .prepare()
                 .createObservable();
     }

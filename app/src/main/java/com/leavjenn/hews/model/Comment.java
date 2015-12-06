@@ -1,27 +1,46 @@
 package com.leavjenn.hews.model;
 
+import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteColumn;
+import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
+
 import java.util.ArrayList;
 
+@StorIOSQLiteType(table = "comment")
 public class Comment extends HNItem {
-    private int index;
-    private String by;
-    private long id;
-    private boolean deleted;
-    private long parent;
-    private ArrayList<Long> kids;
-    private long time;
-    private String text;
+
+    @StorIOSQLiteColumn(name = "id", key = true)
+    long id;
+
+    @StorIOSQLiteColumn(name = "index")
+    int index;
+
+    @StorIOSQLiteColumn(name = "by")
+    String by;
+
+    @StorIOSQLiteColumn(name = "deleted")
+    boolean deleted;
+
+    @StorIOSQLiteColumn(name = "parent")
+    long parent;
+
+    ArrayList<Long> kids;
+
+    @StorIOSQLiteColumn(name = "time")
+    long time;
+
+    @StorIOSQLiteColumn(name = "text")
+    String text;
+
+    @StorIOSQLiteColumn(name = "level")
+    int level;
 
     public ArrayList<Comment> comments;
-    private int level = 0;
-    public boolean isTopLevelComment;
-    public String error;
 
+    //FIXME necessary?
+    public String error;
 
     public Comment() {
         comments = new ArrayList<>();
-        isTopLevelComment = false;
-
     }
 
     public Comment(int index, String by, long id, long parent, ArrayList<Long> kids, long time, String text) {

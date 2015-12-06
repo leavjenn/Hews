@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.leavjenn.hews.data.tables.PostTable;
+import com.leavjenn.hews.data.table.PostTable;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 
