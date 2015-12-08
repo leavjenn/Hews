@@ -232,7 +232,7 @@ public class CommentsFragment extends Fragment
                                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                                     isFetchingCompleted = true;
                                     if (isWaitingBookmark) {
-                                        addBookmark(mPost);
+                                        addPostToBookmark(mPost);
                                     }
                                 }
 
@@ -272,7 +272,7 @@ public class CommentsFragment extends Fragment
 
     public void addBookmark() {
         if (isFetchingCompleted) {
-            addBookmark(mPost);
+            addPostToBookmark(mPost);
         } else {
             isWaitingBookmark = true;
         }
@@ -301,7 +301,7 @@ public class CommentsFragment extends Fragment
 //                );
     }
 
-    private void addBookmark(Post post) {
+    private void addPostToBookmark(Post post) {
         mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<PutResult>() {
@@ -312,7 +312,7 @@ public class CommentsFragment extends Fragment
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("---addBookmark", e.toString());
+                        Log.e("---addPostToBookmark", e.toString());
                     }
 
                     @Override
