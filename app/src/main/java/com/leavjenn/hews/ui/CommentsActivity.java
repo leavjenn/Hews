@@ -454,8 +454,8 @@ public class CommentsActivity extends AppCompatActivity implements
         snackbarProcessing.show();
         mCompositeSubscription.add(
                 mDataManager.reply(itemId, replyText, SharedPrefsManager.getLoginCookie(prefs))
-                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Integer>() {
                             @Override
                             public void onCompleted() {

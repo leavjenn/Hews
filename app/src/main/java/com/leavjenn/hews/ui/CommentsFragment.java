@@ -32,6 +32,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class CommentsFragment extends Fragment
@@ -154,6 +155,7 @@ public class CommentsFragment extends Fragment
     void getPost(long postId) {
         mSubscription = (mService.getStory(String.valueOf(postId))
                 .subscribeOn(mDataManager.getScheduler())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
                     @Override
                     public void onCompleted() {
@@ -213,28 +215,29 @@ public class CommentsFragment extends Fragment
             mSubscription =
 //                    mDataManager.getComments(commentIds, 0))
                     mDataManager.getCommentsFromFirebase(commentIds, 0)
-                    .subscribeOn(mDataManager.getScheduler())
-                    .subscribe(new Subscriber<Comment>() {
-                        @Override
-                        public void onCompleted() {
-                            mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
-                        }
+                            .subscribeOn(mDataManager.getScheduler())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Subscriber<Comment>() {
+                                @Override
+                                public void onCompleted() {
+                                    mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                                }
 
-                        @Override
-                        public void onError(Throwable e) {
-                            mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
-                            Toast.makeText(getActivity(), "Comments loading error",
-                                    Toast.LENGTH_LONG).show();
-                            Log.e("error", "There was an error retrieving the comments " + e);
-                        }
+                                @Override
+                                public void onError(Throwable e) {
+                                    mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
+                                    Toast.makeText(getActivity(), "Comments loading error",
+                                            Toast.LENGTH_LONG).show();
+                                    Log.e("error", "There was an error retrieving the comments " + e);
+                                }
 
-                        @Override
-                        public void onNext(Comment comment) {
-                            if (comment.getText() != null) {
-                                mCommentAdapter.addComment(comment);
-                            }
-                        }
-                    });
+                                @Override
+                                public void onNext(Comment comment) {
+                                    if (comment.getText() != null) {
+                                        mCommentAdapter.addComment(comment);
+                                    }
+                                }
+                            });
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
         }
