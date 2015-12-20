@@ -40,10 +40,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/tv_author"
-        android:layout_toRightOf="@id/tv_time"
-        android:background="?android:textColor"
-        android:visibility="gone"
-        android:textColor="?attr/bg_color" />
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp"
+        android:textColor="?attr/colorAccent"
+        android:visibility="gone" />
 
     <TextView
         android:id="@id/tv_comment"
