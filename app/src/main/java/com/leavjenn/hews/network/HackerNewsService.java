@@ -39,7 +39,7 @@ public interface HackerNewsService {
     Observable<Post> getStory(@Path("itemId") String itemId);
 
     @GET("/item/{itemId}.json")
-    Observable<Comment> getComment(@Path("itemId") String itemId);
+    Observable<Comment> getComment(@Path("itemId") long itemId);
 
     // popularity by time range
     @GET("/search?tags=story")
