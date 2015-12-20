@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -148,6 +149,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
                 mDataManager.getSearchResult(keyword, "created_at_i>" + dateRange.substring(0, 10)
                         + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate)
                         .subscribeOn(mDataManager.getScheduler())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<HNItem.SearchResult>() {
                             @Override
                             public void onCompleted() {
@@ -174,6 +176,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     void loadPostFromList(List<Long> list) {
         mCompositeSubscription.add(mDataManager.getPostFromList(list)
                 .subscribeOn(mDataManager.getScheduler())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
                     @Override
                     public void onCompleted() {
@@ -203,6 +206,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     void loadSummary(final Post post) {
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
                         .subscribeOn(mDataManager.getScheduler())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Comment>() {
                             @Override
                             public void onCompleted() {

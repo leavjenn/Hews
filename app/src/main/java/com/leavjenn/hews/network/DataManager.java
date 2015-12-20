@@ -3,6 +3,7 @@ package com.leavjenn.hews.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.Html;
+import android.util.Log;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -217,7 +218,7 @@ public class DataManager {
                 .concatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long aLong) {
-                        return getComment(aLong);
+                        return getCommentUseFirebase(aLong);
                     }
                 }).filter(new Func1<Comment, Boolean>() {
                     @Override
@@ -242,14 +243,15 @@ public class DataManager {
         return c;
     }
 
-    public Observable<Comment> getComments(final List<Long> commentIds, final int level) {
+    public Observable<Comment> getCommentsUseFirebase(final List<Long> commentIds, final int level) {
         return Observable.from(commentIds)
                 .concatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long aLong) {
-                        return mHackerNewsService.getComment(String.valueOf(aLong));
+//                        return getCommentUseFirebase(aLong);
+                        return mHackerNewsService.getComment(aLong);
                     }
-                }).concatMap(new Func1<Comment, Observable<Comment>>() {
+                }).flatMap(new Func1<Comment, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Comment comment) {
                         if (comment != null && comment.getText() != null) {
@@ -258,7 +260,7 @@ public class DataManager {
                                 return Observable.just(comment);
                             } else {
                                 return Observable.just(comment)
-                                        .mergeWith(getComments(comment.getKids(), level + 1));
+                                        .mergeWith(getCommentsUseFirebase(comment.getKids(), level + 1));
                             }
                         }
                         return Observable.just(null);
@@ -274,39 +276,7 @@ public class DataManager {
                 });
     }
 
-    public Observable<Comment> getCommentsFromFirebase(final List<Long> commentIds, final int level) {
-        return Observable.from(commentIds)
-                .concatMap(new Func1<Long, Observable<? extends Comment>>() {
-                    @Override
-                    public Observable<? extends Comment> call(Long aLong) {
-                        return getComment(aLong);
-                    }
-                }).concatMap(new Func1<Comment, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Comment comment) {
-                        if (comment != null && comment.getText() != null) {
-                            comment.setLevel(level);
-                            if (comment.getKids() == null || comment.getKids().isEmpty()) {
-                                return Observable.just(comment);
-                            } else {
-                                return Observable.just(comment)
-                                        .mergeWith(getCommentsFromFirebase(comment.getKids(), level + 1));
-                            }
-                        }
-                        return Observable.just(null);
-
-                    }
-                }).filter(new Func1<Comment, Boolean>() {
-                    @Override
-                    public Boolean call(Comment comment) {
-                        return (comment != null
-                                && comment.getBy() != null && !comment.getBy().trim().isEmpty()
-                                && comment.getText() != null && !comment.getText().trim().isEmpty());
-                    }
-                });
-    }
-
-    public Observable<Comment> getComment(final Long id) {
+    public Observable<Comment> getCommentUseFirebase(final Long id) {
         return Observable.create(new Observable.OnSubscribe<Comment>() {
             @Override
             public void call(final Subscriber<? super Comment> subscriber) {
@@ -344,6 +314,155 @@ public class DataManager {
         }
         return comment;
 
+    }
+
+    public Observable<List<Comment>> getComments(Post post, int level) {
+        List<Long> commentIds = post.getKids();
+        long descendants = post.getDescendants();
+        if (commentIds.size() > 3 && descendants > 15) {
+            Log.i("---getComments", "kids > 3");
+            return Observable.concat(getCommentsByBranches(commentIds.subList(0, 3), level),
+                    getCommentsAllAtOnce(commentIds.subList(3, commentIds.size() - 1), level));
+        } else if (descendants / commentIds.size() > 15) {
+            Log.i("---getComments", "few kids, big branch");
+            return getCommentsByBranches(commentIds, level);
+        } else {
+            Log.i("---getComments", "other");
+            return getCommentsAllAtOnce(commentIds, level);
+        }
+    }
+
+    public Observable<List<Comment>> getCommentsByBranches(List<Long> commentIds, final int level) {
+        Log.i("---", "getCommentsByBranches");
+        return Observable.from(commentIds)
+                .flatMap(new Func1<Long, Observable<List<Comment>>>() {
+                    @Override
+                    public Observable<List<Comment>> call(Long commentId) {
+                        return getOneBranchComments(commentId, level);
+                    }
+                });
+    }
+
+    public Observable<List<Comment>> getOneBranchComments(final long commentId, final int level) {
+        return mHackerNewsService.getComment(commentId)
+                .filter(new Func1<Comment, Boolean>() {
+                    @Override
+                    public Boolean call(Comment comment) {
+                        return (comment != null) && !comment.getDeleted() && comment.getText() != null;
+                    }
+                })
+                .flatMap(new Func1<Comment, Observable<Comment>>() {
+                    @Override
+                    public Observable<Comment> call(Comment comment) {
+                        Log.i("---getOneBranchComments", String.valueOf(comment.getId()));
+                        return getInnerComments(comment, level);
+                    }
+                })
+                .toList()
+                .map(new Func1<List<Comment>, List<Comment>>() {
+                    @Override
+                    public List<Comment> call(List<Comment> allComments) {
+                        List<Long> firstLevelCommentAsList = new ArrayList<>();
+                        firstLevelCommentAsList.add(commentId);
+                        return sortComments(firstLevelCommentAsList, allComments);
+                    }
+                });
+    }
+
+    public Observable<List<Comment>> getCommentsAllAtOnce(final List<Long> firstLevelCommentIds, final int level) {
+        Log.i("---", "getCommentsAllAtOnce");
+        return Observable.from(firstLevelCommentIds)
+                .flatMap(new Func1<Long, Observable<Comment>>() {
+                    @Override
+                    public Observable<Comment> call(Long commentId) {
+                        return mHackerNewsService.getComment(commentId);
+                    }
+                })
+                .filter(new Func1<Comment, Boolean>() {
+                    @Override
+                    public Boolean call(Comment comment) {
+                        return (comment != null) && !comment.getDeleted() && comment.getText() != null;
+                    }
+                })
+                .flatMap(new Func1<Comment, Observable<Comment>>() {
+                    @Override
+                    public Observable<Comment> call(Comment comment) {
+                        return getInnerComments(comment, level);
+                    }
+                })
+                .toList()
+                .map(new Func1<List<Comment>, List<Comment>>() {
+                    @Override
+                    public List<Comment> call(List<Comment> allComments) {
+                        return sortComments(firstLevelCommentIds, allComments);
+                    }
+                });
+    }
+
+    private Observable<Comment> getInnerComments(Comment comment, final int level) {
+        if (comment == null || comment.getDeleted() || comment.getText() == null) {
+            return null;
+        }
+        comment.setLevel(level);
+        if (comment.getKids() != null && !comment.getKids().isEmpty()) {
+            return Observable.just(comment)
+                    .mergeWith(Observable.from(comment.getKids())
+                                    .flatMap(new Func1<Long, Observable<Comment>>() {
+                                        @Override
+                                        public Observable<Comment> call(Long commentId) {
+                                            return mHackerNewsService.getComment(commentId);
+                                        }
+                                    })
+                                    .filter(new Func1<Comment, Boolean>() {
+                                        @Override
+                                        public Boolean call(Comment comment) {
+                                            return (comment != null) && !comment.getDeleted()
+                                                    && comment.getText() != null;
+                                        }
+                                    })
+                                    .flatMap(new Func1<Comment, Observable<Comment>>() {
+                                        @Override
+                                        public Observable<Comment> call(Comment comment) {
+                                            return getInnerComments(comment, level + 1);
+                                        }
+                                    })
+                    );
+        }
+        return Observable.just(comment);
+    }
+
+    private List<Comment> sortComments(List<Long> firstLevelCommentIds, List<Comment> allComments) {
+        HashMap<Long, Comment> allCommentsMap = new HashMap<>();
+        for (Comment childComment : allComments) {
+            allCommentsMap.put(childComment.getId(), childComment);
+        }
+        List<Comment> validFirstLevelCommentList = new ArrayList<>();
+        for (Long id : firstLevelCommentIds) {
+            Comment firstLevelComment = allCommentsMap.get(id);
+            if (firstLevelComment != null && !firstLevelComment.getDeleted()
+                    && firstLevelComment.getText() != null) {
+                validFirstLevelCommentList.add(firstLevelComment);
+            }
+        }
+        return sortAllComments(validFirstLevelCommentList, allCommentsMap);
+    }
+
+    private List<Comment> sortAllComments(List<Comment> commentList, HashMap<Long, Comment> allCommentsMap) {
+        List<Comment> sortedList = new ArrayList<>();
+        for (Comment comment : commentList) {
+            sortedList.add(comment);
+            if (comment.getKids() != null && comment.getKids().size() > 0) {
+                List<Comment> validChildCommentList = new ArrayList<>();
+                for (long id : comment.getKids()) {
+                    Comment childComment = allCommentsMap.get(id);
+                    if (childComment != null && !childComment.getDeleted() && childComment.getText() != null) {
+                        validChildCommentList.add(childComment);
+                    }
+                }
+                sortedList.addAll(sortAllComments(validChildCommentList, allCommentsMap));
+            }
+        }
+        return sortedList;
     }
 
     public Observable<HNItem.SearchResult> getPopularPosts(String startTime, int page) {

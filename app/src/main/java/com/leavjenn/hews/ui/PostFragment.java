@@ -220,6 +220,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(1, 11)
                         + "," + "created_at_i<" + timeRangeCombine.substring(11), page)
                         .subscribeOn(mDataManager.getScheduler())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<HNItem.SearchResult>() {
                             @Override
                             public void onCompleted() {
@@ -247,6 +248,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     void loadPostFromList(List<Long> list) {
         mCompositeSubscription.add(mDataManager.getPostFromList(list)
                 .subscribeOn(mDataManager.getScheduler())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
                     @Override
                     public void onCompleted() {
@@ -340,6 +342,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     void loadSummary(final Post post) {
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
                         .subscribeOn(mDataManager.getScheduler())
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Comment>() {
                             @Override
                             public void onCompleted() {

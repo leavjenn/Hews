@@ -106,7 +106,7 @@ public class CommentsFragment extends Fragment
         if (mPost != null) {
             mCommentAdapter.addFooter(new HNItem.Footer());
             mCommentAdapter.addHeader(mPost);
-            getComments(mPost.getKids());
+            getComments(mPost);
         } else {
             if (savedInstanceState != null) {
                 mPostId = savedInstanceState.getLong(ARG_POST_ID);
@@ -165,10 +165,11 @@ public class CommentsFragment extends Fragment
     void getPost(long postId) {
         mSubscription = (mService.getStory(String.valueOf(postId))
                 .subscribeOn(mDataManager.getScheduler())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
                     @Override
                     public void onCompleted() {
-                        getComments(mPost.getKids());
+                        getComments(mPost);
                     }
 
                     @Override
@@ -206,7 +207,7 @@ public class CommentsFragment extends Fragment
             public void success(Post post, Response response) {
                 mPost = post;
                 mCommentAdapter.addHeader(mPost);
-                getComments(mPost.getKids());
+                getComments(mPost);
                 ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
             }
 
@@ -217,16 +218,17 @@ public class CommentsFragment extends Fragment
         });
     }
 
-    public void getComments(List<Long> commentIds) {
-        if (commentIds != null && !commentIds.isEmpty()) {
+    public void getComments(Post post) {
+        if (post.getKids() != null && !post.getKids().isEmpty()) {
             if (mSubscription != null) {
                 mSubscription.unsubscribe();
             }
             mSubscription =
-//                    mDataManager.getComments(commentIds, 0))
-                    mDataManager.getCommentsFromFirebase(commentIds, 0)
+//                    mDataManager.getCommentsUseFirebase(commentIds, 0))
+                    mDataManager.getComments(post, 0)
                             .subscribeOn(mDataManager.getScheduler())
-                            .subscribe(new Subscriber<Comment>() {
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Subscriber<List<Comment>>() {
                                 @Override
                                 public void onCompleted() {
                                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
@@ -245,8 +247,8 @@ public class CommentsFragment extends Fragment
                                 }
 
                                 @Override
-                                public void onNext(Comment comment) {
-                                    if (comment.getText() != null) {
+                                public void onNext(List<Comment> commentList) {
+                                    for (Comment comment : commentList) {
                                         mCommentAdapter.addComment(comment);
                                     }
                                 }
