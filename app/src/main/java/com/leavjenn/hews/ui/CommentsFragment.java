@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,12 +26,14 @@ import com.leavjenn.hews.network.HackerNewsService;
 import com.leavjenn.hews.network.RetrofitHelper;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
+import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 
 import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -39,11 +42,13 @@ import rx.subscriptions.CompositeSubscription;
 
 public class CommentsFragment extends Fragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private boolean isFetchingCompleted, isWaitingBookmark;
+    private boolean isFetchingCompleted, isWaitingforBookmark;
     private Post mPost;
     private long mPostId;
+    private boolean isBookmarked;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
+    private Snackbar bookmarkSnackbar;
 
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
@@ -102,7 +107,7 @@ public class CommentsFragment extends Fragment
         mDataManager = new DataManager(Schedulers.io());
         mCompositeSubscription = new CompositeSubscription();
         isFetchingCompleted = false;
-        isWaitingBookmark = false;
+        isWaitingforBookmark = false;
         if (mPost != null) {
             mCommentAdapter.addFooter(new HNItem.Footer());
             mCommentAdapter.addHeader(mPost);
@@ -233,8 +238,8 @@ public class CommentsFragment extends Fragment
                                 public void onCompleted() {
                                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                                     isFetchingCompleted = true;
-                                    if (isWaitingBookmark) {
-                                        addPostToBookmark(mPost);
+                                    if (isWaitingforBookmark) {
+                                        putPostDataToDb(mPost, mCommentAdapter.getCommentList());
                                     }
                                 }
 
@@ -253,9 +258,34 @@ public class CommentsFragment extends Fragment
                                     }
                                 }
                             });
+            mCompositeSubscription.add(mSubscription);
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
         }
+    }
+
+    private void getPostDataFromDb(Post post) {
+        mCompositeSubscription.add(Observable.concat(
+                mDataManager.getPostFromDb(getActivity(), post.getId()),
+                mDataManager.getStoryCommentsFromDb(getActivity(), post.getId()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<? extends HNItem>>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("getCommentFromDb", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(List<? extends HNItem> hnItems) {
+                        mCommentAdapter.addAll(hnItems);
+                    }
+                }));
     }
 
     private void reformatListStyle() {
@@ -273,53 +303,40 @@ public class CommentsFragment extends Fragment
     }
 
     public void addBookmark() {
+        bookmarkSnackbar = Snackbar.make(null, "saving...", Snackbar.LENGTH_INDEFINITE);
         if (isFetchingCompleted) {
-            addPostToBookmark(mPost);
+            putPostDataToDb(mPost, mCommentAdapter.getCommentList());
         } else {
-            isWaitingBookmark = true;
+            isWaitingforBookmark = true;
         }
-
-//                mCompositeSubscription.add(mDataManager.getBookmarks(this)
-//                                .observeOn(AndroidSchedulers.mainThread())
-//                                .subscribe(new Subscriber<List<Post>>() {
-//                                    @Override
-//                                    public void onCompleted() {
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onError(Throwable e) {
-//                                        Log.e("---getBookmarks", e.toString());
-//                                    }
-//
-//                                    @Override
-//                                    public void onNext(List<Post> posts) {
-//                                        for (Post post : posts) {
-//                                            Log.i("----post title", post.getTitle());
-//                                        }
-//                                    }
-//                                })
-//
-//                );
     }
 
-    private void addPostToBookmark(Post post) {
-        mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
+    private void putPostDataToDb(Post post, List<Comment> commentList) {
+        mCompositeSubscription.add(Observable.merge(mDataManager.putPostToDb(getActivity(), post),
+                mDataManager.putCommentsToDb(getActivity(), commentList))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<PutResult>() {
+                .subscribe(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
-                        isWaitingBookmark = false;
+                        isWaitingforBookmark = false;
+                        if (bookmarkSnackbar.isShown())
+                            bookmarkSnackbar.setText("saving succeed!");
+                        bookmarkSnackbar.setDuration(Snackbar.LENGTH_SHORT);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("---addPostToBookmark", e.toString());
+                        Log.e("---putPostDataToDb", e.toString());
                     }
 
                     @Override
-                    public void onNext(PutResult putResult) {
-                        //TODO bookmark succeed
+                    public void onNext(Object o) {
+                        if (o instanceof PutResult) {
+                            Log.i("---", "save post succeeded");
+                        }
+                        if (o instanceof PutResults) {
+                            Log.i("---", "save comments succeeded");
+                        }
                     }
                 }));
     }

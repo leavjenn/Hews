@@ -16,6 +16,7 @@ import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
+import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 import com.pushtorefresh.storio.sqlite.queries.Query;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -624,6 +625,15 @@ public class DataManager {
                 .createObservable();
     }
 
+    public Observable<List<Post>> getPostFromDb(Context context, long postId) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .get()
+                .listOfObjects(Post.class)
+                .withQuery(Query.builder().table("post").where("COLUMN_ID=" + postId).build())
+                .prepare()
+                .createObservable();
+    }
+
     public Observable<List<Post>> getAllPostsFromDb(Context context) {
         return StorIOHelper.getStorIOSQLite(context)
                 .get()
@@ -633,21 +643,21 @@ public class DataManager {
                 .createObservable();
     }
 
-    public Observable<PutResult> putCommentToDb(Context context, Comment comment) {
+    public Observable<PutResults<Comment>> putCommentsToDb(Context context, List<Comment> commentList) {
         return StorIOHelper.getStorIOSQLite(context)
                 .put()
-                .object(comment)
+                .objects(commentList)
                 .prepare()
                 .createObservable();
     }
 
-    public Observable<List<Comment>> getStoryCommentsFromDb(Context context, long parent) {
+    public Observable<List<Comment>> getStoryCommentsFromDb(Context context, long postId) {
         return StorIOHelper.getStorIOSQLite(context)
                 .get()
                 .listOfObjects(Comment.class)
                 .withQuery(Query.builder()
                         .table("comment")
-                        .where("parent = " + String.valueOf(parent))
+                        .where("parent = " + String.valueOf(postId))
                         .orderBy("index DESC")
                         .build())
                 .prepare()

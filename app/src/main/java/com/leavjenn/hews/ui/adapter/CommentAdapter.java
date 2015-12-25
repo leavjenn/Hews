@@ -232,9 +232,23 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyItemInserted(mItemList.size() - 1);
     }
 
+    public void addAll(List<? extends HNItem> hnItemList) {
+        mItemList.addAll(hnItemList);
+    }
+
     public void updateFooter(int loadingState) {
         mLoadingState = loadingState;
         notifyItemChanged(mItemList.size() - 1);
+    }
+
+    public List<Comment> getCommentList() {
+        List<Comment> commentList = new ArrayList<>();
+        for (HNItem hnItem : mItemList) {
+            if (hnItem instanceof Comment) {
+                commentList.add((Comment) hnItem);
+            }
+        }
+        return commentList;
     }
 
     public void clear() {
