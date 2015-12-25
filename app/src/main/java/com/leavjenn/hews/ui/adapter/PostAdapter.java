@@ -53,14 +53,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder viewHolder, final int i) {
-        if (mMaxRead < i) {
-            mMaxRead = i;
+    public void onBindViewHolder(final ViewHolder viewHolder, int position) {
+        if (mMaxRead < position) {
+            mMaxRead = position;
             if (mMaxRead >= getItemCount() - UNREAD_ITEM_LEFT_FOR_RELOADING) {
                 mOnReachBottomListener.OnReachBottom();
             }
         }
-        final Post currentPost = mPostArrayList.get(i);
+        final Post currentPost = mPostArrayList.get(position);
         viewHolder.tvTitle.setText(currentPost.getTitle());
 
         String s = currentPost.getDescendants() > 1 ? " comments" : " comment";
@@ -74,19 +74,19 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         } else {
             viewHolder.tvSummary.setVisibility(View.GONE);
         }
-        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mOnItemClickListener.onOpenComment(mPostArrayList.get(i));
-            }
-        });
-        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                mOnItemClickListener.onOpenLink(mPostArrayList.get(i));
-                return true;
-            }
-        });
+//        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mOnItemClickListener.onOpenComment(mPostArrayList.get(position));
+//            }
+//        });
+//        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                mOnItemClickListener.onOpenLink(mPostArrayList.get(position));
+//                return true;
+//            }
+//        });
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         mLineHeight = SharedPrefsManager.getPostLineHeight(prefs);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle;
         TextView tvScore;
         TextView tvDescendants;
@@ -128,6 +128,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             tvDescendants = (TextView) v.findViewById(R.id.tv_post_comments);
             tvPrettyUrl = (TextView) v.findViewById(R.id.tv_post_pretty_url);
             tvSummary = (TextView) v.findViewById(R.id.tv_post_summary);
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnItemClickListener.onOpenComment(mPostArrayList.get(getAdapterPosition()));
+                }
+            });
+
+            v.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mOnItemClickListener.onOpenLink(mPostArrayList.get(getAdapterPosition()));
+                    return true;
+                }
+            });
         }
     }
 
