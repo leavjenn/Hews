@@ -15,6 +15,7 @@ public class PostTable {
     public static final String COLUMN_URL = "url";
     public static final String COLUMN_PRETTY_URL = "prettyUrl";
     public static final String COLUMN_SUMMARY = "summary";
+    public static final String COLUMN_ISBOOKMARKED = "isBookmarked";
 
 
     public static String getCreateTableQuery() {
@@ -30,7 +31,8 @@ public class PostTable {
                 + COLUMN_TYPE + " TEXT, "
                 + COLUMN_URL + " TEXT, "
                 + COLUMN_PRETTY_URL + " TEXT, "
-                + COLUMN_SUMMARY + " TEXT"
+                + COLUMN_SUMMARY + " TEXT, "
+                + COLUMN_ISBOOKMARKED + " INTEGER"
                 + ");";
     }
 }

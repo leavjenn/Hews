@@ -48,6 +48,9 @@ public class Post extends HNItem implements Parcelable {
     @StorIOSQLiteColumn(name = "summary")
     String summary;
 
+    @StorIOSQLiteColumn(name = "isBookmarked")
+    boolean isBookmarked;
+
     public Post() {
     }
 
@@ -162,6 +165,14 @@ public class Post extends HNItem implements Parcelable {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public boolean isBookmarked() {
+        return isBookmarked;
+    }
+
+    public void setIsBookmarked(boolean isBookmarked) {
+        this.isBookmarked = isBookmarked;
     }
 
     @Override
