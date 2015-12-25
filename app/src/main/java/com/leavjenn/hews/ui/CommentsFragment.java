@@ -21,19 +21,16 @@ import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
-import com.leavjenn.hews.network.HackerNewsService;
-import com.leavjenn.hews.network.RetrofitHelper;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
 
 import java.util.List;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class CommentsFragment extends Fragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -45,8 +42,8 @@ public class CommentsFragment extends Fragment
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
     private DataManager mDataManager;
-    private Subscription mSubscription;
-    private HackerNewsService mService;
+    private Subscription mPostSubscription, mCommentsSubscription;
+    private CompositeSubscription mCompositeSubscription;
     OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
     private static final String ARG_POST = "post";
@@ -84,6 +81,7 @@ public class CommentsFragment extends Fragment
             }
         }
 
+        mCompositeSubscription = new CompositeSubscription();
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
     }
@@ -104,9 +102,7 @@ public class CommentsFragment extends Fragment
             if (savedInstanceState != null) {
                 mPostId = savedInstanceState.getLong(ARG_POST_ID);
             }
-            mService = new RetrofitHelper().getHackerNewsService();
-//            getPost(mPostId);
-            getPostInfo(mPostId);
+            getPost(mPostId);
         }
         return rootView;
     }
@@ -131,16 +127,11 @@ public class CommentsFragment extends Fragment
 
     @Override
     public void onDetach() {
-        super.onDetach();
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
+        if (mCompositeSubscription.hasSubscriptions()) {
+            mCompositeSubscription.unsubscribe();
         }
         prefs.unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+        super.onDetach();
     }
 
     private void initRecyclerView(View rootView) {
@@ -152,67 +143,44 @@ public class CommentsFragment extends Fragment
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
     }
 
-    void getPost(long postId) {
-        mSubscription = (mService.getStory(String.valueOf(postId))
-                .subscribeOn(mDataManager.getScheduler())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Post>() {
-                    @Override
-                    public void onCompleted() {
-                        getComments(mPost);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Post post) {
-                        mPost = post;
-                    }
-                }));
-    }
-
     public void refresh() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-        }
         mCommentAdapter.clear();
         mCommentAdapter.notifyDataSetChanged();
-        if (mPost != null) {
-            getPostInfo(mPost.getId());
-        } else {
-            getPostInfo(mPostId);
-        }
+        getPost(mPost != null ? mPost.getId() : mPostId);
     }
 
-    public void getPostInfo(long postId) {
+    public void getPost(long postId) {
         mCommentAdapter.addFooter(new HNItem.Footer());
         mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
-        mService = new RetrofitHelper().getHackerNewsService();
-        mService.getItem(String.valueOf(postId), new Callback<Post>() {
-            @Override
-            public void success(Post post, Response response) {
-                mPost = post;
-                mCommentAdapter.addHeader(mPost);
-                getComments(mPost);
-                ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.e("getPostInfo", error.toString());
-            }
-        });
+        if (mPostSubscription != null) {
+            mPostSubscription.unsubscribe();
+        }
+        mPostSubscription = mDataManager.getPost(postId)
+                .subscribeOn(mDataManager.getScheduler())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Post>() {
+                    @Override
+                    public void call(Post post) {
+                        mPost = post;
+                        mCommentAdapter.addHeader(mPost);
+                        getComments(mPost);
+                        ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("getPost", throwable.toString());
+                    }
+                });
+        mCompositeSubscription.add(mPostSubscription);
     }
 
     public void getComments(Post post) {
         if (post.getKids() != null && !post.getKids().isEmpty()) {
-            if (mSubscription != null) {
-                mSubscription.unsubscribe();
+            if (mCommentsSubscription != null) {
+                mCommentsSubscription.unsubscribe();
             }
-            mSubscription =
+            mCommentsSubscription =
 //                    mDataManager.getCommentsUseFirebase(commentIds, 0))
                     mDataManager.getComments(post, 0)
                             .subscribeOn(mDataManager.getScheduler())
@@ -238,6 +206,7 @@ public class CommentsFragment extends Fragment
                                     }
                                 }
                             });
+            mCompositeSubscription.add(mCommentsSubscription);
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
         }
