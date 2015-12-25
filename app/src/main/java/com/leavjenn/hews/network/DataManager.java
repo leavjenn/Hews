@@ -194,9 +194,13 @@ public class DataManager {
         return post;
     }
 
+    public Observable<Post> getPost(Long postId) {
+        return mHackerNewsService.getStory(String.valueOf(postId));
+    }
+
     public Observable<Post> getPosts(List<Long> postIds) {
         return Observable.from(postIds)
-                .concatMap(new Func1<Long, Observable<Post>>() {
+                .flatMap(new Func1<Long, Observable<Post>>() {
                     @Override
                     public Observable<Post> call(Long aLong) {
                         return mHackerNewsService.getStory(String.valueOf(aLong));
