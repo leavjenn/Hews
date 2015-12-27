@@ -1,7 +1,9 @@
-package com.leavjenn.hews;
+package com.leavjenn.hews.misc;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.leavjenn.hews.R;
 
 public class SharedPrefsManager {
     public static final String KEY_POST_FONT = "key_post_font";

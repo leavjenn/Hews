@@ -12,9 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.leavjenn.hews.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 
 public class SettingsActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {

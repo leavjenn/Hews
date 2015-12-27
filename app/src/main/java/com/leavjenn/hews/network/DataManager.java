@@ -9,7 +9,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.leavjenn.hews.Constants;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;

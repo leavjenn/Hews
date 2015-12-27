@@ -21,10 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.leavjenn.hews.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;

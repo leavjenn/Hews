@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Comment;

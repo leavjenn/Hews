@@ -1,4 +1,4 @@
-package com.leavjenn.hews;
+package com.leavjenn.hews.misc;
 
 import android.app.Activity;
 import android.content.ComponentName;

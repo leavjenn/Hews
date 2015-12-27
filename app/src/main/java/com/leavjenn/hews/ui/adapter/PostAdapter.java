@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.model.Post;
 

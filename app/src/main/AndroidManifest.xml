@@ -54,7 +54,7 @@
             android:label="@string/title_activity_settings"
             android:screenOrientation="sensorPortrait" />
 
-        <receiver android:name=".ShareBroadcastReceiver" />
+        <receiver android:name=".misc.ShareBroadcastReceiver" />
     </application>
 
 </manifest>

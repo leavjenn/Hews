@@ -17,6 +17,9 @@ import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
+import com.leavjenn.hews.misc.ShareBroadcastReceiver;
+import com.leavjenn.hews.misc.SharedPrefsManager;
+
 public class Utils {
     public static CharSequence formatTime(long timeStamp) {
         timeStamp = timeStamp * 1000;
