@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,12 +29,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
-import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
@@ -183,17 +182,7 @@ public class CommentsActivity extends AppCompatActivity implements
                     if (mChromeCustomTabsHelper != null) {
                         // build CustomTabs UI
                         CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
-                            intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
-                        } else {
-                            //TODO use darker orange color here so chrome toolbar will fit dark theme
-                            intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_800));
-                        }
-
-                        intentBuilder.setShowTitle(true);
-                        intentBuilder.setCloseButtonIcon(
-                                BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
-
+                        Utils.setupIntentBuilder(intentBuilder, this, prefs);
                         ChromeCustomTabsHelper.openCustomTab(this, intentBuilder.build(),
                                 Utils.validateAndParseUri(mUrl, mPostId), null);
                     } else {
@@ -514,6 +503,14 @@ public class CommentsActivity extends AppCompatActivity implements
                                 }
                             }
                         }));
+    }
+
+    public ChromeCustomTabsHelper getChromeCustomTabsHelper() {
+        return mChromeCustomTabsHelper;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return prefs;
     }
 
     @Override

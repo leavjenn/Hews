@@ -1,9 +1,14 @@
 package com.leavjenn.hews;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -68,5 +73,37 @@ public class Utils {
             return Uri.parse("https://news.ycombinator.com/item?id=" + postId);
         }
 //        }
+    }
+
+    public static void setupIntentBuilder(CustomTabsIntent.Builder intentBuilder, Context context, SharedPreferences prefs) {
+        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
+            intentBuilder.setToolbarColor(context.getResources().getColor(R.color.grey_900));
+        } else {
+            // use darker orange color here so chrome toolbar will fit dark theme
+            intentBuilder.setToolbarColor(context.getResources().getColor(R.color.orange_800));
+        }
+        intentBuilder.enableUrlBarHiding();
+        intentBuilder.setShowTitle(true);
+        intentBuilder.setCloseButtonIcon(
+                BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_arrow_back));
+        // share link option
+        String menuItemTitle = context.getString(R.string.share_link_to);
+        Intent actionIntent = new Intent(context.getApplicationContext(), ShareBroadcastReceiver.class);
+        PendingIntent menuItemPendingIntent =
+                PendingIntent.getBroadcast(context.getApplicationContext(), 0, actionIntent, 0);
+        intentBuilder.addMenuItem(menuItemTitle, menuItemPendingIntent);
+        // TODO Use this way, it will show share to option when long click
+//            String shareLabel = getString(R.string.share_link_to);
+//            Intent shareIntent = new Intent();
+//            shareIntent.setAction(Intent.ACTION_SEND);
+//            String postUrl = post.getUrl();
+//            shareIntent.putExtra(Intent.EXTRA_TEXT, postUrl);
+//            shareIntent.setType("text/plain");
+//            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            Intent chooserIntent = Intent.createChooser(shareIntent, getString(R.string.share_link_to));
+//            startActivity(chooserIntent);
+//            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
+//                    shareIntent, 0);
+//            intentBuilder.addMenuItem(shareLabel, pendingIntent);
     }
 }

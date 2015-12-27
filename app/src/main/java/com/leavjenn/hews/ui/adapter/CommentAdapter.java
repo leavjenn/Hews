@@ -1,21 +1,27 @@
 package com.leavjenn.hews.ui.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.preference.PreferenceManager;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.SharedPrefsManager;
@@ -41,7 +47,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     ArrayList<HNItem> mItemList;
     Map<Long, List<Comment>> mCollapsedChildrenCommentsIndex;
     Map<Long, List<Comment>> mCollapsedOlderCommentsIndex;
-    static SharedPreferences prefs;
+    SharedPreferences prefs;
     Typeface mFont;
     float mTextSize, mLineHeight;
     int mLoadingState = 0;
@@ -53,7 +59,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mItemList = new ArrayList<>();
         mCollapsedChildrenCommentsIndex = new HashMap<>();
         mCollapsedOlderCommentsIndex = new HashMap<>();
-        prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        prefs = ((CommentsActivity) mContext).getSharedPreferences();
         updateCommentPrefs();
         setCommentIndentStyle();
     }
@@ -125,7 +131,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             CharSequence text = comment.getDeleted() ? "[deleted]"
                     : Html.fromHtml(comment.getText()
                     .replace("<p>", "<br /><br />").replace("\n", "<br />"));
-            commentViewHolder.tvComment.setText(text);
             commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
             if (!comment.getDeleted()) {
                 commentViewHolder.tvAuthor.setText(comment.getBy());
@@ -139,6 +144,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 commentViewHolder.tvComment.setGravity(Gravity.CENTER);
             } else {
                 commentViewHolder.tvComment.setText(text);
+                setTextViewHTML(commentViewHolder.tvComment, comment.getText());
                 commentViewHolder.tvComment.setMinLines(Integer.MIN_VALUE);
                 commentViewHolder.tvComment.setGravity(Gravity.LEFT);
             }
@@ -196,6 +202,44 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         }
     }
+
+
+    private void setTextViewHTML(TextView textView, String string) {
+        // trim two trailing blank lines
+        CharSequence sequence =
+                Html.fromHtml(string.replace("<p>", "<br /><br />").replace("\n", "<br />"));
+        // use Chrome custom tab if it is available
+        if (mContext instanceof CommentsActivity
+                && ((CommentsActivity) mContext).getChromeCustomTabsHelper() != null) {
+            SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
+            URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
+            for (URLSpan span : urls) {
+                makeLinkClickable(strBuilder, span);
+            }
+            textView.setText(strBuilder);
+        } else {
+            textView.setText(sequence);
+        }
+    }
+
+    private void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {
+        int start = strBuilder.getSpanStart(span);
+        int end = strBuilder.getSpanEnd(span);
+        int flags = strBuilder.getSpanFlags(span);
+        ClickableSpan clickable = new ClickableSpan() {
+            public void onClick(View view) {
+                Uri uri = Uri.parse(span.getURL());
+                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                Utils.setupIntentBuilder(intentBuilder, mContext,
+                        ((CommentsActivity) mContext).getSharedPreferences());
+                ChromeCustomTabsHelper.openCustomTab((Activity) mContext, intentBuilder.build(),
+                        uri, null);
+            }
+        };
+        strBuilder.setSpan(clickable, start, end, flags);
+        strBuilder.removeSpan(span);
+    }
+
 
     @Override
     public int getItemCount() {

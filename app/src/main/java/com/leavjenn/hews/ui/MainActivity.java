@@ -39,13 +39,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
-import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.ShareBroadcastReceiver;
+import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
@@ -211,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
-            //TODO if ChromeCustomTabsHelper was not null and called unbind, erroe would occur
+            // if ChromeCustomTabsHelper was not null and called unbind, error would occur
             mChromeCustomTabsHelper = null;
         }
     }
@@ -820,36 +819,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         if (mChromeCustomTabsHelper != null) {
             // build CustomTabs UI
             CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-            if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
-                intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
-            } else {
-                //TODO use darker orange color here so chrome toolbar will fit dark theme
-                intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_800));
-            }
-            intentBuilder.enableUrlBarHiding();
-            intentBuilder.setShowTitle(true);
-            intentBuilder.setCloseButtonIcon(
-                    BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
-
-            // TODO Use this way, it will show share to option when long click
-//            String shareLabel = getString(R.string.share_link_to);
-//            Intent shareIntent = new Intent();
-//            shareIntent.setAction(Intent.ACTION_SEND);
-//            String postUrl = post.getUrl();
-//            shareIntent.putExtra(Intent.EXTRA_TEXT, postUrl);
-//            shareIntent.setType("text/plain");
-//            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            Intent chooserIntent = Intent.createChooser(shareIntent, getString(R.string.share_link_to));
-//            startActivity(chooserIntent);
-//            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
-//                    shareIntent, 0);
-//            intentBuilder.addMenuItem(shareLabel, pendingIntent);
-
-
-            String menuItemTitle = getString(R.string.share_link_to);
-            PendingIntent menuItemPendingIntent = createPendingIntent();
-            intentBuilder.addMenuItem(menuItemTitle, menuItemPendingIntent);
-
+            Utils.setupIntentBuilder(intentBuilder, this, prefs);
+            // open comments section option
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_comment);
             Intent goToCommentIntent = new Intent(this, CommentsActivity.class);
             goToCommentIntent.putExtra(Constants.KEY_POST, post);
@@ -864,12 +835,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             urlIntent.setData(Utils.validateAndParseUri(post.getUrl(), post.getId()));
             startActivity(urlIntent);
         }
-    }
-
-    private PendingIntent createPendingIntent() {
-        Intent actionIntent = new Intent(
-                this.getApplicationContext(), ShareBroadcastReceiver.class);
-        return PendingIntent.getBroadcast(getApplicationContext(), 0, actionIntent, 0);
     }
 
     @Override
