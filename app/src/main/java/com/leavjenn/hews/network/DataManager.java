@@ -322,7 +322,7 @@ public class DataManager {
         if (commentIds.size() > 3 && descendants > 15) {
             Log.i("---getComments", "kids > 3");
             return Observable.concat(getCommentsByBranches(commentIds.subList(0, 3), level),
-                    getCommentsAllAtOnce(commentIds.subList(3, commentIds.size() - 1), level));
+                    getCommentsAllAtOnce(commentIds.subList(3, commentIds.size()), level));
         } else if (descendants / commentIds.size() > 15) {
             Log.i("---getComments", "few kids, big branch");
             return getCommentsByBranches(commentIds, level);
