@@ -263,6 +263,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 break;
 
             case android.R.id.home:
+                if (mWindow.isWindowShowing()) {
+                    mWindow.dismiss();
+                }
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 break;
         }
