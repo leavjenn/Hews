@@ -345,6 +345,12 @@ public class DataManager {
 
     public Observable<List<Comment>> getOneBranchComments(final long commentId, final int level) {
         return mHackerNewsService.getComment(commentId)
+                .onErrorReturn(new Func1<Throwable, Comment>() {
+                    @Override
+                    public Comment call(Throwable throwable) {
+                        return null;
+                    }
+                })
                 .filter(new Func1<Comment, Boolean>() {
                     @Override
                     public Boolean call(Comment comment) {
@@ -375,7 +381,13 @@ public class DataManager {
                 .flatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long commentId) {
-                        return mHackerNewsService.getComment(commentId);
+                        return mHackerNewsService.getComment(commentId)
+                                .onErrorReturn(new Func1<Throwable, Comment>() {
+                                    @Override
+                                    public Comment call(Throwable throwable) {
+                                        return null;
+                                    }
+                                });
                     }
                 })
                 .filter(new Func1<Comment, Boolean>() {
@@ -407,25 +419,31 @@ public class DataManager {
         if (comment.getKids() != null && !comment.getKids().isEmpty()) {
             return Observable.just(comment)
                     .mergeWith(Observable.from(comment.getKids())
-                                    .flatMap(new Func1<Long, Observable<Comment>>() {
-                                        @Override
-                                        public Observable<Comment> call(Long commentId) {
-                                            return mHackerNewsService.getComment(commentId);
-                                        }
-                                    })
-                                    .filter(new Func1<Comment, Boolean>() {
-                                        @Override
-                                        public Boolean call(Comment comment) {
-                                            return (comment != null) && !comment.getDeleted()
-                                                    && comment.getText() != null;
-                                        }
-                                    })
-                                    .flatMap(new Func1<Comment, Observable<Comment>>() {
-                                        @Override
-                                        public Observable<Comment> call(Comment comment) {
-                                            return getInnerComments(comment, level + 1);
-                                        }
-                                    })
+                            .flatMap(new Func1<Long, Observable<Comment>>() {
+                                @Override
+                                public Observable<Comment> call(Long commentId) {
+                                    return mHackerNewsService.getComment(commentId)
+                                            .onErrorReturn(new Func1<Throwable, Comment>() {
+                                                @Override
+                                                public Comment call(Throwable throwable) {
+                                                    return null;
+                                                }
+                                            });
+                                }
+                            })
+                            .filter(new Func1<Comment, Boolean>() {
+                                @Override
+                                public Boolean call(Comment comment) {
+                                    return (comment != null) && !comment.getDeleted()
+                                            && comment.getText() != null;
+                                }
+                            })
+                            .flatMap(new Func1<Comment, Observable<Comment>>() {
+                                @Override
+                                public Observable<Comment> call(Comment comment) {
+                                    return getInnerComments(comment, level + 1);
+                                }
+                            })
                     );
         }
         return Observable.just(comment);
