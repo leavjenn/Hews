@@ -6,14 +6,15 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     final static int UNREAD_ITEM_LEFT_FOR_RELOADING = 10;
     static SharedPreferences prefs;
-    ArrayList<Post> mPostArrayList;
+    ArrayList<Post> mPostList;
     static Context mContext;
     int mMaxRead;
     Typeface mFont;
@@ -33,7 +34,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                        OnItemClickListener onItemClickListener) {
         mContext = context;
         mMaxRead = 0;
-        mPostArrayList = new ArrayList<>();
+        mPostList = new ArrayList<>();
         mOnReachBottomListener = onReachBottomListener;
         mOnItemClickListener = onItemClickListener;
         prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -60,8 +61,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 mOnReachBottomListener.OnReachBottom();
             }
         }
-        final Post currentPost = mPostArrayList.get(position);
+        final Post currentPost = mPostList.get(position);
         viewHolder.tvTitle.setText(currentPost.getTitle());
+        // set title color based on has read or not
+        TypedValue titleColor = new TypedValue();
+        if (SharedPrefsManager.isPostRead(prefs, currentPost.getId())) {
+            mContext.getTheme().resolveAttribute(R.attr.text_title_color_inverse, titleColor, true);
+        } else {
+            mContext.getTheme().resolveAttribute(android.R.attr.textColor, titleColor, true);
+        }
+        viewHolder.tvTitle.setTextColor(titleColor.data);
 
         String s = currentPost.getDescendants() > 1 ? " comments" : " comment";
         viewHolder.tvScore.setText("+ " + String.valueOf(currentPost.getScore()));
@@ -77,13 +86,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 //        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                mOnItemClickListener.onOpenComment(mPostArrayList.get(position));
+//                mOnItemClickListener.onOpenComment(mPostList.get(position));
 //            }
 //        });
 //        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
 //            @Override
 //            public boolean onLongClick(View v) {
-//                mOnItemClickListener.onOpenLink(mPostArrayList.get(position));
+//                mOnItemClickListener.onOpenLink(mPostList.get(position));
 //                return true;
 //            }
 //        });
@@ -91,17 +100,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mPostArrayList.size();
+        return mPostList.size();
     }
 
     public void add(Post item) {
-        mPostArrayList.add(item);
-        notifyItemInserted(mPostArrayList.size());
+        mPostList.add(item);
+        notifyItemInserted(mPostList.size());
     }
 
 
     public void clear() {
-        mPostArrayList.clear();
+        mPostList.clear();
         mMaxRead = 0;
     }
 
@@ -131,13 +140,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemClickListener.onOpenComment(mPostArrayList.get(getAdapterPosition()));
+                    SharedPrefsManager.setPostRead(prefs, mPostList.get(getAdapterPosition()).getId());
+                    notifyItemChanged(getAdapterPosition());
+                    mOnItemClickListener.onOpenComment(mPostList.get(getAdapterPosition()));
                 }
             });
             v.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    mOnItemClickListener.onOpenLink(mPostArrayList.get(getAdapterPosition()));
+                    mOnItemClickListener.onOpenLink(mPostList.get(getAdapterPosition()));
                     return true;
                 }
             });

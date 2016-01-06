@@ -7,7 +7,8 @@
     <!-- secondary text / (test) popupWindow bg-->
     <color name="grey_400">#bdbdbd</color>
 
-    <color name="grey_700">#616161</color>
+    <color name="grey_500">#9e9e9e</color>
+    <color name="grey_600">#757575</color>
     <!-- toolbar (dark) -->
     <color name="grey_800">#424242</color>
     <!-- bg (dark) -->

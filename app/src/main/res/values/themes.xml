@@ -13,6 +13,7 @@
         <item name="android:windowActionBar">false</item>
         <item name="windowActionBar">false</item>
         <item name="android:textColor">@color/black</item>
+        <item name="text_title_color_inverse">@color/grey_500</item>
         <item name="text_info_color">@color/grey_400</item>
         <item name="bg_color">@color/grey_200</item>
         <item name="list_item_bg_color">@style/ListItemBgColor</item>
@@ -26,6 +27,7 @@
     </style>
 
     <style name="AppTheme.Sepia">
+        <item name="text_title_color_inverse">@color/sepia_light</item>
         <item name="text_info_color">@color/sepia_light</item>
         <item name="bg_color">@color/sepia</item>
         <item name="android:textColor">@color/sepia_dark</item>
@@ -39,7 +41,8 @@
         <item name="colorAccent">@color/orange_900</item>
         <item name="colorControlHighlight">@color/orange_900</item>
         <item name="android:textColor">@color/grey_200</item>
-        <item name="text_info_color">@color/grey_400</item>
+        <item name="text_title_color_inverse">@color/grey_500</item>
+        <item name="text_info_color">@color/grey_600</item>
         <item name="bg_color">@color/grey_900</item>
         <item name="list_item_bg_color">@style/ListItemBgColor.Dark</item>
         <item name="toolbar_bg_color">@color/grey_800</item>
