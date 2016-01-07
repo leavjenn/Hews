@@ -158,8 +158,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
-
-            mDataManager = new DataManager(Schedulers.io());
         }
     }
 
@@ -169,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         //init mCompositeSubscription here due to onCreate() will not be called
 //        when theme changed (call recreate())
         mCompositeSubscription = new CompositeSubscription();
+        mDataManager = new DataManager(Schedulers.io());
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
                 && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
