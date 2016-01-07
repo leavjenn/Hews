@@ -22,7 +22,7 @@ public class LoginDialogFragment extends DialogFragment {
     TextInputLayout tiLayoutName;
     TextInputLayout tiLayoutPassword;
     ProgressBar progress;
-    TextView tvHint;
+    TextView tvPrompt;
 
     public LoginDialogFragment() {
         // Required empty public constructor
@@ -44,7 +44,7 @@ public class LoginDialogFragment extends DialogFragment {
         tiLayoutName = (TextInputLayout) v.findViewById(R.id.tilayout_user_name);
         tiLayoutPassword = (TextInputLayout) v.findViewById(R.id.tilayout_password);
         progress = (ProgressBar) v.findViewById(R.id.progressbar_login);
-        tvHint = (TextView) v.findViewById(R.id.tv_hint);
+        tvPrompt = (TextView) v.findViewById(R.id.tv_prompt);
         builder.setView(v)
                 .setPositiveButton("Login", new DialogInterface.OnClickListener() {
                             @Override
@@ -99,15 +99,19 @@ public class LoginDialogFragment extends DialogFragment {
                             tiLayoutName.setVisibility(View.GONE);
                             tiLayoutPassword.setVisibility(View.GONE);
                             progress.setVisibility(View.VISIBLE);
-                            tvHint.setText(R.string.login_hint_logging_in);
+                            tvPrompt.setTextColor(getActivity().getResources().getColor(android.R.color.black));
+                            tvPrompt.setText(R.string.login_prompt_logging_in);
                         } else if (username.isEmpty()) {
-                            tvHint.setText(R.string.login_hint_error_empty_username);
+                            tvPrompt.setTextColor(getActivity().getResources().getColor(android.R.color.holo_red_dark));
+                            tvPrompt.setText(R.string.login_prompt_error_empty_username);
                         } else if (password.length() < 6) {
                             // according to a user report, the password may less than 8 characters
-                            tvHint.setText(R.string.login_hint_error_short_password);
+                            tvPrompt.setTextColor(getActivity().getResources().getColor(android.R.color.holo_red_dark));
+                            tvPrompt.setText(R.string.login_prompt_error_short_password);
                         }
                     } else {
-                        tvHint.setText(R.string.login_hint_error_offline);
+                        tvPrompt.setTextColor(getActivity().getResources().getColor(android.R.color.holo_red_dark));
+                        tvPrompt.setText(R.string.login_prompt_error_offline);
                     }
                 }
             });
@@ -118,7 +122,8 @@ public class LoginDialogFragment extends DialogFragment {
         tiLayoutName.setVisibility(View.VISIBLE);
         tiLayoutPassword.setVisibility(View.VISIBLE);
         progress.setVisibility(View.GONE);
-        tvHint.setText(R.string.login_hint_error_wrong_info);
+        tvPrompt.setTextColor(getActivity().getResources().getColor(android.R.color.holo_red_dark));
+        tvPrompt.setText(R.string.login_prompt_error_wrong_info);
     }
 
     public void setListener(OnLoginListener onLoginListener) {
