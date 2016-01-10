@@ -16,8 +16,8 @@ import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
@@ -94,7 +94,7 @@ public class CommentsFragment extends Fragment
         initRecyclerView(rootView);
         //setupFab(rootView);
 
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         if (mPost != null) {
             mCommentAdapter.addFooter(new HNItem.Footer());
             mCommentAdapter.addHeader(mPost);
@@ -157,7 +157,7 @@ public class CommentsFragment extends Fragment
             mPostSubscription.unsubscribe();
         }
         mPostSubscription = mDataManager.getPost(postId)
-                .subscribeOn(mDataManager.getScheduler())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Post>() {
                     @Override
@@ -184,7 +184,7 @@ public class CommentsFragment extends Fragment
             mCommentsSubscription =
 //                    mDataManager.getCommentsUseFirebase(commentIds, 0))
                     mDataManager.getComments(post, 0)
-                            .subscribeOn(mDataManager.getScheduler())
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Subscriber<List<Comment>>() {
                                 @Override

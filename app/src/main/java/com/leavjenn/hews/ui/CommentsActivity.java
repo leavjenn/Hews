@@ -124,7 +124,7 @@ public class CommentsActivity extends AppCompatActivity implements
             }
         }
 
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
     }
 

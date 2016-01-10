@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.functions.Func1;
 
@@ -39,12 +38,10 @@ public class DataManager {
     public static final String HACKER_NEWS_ITEM_URL = "https://news.ycombinator.com/item?id=";
     private static final int MINIMUM_STRING = 20;
     HackerNewsService mHackerNewsService, mSearchService;
-    private Scheduler mScheduler;
 
-    public DataManager(Scheduler scheduler) {
+    public DataManager() {
         mHackerNewsService = new RetrofitHelper().getHackerNewsService();
         mSearchService = new RetrofitHelper().getSearchService();
-        mScheduler = scheduler;
     }
 
     public Observable<List<Long>> getPostListFromFirebase(final String type) {
@@ -514,9 +511,5 @@ public class DataManager {
                 }
             }
         });
-    }
-
-    public Scheduler getScheduler() {
-        return mScheduler;
     }
 }

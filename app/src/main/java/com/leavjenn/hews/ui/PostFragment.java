@@ -134,7 +134,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             }
         });
         SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
 
         if (SharedPrefsManager.getIsShowTooltip(prefs)) {
@@ -193,7 +193,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadPostListFromFirebase(String storyTypeUrl) {
         mCompositeSubscription.add(mDataManager.getPostListFromFirebase(storyTypeUrl)
-                .subscribeOn(mDataManager.getScheduler())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Long>>() {
                     @Override
@@ -219,7 +219,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mCompositeSubscription.add(
                 mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(1, 11)
                         + "," + "created_at_i<" + timeRangeCombine.substring(11), page)
-                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<HNItem.SearchResult>() {
                             @Override
@@ -247,7 +247,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadPostFromList(List<Long> list) {
         mCompositeSubscription.add(mDataManager.getPostFromList(list)
-                .subscribeOn(mDataManager.getScheduler())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
                     @Override
@@ -341,7 +341,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadSummary(final Post post) {
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
-                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Comment>() {
                             @Override

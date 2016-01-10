@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         //init mCompositeSubscription here due to onCreate() will not be called
 //        when theme changed (call recreate())
         mCompositeSubscription = new CompositeSubscription();
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
                 && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
