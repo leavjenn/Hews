@@ -197,12 +197,12 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         outState.putInt(KEY_SEARCH_RESULT_TOTAL_PAGE, mSearchResultTotalPages);
         outState.putString(KEY_STORY_TYPE, mStoryType);
         outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
-        int lastTimePosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
+        mLastTimeListPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
                 findFirstVisibleItemPosition();
-        outState.putInt(KEY_LAST_TIME_POSITION, lastTimePosition);
+        outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
         Log.d("postfrag saveState", mStoryType);
         Log.d("postfrag saveState", mStoryTypeSpec);
-        Log.d("postfrag saveState", String.valueOf(lastTimePosition));
+        Log.d("postfrag saveState", String.valueOf(mLastTimeListPosition));
     }
 
     @Override
