@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
         if (getFragmentManager().findFragmentById(R.id.container) == null) {
             Log.i("act oncreate", "null frag");
-            mStoryType = Constants.STORY_TYPE_TOP_URL;
+            mStoryType = Constants.TYPE_STORY;
             mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
