@@ -47,40 +47,6 @@ public class DataManager {
         mScheduler = scheduler;
     }
 
-
-    public Observable<Post> getAllPostFromFirebaseAndRetro(final String type) {
-        return Observable.create(new Observable.OnSubscribe<DataSnapshot>() {
-            @Override
-            public void call(final Subscriber<? super DataSnapshot> subscriber) {
-
-                Firebase storiesRef = new Firebase(type);
-                storiesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        subscriber.onNext(dataSnapshot);
-                        subscriber.onCompleted();
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        subscriber.onError(firebaseError.toException());
-                    }
-                });
-            }
-        }).map(new Func1<DataSnapshot, List<Long>>() {
-            @Override
-            public List<Long> call(DataSnapshot dataSnapshot) {
-                return (List<Long>) dataSnapshot.getValue();
-            }
-        }).flatMap(new Func1<List<Long>, Observable<Post>>() {
-            @Override
-            public Observable<Post> call(List<Long> longs) {
-                return getPosts(longs);
-            }
-        });
-    }
-
     public Observable<List<Long>> getPostListFromFirebase(final String type) {
         return Observable.create(new Observable.OnSubscribe<DataSnapshot>() {
             @Override
@@ -112,16 +78,6 @@ public class DataManager {
     public Observable<Post> getPostFromList(final List<Long> list) {
         return Observable.from(list)
                 .flatMap(new Func1<Long, Observable<Post>>() {
-                    @Override
-                    public Observable<Post> call(Long aLong) {
-                        return getPostFromFirebase(aLong);
-                    }
-                });
-    }
-
-    public Observable<Post> getPostFromListByOrder(final List<Long> list) {
-        return Observable.from(list)
-                .concatMap(new Func1<Long, Observable<Post>>() {
                     @Override
                     public Observable<Post> call(Long aLong) {
                         return getPostFromFirebase(aLong);
@@ -214,11 +170,11 @@ public class DataManager {
     }
 
     public Observable<Comment> getSummary(List<Long> commentIds) {
-        Observable<Comment> c = Observable.from(commentIds)
+        return Observable.from(commentIds)
                 .concatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long aLong) {
-                        return getCommentUseFirebase(aLong);
+                        return mHackerNewsService.getComment(aLong);
                     }
                 }).filter(new Func1<Comment, Boolean>() {
                     @Override
@@ -240,80 +196,6 @@ public class DataManager {
                         }
                     }
                 }).firstOrDefault(null);
-        return c;
-    }
-
-    public Observable<Comment> getCommentsUseFirebase(final List<Long> commentIds, final int level) {
-        return Observable.from(commentIds)
-                .concatMap(new Func1<Long, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Long aLong) {
-//                        return getCommentUseFirebase(aLong);
-                        return mHackerNewsService.getComment(aLong);
-                    }
-                }).flatMap(new Func1<Comment, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Comment comment) {
-                        if (comment != null && comment.getText() != null) {
-                            comment.setLevel(level);
-                            if (comment.getKids() == null || comment.getKids().isEmpty()) {
-                                return Observable.just(comment);
-                            } else {
-                                return Observable.just(comment)
-                                        .mergeWith(getCommentsUseFirebase(comment.getKids(), level + 1));
-                            }
-                        }
-                        return Observable.just(null);
-
-                    }
-                }).filter(new Func1<Comment, Boolean>() {
-                    @Override
-                    public Boolean call(Comment comment) {
-                        return (comment != null
-                                && comment.getBy() != null && !comment.getBy().trim().isEmpty()
-                                && comment.getText() != null && !comment.getText().trim().isEmpty());
-                    }
-                });
-    }
-
-    public Observable<Comment> getCommentUseFirebase(final Long id) {
-        return Observable.create(new Observable.OnSubscribe<Comment>() {
-            @Override
-            public void call(final Subscriber<? super Comment> subscriber) {
-
-                Firebase itemRef = new Firebase(Constants.KEY_ITEM_URL + id);
-                itemRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Comment comment = mapToComment(dataSnapshot);
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(comment);
-                        }
-                        subscriber.onCompleted();
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        subscriber.onError(firebaseError.toException());
-                    }
-                });
-            }
-        });
-    }
-
-    private Comment mapToComment(DataSnapshot snapshot) {
-        HashMap<String, Object> item = (HashMap<String, Object>) snapshot.getValue();
-        Comment comment = null;
-        if (item != null && item.get(Constants.KEY_TEXT) != null) {
-            comment = new Comment();
-            comment.setId((Long) item.get(Constants.KEY_ID));
-            comment.setKids((ArrayList<Long>) item.get(Constants.KEY_KIDS));
-            comment.setBy((String) item.get(Constants.KEY_BY));
-            comment.setText((String) item.get(Constants.KEY_TEXT));
-            comment.setTime((Long) item.get(Constants.KEY_TIME));
-        }
-        return comment;
-
     }
 
     public Observable<List<Comment>> getComments(Post post, int level) {

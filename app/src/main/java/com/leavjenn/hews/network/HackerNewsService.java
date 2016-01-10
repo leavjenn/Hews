@@ -6,22 +6,12 @@ import com.leavjenn.hews.model.Post;
 
 import java.util.List;
 
-import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;
 import retrofit.http.Query;
 import rx.Observable;
 
 public interface HackerNewsService {
-
-    @GET("/topstories.json")
-    void getTopStories(Callback<int[]> callback);
-
-    @GET("/item/{itemId}.json")
-    void getItem(@Path("itemId") String itemId, Callback<Post> callback);
-
-
-    // RxJava
 
     @GET("/topstories.json")
     Observable<List<Long>> getTopStories();
