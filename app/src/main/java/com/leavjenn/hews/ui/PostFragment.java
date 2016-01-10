@@ -29,6 +29,8 @@ import com.nhaarman.supertooltips.ToolTip;
 import com.nhaarman.supertooltips.ToolTipRelativeLayout;
 import com.nhaarman.supertooltips.ToolTipView;
 
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,31 +42,37 @@ import rx.subscriptions.CompositeSubscription;
 public class PostFragment extends Fragment implements PostAdapter.OnReachBottomListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static final String KEY_LAST_TIME_POSITION = "key_last_time_position";
-    public static final String KEY_STORY_TYPE = "story_type";
-    public static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
-
-    static int LOADING_TIME = 1;
-    private int mLoadingState = Constants.LOADING_IDLE;
-    static Boolean SHOW_POST_SUMMARY = false;
-
-    private int mLastTimeListPosition;
-    private String mStoryType, mStoryTypeSpec;
-    private PostAdapter.OnItemClickListener mOnItemClickListener;
-    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
+    static final String KEY_POST_ID_LIST = "key_post_id_list";
+    static final String KEY_LOADED_POSTS = "key_loaded_posts";
+    static final String KEY_LOADED_TIME = "key_loaded_time";
+    static final String KEY_LOADING_STATE = "key_loading_state";
+    static final String KEY_LAST_TIME_POSITION = "key_last_time_position";
+    static final String KEY_SEARCH_RESULT_TOTAL_PAGE = "key_search_result_total_page";
+    static final String KEY_STORY_TYPE = "story_type";
+    static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
-    private PostAdapter mPostAdapter;
-    private SharedPreferences prefs;
-    private List<Long> mPostIdList;
-    int searchResultTotalPages = 0;
-    private DataManager mDataManager;
-    private CompositeSubscription mCompositeSubscription;
     private ToolTipRelativeLayout tooltipLayout;
     private ToolTip toolTip;
 
+    private PostAdapter.OnItemClickListener mOnItemClickListener;
+    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
+
+    private SharedPreferences prefs;
+    private boolean showPostSummary;
+    private String mStoryType, mStoryTypeSpec;
+    private int loadedTime = 1;
+    private int mLoadingState = Constants.LOADING_IDLE;
+    private int mLastTimeListPosition;
+    private int mSearchResultTotalPages;
+    private PostAdapter mPostAdapter;
+    private List<Long> mPostIdList;
+    private DataManager mDataManager;
+    private CompositeSubscription mCompositeSubscription;
+
+    // no meaningful effect
     public static PostFragment newInstance(String storyType, String storyTypeSpec) {
         PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
@@ -100,17 +108,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 //        }
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
-
-        if (savedInstanceState != null) {
-            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
-            mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
-            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
-            //Log.d("postfrag onCreate", mStoryType);
-            //Log.d("postfrag onCreate", mStoryTypeSpec);
-        } else {
-            mStoryType = Constants.TYPE_STORY;
-            mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
-        }
     }
 
     @Override
@@ -133,9 +130,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 refresh(mStoryType, mStoryTypeSpec);
             }
         });
-        SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
-        mDataManager = new DataManager();
-        mCompositeSubscription = new CompositeSubscription();
 
         if (SharedPrefsManager.getIsShowTooltip(prefs)) {
             tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
@@ -151,22 +145,64 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        refresh(mStoryType, mStoryTypeSpec);
-        if (mStoryType.equals(Constants.TYPE_SEARCH)) {
-            ((MainActivity) getActivity()).
-                    setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
+        showPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
+        mDataManager = new DataManager();
+        mCompositeSubscription = new CompositeSubscription();
+        if (savedInstanceState != null) {
+            mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
+            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
+            if (mStoryType.equals(Constants.TYPE_SEARCH)) {
+                ((MainActivity) getActivity()).
+                        setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
+            }
+
+            mPostIdList = savedInstanceState.getParcelable(KEY_POST_ID_LIST);
+            mPostAdapter = savedInstanceState.getParcelable(KEY_LOADED_POSTS);
+            mPostAdapter.notifyDataSetChanged();
+            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
+            mRecyclerView.getLayoutManager().scrollToPosition(mLastTimeListPosition);
+
+            loadedTime = savedInstanceState.getInt(KEY_LOADED_TIME);
+            mSearchResultTotalPages = savedInstanceState.getInt(KEY_SEARCH_RESULT_TOTAL_PAGE);
+            mLoadingState = savedInstanceState.getInt(KEY_LOADING_STATE);
+            if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
+                loadingMore();
+            }
+            //Log.d("postfragActivityCreated", mStoryType);
+            //Log.d("postfragActivityCreated", mStoryTypeSpec);
+        } else {
+            mStoryType = Constants.TYPE_STORY;
+            mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
+            refresh(mStoryType, mStoryTypeSpec);
         }
-        //Log.d("postfragActivityCreated", mStoryType);
-        //Log.d("postfragActivityCreated", mStoryTypeSpec);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (!SharedPrefsManager.getShowPostSummary(prefs, getActivity()).equals(SHOW_POST_SUMMARY)) {
-            SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
+        // invoked when showPostSummary setting changed
+        if (!SharedPrefsManager.getShowPostSummary(prefs, getActivity()).equals(showPostSummary)) {
+            showPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
             refresh(mStoryType, mStoryTypeSpec);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(KEY_POST_ID_LIST, Parcels.wrap(mPostIdList));
+        outState.putParcelable(KEY_LOADED_POSTS, Parcels.wrap(mPostAdapter.getPostList()));
+        outState.putInt(KEY_LOADED_TIME, loadedTime);
+        outState.putInt(KEY_LOADING_STATE, mLoadingState);
+        outState.putInt(KEY_SEARCH_RESULT_TOTAL_PAGE, mSearchResultTotalPages);
+        outState.putString(KEY_STORY_TYPE, mStoryType);
+        outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
+        int lastTimePosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
+                findFirstVisibleItemPosition();
+        outState.putInt(KEY_LAST_TIME_POSITION, lastTimePosition);
+        Log.d("postfrag saveState", mStoryType);
+        Log.d("postfrag saveState", mStoryTypeSpec);
+        Log.d("postfrag saveState", String.valueOf(lastTimePosition));
     }
 
     @Override
@@ -178,20 +214,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         prefs.unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        int lastTimePosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
-                findFirstVisibleItemPosition();
-        outState.putInt(KEY_LAST_TIME_POSITION, lastTimePosition);
-        outState.putString(KEY_STORY_TYPE, mStoryType);
-        outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
-        Log.d("postfrag saveState", mStoryType);
-        Log.d("postfrag saveState", mStoryTypeSpec);
-        Log.d("postfrag saveState", String.valueOf(lastTimePosition));
-    }
-
-    void loadPostListFromFirebase(String storyTypeUrl) {
+    void loadPostList(String storyTypeUrl) {
         mCompositeSubscription.add(mDataManager.getPostList(storyTypeUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -208,7 +231,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                     @Override
                     public void onNext(List<Long> longs) {
                         mPostIdList = longs;
-//                        Toast.makeText(getActivity(), "Feed list loaded", Toast.LENGTH_SHORT).show();
                         loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
                         mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
@@ -234,11 +256,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                             @Override
                             public void onNext(HNItem.SearchResult searchResult) {
                                 List<Long> list = new ArrayList<>();
-                                searchResultTotalPages = searchResult.getNbPages();
+                                mSearchResultTotalPages = searchResult.getNbPages();
                                 for (int i = 0; i < searchResult.getHits().length; i++) {
                                     list.add(searchResult.getHits()[i].getObjectID());
                                 }
-                                //Toast.makeText(getActivity(), "Search list loaded", Toast.LENGTH_SHORT).show();
                                 loadPostFromList(list);
                                 mLoadingState = Constants.LOADING_IN_PROGRESS;
                             }
@@ -269,7 +290,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                             post.setIndex(mPostAdapter.getItemCount() - 1);
                             if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_PATH
                                     && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_PATH
-                                    && SHOW_POST_SUMMARY && post.getKids() != null) {
+                                    && showPostSummary && post.getKids() != null) {
                                 loadSummary(post);
                             }
                             if (SharedPrefsManager.getIsShowTooltip(prefs)
@@ -296,7 +317,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mStoryType = type;
         mStoryTypeSpec = spec;
         if (Utils.isOnline(getActivity())) {
-            LOADING_TIME = 1;
+            loadedTime = 1;
             mCompositeSubscription.clear();
             // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
             // https://code.google.com/p/android/issues/detail?id=77712
@@ -311,7 +332,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             if (type.equals(Constants.TYPE_SEARCH)) {
                 loadPostListFromSearch(spec, 0);
             } else if (type.equals(Constants.TYPE_STORY)) {
-                loadPostListFromFirebase(spec);
+                loadPostList(spec);
             } else {
                 Log.e("refresh", "type");
             }
@@ -325,6 +346,26 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     public void refresh() {
         refresh(mStoryType, mStoryTypeSpec);
+    }
+
+    private void loadingMore() {
+        if (mStoryType.equals(Constants.TYPE_STORY)
+                && Constants.NUM_LOADING_ITEM * (loadedTime + 1) < mPostIdList.size()) {
+            int start = Constants.NUM_LOADING_ITEM * loadedTime,
+                    end = Constants.NUM_LOADING_ITEM * (++loadedTime);
+            loadPostFromList(mPostIdList.subList(start, end));
+            mLoadingState = Constants.LOADING_IN_PROGRESS;
+            //Toast.makeText(getActivity(), "Loading more", Toast.LENGTH_SHORT).show();
+            Log.i("loading", String.valueOf(start) + " - " + end);
+        } else if (mStoryType.equals(Constants.TYPE_SEARCH)
+                && loadedTime < mSearchResultTotalPages) {
+            Log.i(String.valueOf(mSearchResultTotalPages), String.valueOf(loadedTime));
+            loadPostListFromSearch(mStoryTypeSpec, loadedTime++);
+            mLoadingState = Constants.LOADING_IN_PROGRESS;
+        } else {
+            Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();
+            mLoadingState = Constants.LOADING_FINISH;
+        }
     }
 
     private void reformatListStyle() {
@@ -373,23 +414,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void OnReachBottom() {
         if (mLoadingState == Constants.LOADING_IDLE) {
-            if (mStoryType.equals(Constants.TYPE_STORY)
-                    && Constants.NUM_LOADING_ITEM * (LOADING_TIME + 1) < mPostIdList.size()) {
-                int start = Constants.NUM_LOADING_ITEM * LOADING_TIME,
-                        end = Constants.NUM_LOADING_ITEM * (++LOADING_TIME);
-                loadPostFromList(mPostIdList.subList(start, end));
-                mLoadingState = Constants.LOADING_IN_PROGRESS;
-                //Toast.makeText(getActivity(), "Loading more", Toast.LENGTH_SHORT).show();
-                Log.i("loading", String.valueOf(start) + " - " + end);
-            } else if (mStoryType.equals(Constants.TYPE_SEARCH)
-                    && LOADING_TIME < searchResultTotalPages) {
-                Log.i(String.valueOf(searchResultTotalPages), String.valueOf(LOADING_TIME));
-                loadPostListFromSearch(mStoryTypeSpec, LOADING_TIME++);
-                mLoadingState = Constants.LOADING_IN_PROGRESS;
-            } else {
-                Toast.makeText(getActivity(), "No more posts", Toast.LENGTH_SHORT).show();
-                mLoadingState = Constants.LOADING_FINISH;
-            }
+            loadingMore();
         }
     }
 

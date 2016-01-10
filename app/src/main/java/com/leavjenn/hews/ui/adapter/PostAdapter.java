@@ -114,6 +114,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         mMaxRead = 0;
     }
 
+    public ArrayList<Post> getPostList() {
+        return mPostList;
+    }
+
     public void updatePostPrefs() {
         mFont = Typeface.createFromAsset(mContext.getAssets(),
                 SharedPrefsManager.getPostFont(prefs) + ".ttf");
