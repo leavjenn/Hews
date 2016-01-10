@@ -1,24 +1,27 @@
 package com.leavjenn.hews.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import org.parceler.Parcel;
 
 import java.util.ArrayList;
 
-public class Post extends HNItem implements Parcelable {
-    private int index;
-    private String by;
-    private long descendants;
-    private long id;
-    private ArrayList<Long> kids;
-    private long score;
-    private String text;
-    private long time;
-    private String title;
-    private String type;
-    private String url;
-    private String prettyUrl;
-    private String summary;
+@Parcel
+public class Post extends HNItem {
+    int index;
+    String by;
+    long descendants;
+    long id;
+    ArrayList<Long> kids;
+    long score;
+    String text;
+    long time;
+    String title;
+    String type;
+    String url;
+    String prettyUrl;
+    String summary;
+
+    public Post() {
+    }
 
     public Post(Long id) {
         this.id = id;
@@ -131,50 +134,5 @@ public class Post extends HNItem implements Parcelable {
 
     public void setSummary(String summary) {
         this.summary = summary;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.by);
-        dest.writeValue(this.descendants);
-        dest.writeValue(this.id);
-        dest.writeSerializable(this.kids);
-        dest.writeValue(this.score);
-        dest.writeString(this.text);
-        dest.writeValue(this.time);
-        dest.writeString(this.title);
-        dest.writeString(this.type);
-        dest.writeString(this.url);
-    }
-
-    public static final Parcelable.Creator<Post> CREATOR = new Parcelable.Creator<Post>() {
-
-        @Override
-        public Post createFromParcel(Parcel source) {
-            return new Post(source);
-        }
-
-        @Override
-        public Post[] newArray(int size) {
-            return new Post[size];
-        }
-    };
-
-    private Post(Parcel in) {
-        this.by = in.readString();
-        this.descendants = (Long) in.readValue(Long.class.getClassLoader());
-        this.id = (Long) in.readValue(Long.class.getClassLoader());
-        this.kids = (ArrayList<Long>) in.readSerializable();
-        this.score = (Long) in.readValue(Long.class.getClassLoader());
-        this.text = in.readString();
-        this.time = (Long) in.readValue(Long.class.getClassLoader());
-        this.title = in.readString();
-        this.type = in.readString();
-        this.url = in.readString();
     }
 }

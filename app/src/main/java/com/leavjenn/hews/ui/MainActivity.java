@@ -55,6 +55,8 @@ import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
+import org.parceler.Parcels;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -812,7 +814,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     public void onOpenComment(Post post) {
         Intent intent = new Intent(this, CommentsActivity.class);
-        intent.putExtra(Constants.KEY_POST, post);
+        intent.putExtra(Constants.KEY_POST_PARCEL, Parcels.wrap(post));
         startActivity(intent);
     }
 
@@ -825,7 +827,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             // open comments section option
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_comment);
             Intent goToCommentIntent = new Intent(this, CommentsActivity.class);
-            goToCommentIntent.putExtra(Constants.KEY_POST, post);
+            goToCommentIntent.putExtra(Constants.KEY_POST_PARCEL, Parcels.wrap(post));
             PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
                     goToCommentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             intentBuilder.setActionButton(icon, getString(R.string.go_to_comment), pi);

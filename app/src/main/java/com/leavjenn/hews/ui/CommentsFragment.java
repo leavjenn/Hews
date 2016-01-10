@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +23,8 @@ import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
+
+import org.parceler.Parcels;
 
 import java.util.List;
 
@@ -46,14 +49,16 @@ public class CommentsFragment extends Fragment
     private CompositeSubscription mCompositeSubscription;
     OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
-    private static final String ARG_POST = "post";
+    private static final String ARG_POST_PARCEL = "post_parcel";
     private static final String ARG_POST_ID = "post_id";
 
+    public CommentsFragment() {
+    }
 
-    public static CommentsFragment newInstance(Post post) {
+    public static CommentsFragment newInstance(Parcelable postParcel) {
         CommentsFragment fragment = new CommentsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_POST, post);
+        args.putParcelable(ARG_POST_PARCEL, postParcel);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,16 +71,12 @@ public class CommentsFragment extends Fragment
         return fragment;
     }
 
-
-    public CommentsFragment() {
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            if (getArguments().containsKey(ARG_POST)) {
-                mPost = getArguments().getParcelable(ARG_POST);
+            if (getArguments().containsKey(ARG_POST_PARCEL)) {
+                mPost = Parcels.unwrap(getArguments().getParcelable(ARG_POST_PARCEL));
             } else if (getArguments().containsKey(ARG_POST_ID)) {
                 mPostId = getArguments().getLong(ARG_POST_ID);
             }

@@ -14,7 +14,7 @@ public final class Constants {
     public static final String KEY_URL = "url";
     public static final String KEY_TEXT = "text";
     public static final String KEY_ERROR = "error";
-    public static final String KEY_POST = "post";
+    public static final String KEY_POST_PARCEL = "post";
     public static final String YCOMBINATOR_ITEM_URL = "https://news.ycombinator.com/item?id=";
     public static final String TYPE_SEARCH = "search";
     public static final String TYPE_STORY = "type_story";

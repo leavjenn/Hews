@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.CoordinatorLayout;
@@ -31,15 +32,17 @@ import android.widget.TextView;
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
+import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.misc.SharedPrefsManager;
-import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
+
+import org.parceler.Parcels;
 
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -97,9 +100,10 @@ public class CommentsActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         CommentsFragment commentsFragment = null;
 
-        Post post = intent.getParcelableExtra(Constants.KEY_POST);
-        if (post != null) {
-            commentsFragment = CommentsFragment.newInstance(post);
+        Parcelable postParcel = intent.getParcelableExtra(Constants.KEY_POST_PARCEL);
+        if (postParcel != null) {
+            commentsFragment = CommentsFragment.newInstance(postParcel);
+            Post post = Parcels.unwrap(postParcel);
             //TODO how the url could be null?!
             mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
             mPostId = post.getId();
