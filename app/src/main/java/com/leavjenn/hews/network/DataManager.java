@@ -4,10 +4,6 @@ import android.content.SharedPreferences;
 import android.text.Html;
 import android.util.Log;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
@@ -44,107 +40,8 @@ public class DataManager {
         mSearchService = new RetrofitHelper().getSearchService();
     }
 
-    public Observable<List<Long>> getPostListFromFirebase(final String type) {
-        return Observable.create(new Observable.OnSubscribe<DataSnapshot>() {
-            @Override
-            public void call(final Subscriber<? super DataSnapshot> subscriber) {
-
-                Firebase storiesRef = new Firebase(type);
-                storiesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        subscriber.onNext(dataSnapshot);
-                        subscriber.onCompleted();
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        subscriber.onError(firebaseError.toException());
-                    }
-                });
-            }
-        }).map(new Func1<DataSnapshot, List<Long>>() {
-            @Override
-            public List<Long> call(DataSnapshot dataSnapshot) {
-                return (List<Long>) dataSnapshot.getValue();
-            }
-        });
-    }
-
-    public Observable<Post> getPostFromList(final List<Long> list) {
-        return Observable.from(list)
-                .flatMap(new Func1<Long, Observable<Post>>() {
-                    @Override
-                    public Observable<Post> call(Long aLong) {
-                        return getPostFromFirebase(aLong);
-                    }
-                });
-    }
-
-    public Observable<Post> getPostFromFirebase(final Long postId) {
-        return Observable.create(new Observable.OnSubscribe<Post>() {
-            @Override
-            public void call(final Subscriber<? super Post> subscriber) {
-
-                Firebase itemRef = new Firebase(Constants.KEY_ITEM_URL + postId);
-                itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Post post = mapToPost(dataSnapshot);
-                        //if (post != null) {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(post);
-                        }
-                        subscriber.onCompleted();
-                        //}
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        subscriber.onError(firebaseError.toException());
-                    }
-                });
-            }
-        });
-    }
-
-    Post mapToPost(DataSnapshot snapshot) {
-        HashMap<String, Object> item = (HashMap<String,
-                Object>) snapshot.getValue();
-        Post post = null;
-        if (item != null && item.get(Constants.KEY_TITLE) != null) {
-            post = new Post((Long) item.get(Constants.KEY_ID));
-            post.setTitle((String) item.get(Constants.KEY_TITLE));
-            post.setKids((ArrayList<Long>) item.get(Constants.KEY_KIDS));
-            post.setScore((Long) item.get(Constants.KEY_SCORE));
-            post.setBy((String) item.get(Constants.KEY_BY));
-            if (item.get(Constants.KEY_DESC) != null) {
-                post.setDescendants((Long) item.get(Constants.KEY_DESC));
-            } else {
-                // Jobs or what
-                post.setDescendants(0);
-            }
-            if (item.get(Constants.KEY_TEXT) != null) {
-                post.setText((String) item.get(Constants.KEY_TEXT));
-            }
-            post.setTime((Long) item.get(Constants.KEY_TIME));
-            post.setType((String) item.get(Constants.KEY_TYPE));
-
-            String url = (String) item.get(Constants.KEY_URL);
-            if (url == null || url.isEmpty()) {
-                url = Constants.YCOMBINATOR_ITEM_URL + post.getId();
-            }
-            //TODO change self URL
-            post.setUrl(url);
-
-            String[] splitUrl = url.split("/");
-            if (splitUrl.length > 2) {
-                url = splitUrl[2];
-                post.setPrettyUrl(url);
-            }
-        }
-        return post;
+    public Observable<List<Long>> getPostList(String type) {
+        return mHackerNewsService.getStories(type);
     }
 
     public Observable<Post> getPost(Long postId) {
@@ -158,7 +55,15 @@ public class DataManager {
                     public Observable<Post> call(Long aLong) {
                         return mHackerNewsService.getStory(String.valueOf(aLong));
                     }
-                }).filter(new Func1<Post, Boolean>() {
+                })
+                .onErrorReturn(new Func1<Throwable, Post>() {
+                    @Override
+                    public Post call(Throwable throwable) {
+                        Log.e("getPosts", throwable.toString());
+                        return null;
+                    }
+                })
+                .filter(new Func1<Post, Boolean>() {
                     @Override
                     public Boolean call(Post post) {
                         return post != null && post.getTitle() != null;
@@ -227,6 +132,7 @@ public class DataManager {
                 .onErrorReturn(new Func1<Throwable, Comment>() {
                     @Override
                     public Comment call(Throwable throwable) {
+                        Log.e("getOneBranchComments", throwable.toString());
                         return null;
                     }
                 })
@@ -264,6 +170,7 @@ public class DataManager {
                                 .onErrorReturn(new Func1<Throwable, Comment>() {
                                     @Override
                                     public Comment call(Throwable throwable) {
+                                        Log.e("getCommentsAllAtOnce", throwable.toString());
                                         return null;
                                     }
                                 });
@@ -305,6 +212,7 @@ public class DataManager {
                                             .onErrorReturn(new Func1<Throwable, Comment>() {
                                                 @Override
                                                 public Comment call(Throwable throwable) {
+                                                    Log.e("getInnerComments", throwable.toString());
                                                     return null;
                                                 }
                                             });

@@ -174,7 +174,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     }
 
     void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(mDataManager.getPostFromList(list)
+        mCompositeSubscription.add(mDataManager.getPosts(list)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {

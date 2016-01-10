@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         if (getFragmentManager().findFragmentById(R.id.container) == null) {
             Log.i("act oncreate", "null frag");
             mStoryType = Constants.TYPE_STORY;
-            mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+            mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
         }
@@ -367,19 +367,19 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         final int type = menuItem.getItemId();
                         switch (type) {
                             case R.id.nav_top_story:
-                                mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
                                 mDrawerSelectedItem = 0;
                                 break;
                             case R.id.nav_new_story:
-                                mStoryTypeSpec = Constants.STORY_TYPE_NEW_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_NEW_PATH;
                                 mDrawerSelectedItem = 1;
                                 break;
                             case R.id.nav_ask_hn:
-                                mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_PATH;
                                 mDrawerSelectedItem = 2;
                                 break;
                             case R.id.nav_show_hn:
-                                mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_PATH;
                                 mDrawerSelectedItem = 3;
                                 break;
                             case R.id.nav_popular:

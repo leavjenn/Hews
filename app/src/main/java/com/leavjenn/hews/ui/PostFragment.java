@@ -104,12 +104,12 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         if (savedInstanceState != null) {
             mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
             mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
-            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_URL);
+            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
             //Log.d("postfrag onCreate", mStoryType);
             //Log.d("postfrag onCreate", mStoryTypeSpec);
         } else {
             mStoryType = Constants.TYPE_STORY;
-            mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+            mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
         }
     }
 
@@ -192,7 +192,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     void loadPostListFromFirebase(String storyTypeUrl) {
-        mCompositeSubscription.add(mDataManager.getPostListFromFirebase(storyTypeUrl)
+        mCompositeSubscription.add(mDataManager.getPostList(storyTypeUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Long>>() {
@@ -246,7 +246,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(mDataManager.getPostFromList(list)
+        mCompositeSubscription.add(mDataManager.getPosts(list)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
@@ -267,8 +267,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         if (post != null) {
                             mPostAdapter.add(post);
                             post.setIndex(mPostAdapter.getItemCount() - 1);
-                            if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_URL
-                                    && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_URL
+                            if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_PATH
+                                    && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_PATH
                                     && SHOW_POST_SUMMARY && post.getKids() != null) {
                                 loadSummary(post);
                             }
@@ -341,28 +341,28 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadSummary(final Post post) {
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Comment>() {
-                            @Override
-                            public void onCompleted() {
-                            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Comment>() {
+                    @Override
+                    public void onCompleted() {
+                    }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e("err " + String.valueOf(post.getId()), e.toString());
-                            }
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("err " + String.valueOf(post.getId()), e.toString());
+                    }
 
-                            @Override
-                            public void onNext(Comment comment) {
-                                if (comment != null) {
-                                    post.setSummary(Html.fromHtml(comment.getText()).toString());
-                                    mPostAdapter.notifyItemChanged(post.getIndex());
-                                } else {
-                                    post.setSummary(null);
-                                }
-                            }
-                        })
+                    @Override
+                    public void onNext(Comment comment) {
+                        if (comment != null) {
+                            post.setSummary(Html.fromHtml(comment.getText()).toString());
+                            mPostAdapter.notifyItemChanged(post.getIndex());
+                        } else {
+                            post.setSummary(null);
+                        }
+                    }
+                })
         );
     }
 
