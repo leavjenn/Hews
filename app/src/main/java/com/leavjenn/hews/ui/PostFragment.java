@@ -206,6 +206,13 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     @Override
+    public void onDetach() {
+        mOnItemClickListener = null;
+        mOnRecyclerViewCreateListener = null;
+        super.onDetach();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (mCompositeSubscription.hasSubscriptions()) {

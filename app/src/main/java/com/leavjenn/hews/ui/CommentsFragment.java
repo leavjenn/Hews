@@ -72,6 +72,17 @@ public class CommentsFragment extends Fragment
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement (MainActivity.OnRecyclerViewCreateListener)");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -109,17 +120,6 @@ public class CommentsFragment extends Fragment
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement (MainActivity.OnRecyclerViewCreateListener)");
-        }
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mPostId = mPost.getId();
@@ -132,6 +132,7 @@ public class CommentsFragment extends Fragment
             mCompositeSubscription.unsubscribe();
         }
         prefs.unregisterOnSharedPreferenceChangeListener(this);
+        mOnRecyclerViewCreateListener = null;
         super.onDetach();
     }
 
