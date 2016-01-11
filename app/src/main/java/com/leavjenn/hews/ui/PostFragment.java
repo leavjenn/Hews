@@ -214,11 +214,11 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
         prefs.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
     }
 
     void loadPostList(String storyTypeUrl) {
