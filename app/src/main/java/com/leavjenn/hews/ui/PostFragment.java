@@ -108,6 +108,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 //        }
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
+        mDataManager = new DataManager();
+        mCompositeSubscription = new CompositeSubscription();
     }
 
     @Override
@@ -146,8 +148,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         showPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
-        mDataManager = new DataManager();
-        mCompositeSubscription = new CompositeSubscription();
         if (savedInstanceState != null) {
             mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
             mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
