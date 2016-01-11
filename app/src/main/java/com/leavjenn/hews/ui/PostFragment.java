@@ -63,7 +63,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private SharedPreferences prefs;
     private boolean showPostSummary;
     private String mStoryType, mStoryTypeSpec;
-    private int loadedTime = 1;
+    private int loadedTime;
     private int mLoadingState = Constants.LOADING_IDLE;
     private int mLastTimeListPosition;
     private int mSearchResultTotalPages;
