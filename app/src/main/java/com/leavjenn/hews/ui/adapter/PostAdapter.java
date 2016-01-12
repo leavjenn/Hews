@@ -18,6 +18,7 @@ import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     final static int UNREAD_ITEM_LEFT_FOR_RELOADING = 10;
@@ -108,6 +109,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         notifyItemInserted(mPostList.size());
     }
 
+    public void addAll(List<Post> postList) {
+        mPostList.addAll(postList);
+        notifyDataSetChanged();
+    }
 
     public void clear() {
         mPostList.clear();

@@ -156,9 +156,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
             }
 
-            mPostIdList = savedInstanceState.getParcelable(KEY_POST_ID_LIST);
-            mPostAdapter = savedInstanceState.getParcelable(KEY_LOADED_POSTS);
-            mPostAdapter.notifyDataSetChanged();
+            mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
+            if (mPostAdapter.getItemCount() == 0) {
+                mPostAdapter.addAll((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
+            }
             mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
             mRecyclerView.getLayoutManager().scrollToPosition(mLastTimeListPosition);
 
