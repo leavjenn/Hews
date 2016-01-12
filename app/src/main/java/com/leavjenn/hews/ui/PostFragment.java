@@ -293,8 +293,19 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         mSwipeRefreshLayout.setRefreshing(false);
                         mRecyclerView.setVisibility(View.VISIBLE);
                         if (post != null) {
-                            mPostAdapter.add(post);
                             post.setIndex(mPostAdapter.getItemCount() - 1);
+                            // setup url and pretty url
+                            String url = post.getUrl();
+                            if (url == null || url.isEmpty()) {
+                                url = Constants.YCOMBINATOR_ITEM_URL + post.getId();
+                                post.setUrl(url);
+                            }
+                            String[] splitUrl = url.split("/");
+                            if (splitUrl.length > 2) {
+                                url = splitUrl[2];
+                                post.setPrettyUrl(url);
+                            }
+                            mPostAdapter.add(post);
                             if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_PATH
                                     && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_PATH
                                     && showPostSummary && post.getKids() != null) {
