@@ -306,9 +306,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                                 post.setPrettyUrl(url);
                             }
                             mPostAdapter.add(post);
-                            if (mStoryTypeSpec != Constants.STORY_TYPE_ASK_HN_PATH
-                                    && mStoryTypeSpec != Constants.STORY_TYPE_SHOW_HN_PATH
-                                    && showPostSummary && post.getKids() != null) {
+                            if (showPostSummary
+                                    && !mStoryTypeSpec.equals(Constants.STORY_TYPE_ASK_HN_PATH)
+                                    && !mStoryTypeSpec.equals(Constants.STORY_TYPE_SHOW_HN_PATH)
+                                    && post.getKids() != null) {
                                 loadSummary(post);
                             }
                             if (SharedPrefsManager.getIsShowTooltip(prefs)

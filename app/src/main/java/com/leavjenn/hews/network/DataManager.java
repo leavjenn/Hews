@@ -73,7 +73,7 @@ public class DataManager {
 
     public Observable<Comment> getSummary(List<Long> commentIds) {
         return Observable.from(commentIds)
-                .concatMap(new Func1<Long, Observable<Comment>>() {
+                .flatMap(new Func1<Long, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Long aLong) {
                         return mHackerNewsService.getComment(aLong);
