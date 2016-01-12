@@ -417,7 +417,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                     @Override
                     public void onNext(Comment comment) {
                         if (comment != null) {
-                            post.setSummary(Html.fromHtml(comment.getText()).toString());
+                            post.setSummary(Html.fromHtml(comment.getText()
+                                    .replace("<p>", "<br /><br />").replace("\n", "<br />")).toString());
                             mPostAdapter.notifyItemChanged(post.getIndex());
                         } else {
                             post.setSummary(null);
