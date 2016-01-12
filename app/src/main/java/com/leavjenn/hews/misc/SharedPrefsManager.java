@@ -72,7 +72,7 @@ public class SharedPrefsManager {
     }
 
     public static String getCommentFont(SharedPreferences sp) {
-        return sp.getString(KEY_COMMENT_FONT, "Roboto");
+        return sp.getString(KEY_COMMENT_FONT, "Open Sans");
     }
 
     public static void setCommentFont(SharedPreferences sp, String fontName) {
@@ -92,7 +92,7 @@ public class SharedPrefsManager {
     }
 
     public static float getCommentLineHeight(SharedPreferences sp) {
-        return sp.getFloat(KEY_COMMENT_LINE_HEIGHT, 1.2f);
+        return sp.getFloat(KEY_COMMENT_LINE_HEIGHT, 1.0f);
     }
 
     public static void setCommentLineHeight(SharedPreferences sp, float add) {

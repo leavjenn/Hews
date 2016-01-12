@@ -51,6 +51,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         vh.tvTitle.setTextSize(mTextSize);
         vh.tvTitle.setLineSpacing(0, mLineHeight);
         vh.tvTitle.setPaintFlags(vh.tvTitle.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
+        vh.tvSummary.setTypeface(Typeface.createFromAsset(mContext.getAssets(), "Open Sans.ttf"));
         return vh;
     }
 
