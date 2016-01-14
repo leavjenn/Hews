@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -41,10 +42,10 @@ import android.widget.TextView;
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
+import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.misc.SharedPrefsManager;
-import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
@@ -110,6 +111,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         if (theme.equals(SharedPrefsManager.THEME_DARK)) {
             setTheme(R.style.AppTheme_Dark);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));
+            }
         }
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(this);

@@ -8,7 +8,8 @@
     </style>
 
     <style name="ListItemBgColor.Dark">
-        <item name="android:background">@color/grey_900</item>
+        <!--<item name="android:background">@color/grey_900</item>-->
+    <item name="android:background">@android:color/black</item>
     </style>
 
     <style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">

@@ -453,7 +453,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mCommentIndentColorBg = 0xFFEEEEEE; //grey_200
         } else if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
             mCommentIndentColorOrange = 0xFFe65100; //orange_900
-            mCommentIndentColorBg = 0xFF212121; //grey_900
+//            mCommentIndentColorBg = 0xFF212121; //grey_900
+            mCommentIndentColorBg = 0xFF000000; //black
         } else {
             mCommentIndentColorOrange = 0xFFffa726; //orange_400
             mCommentIndentColorBg = 0xFFF4ECD8; //sepia
