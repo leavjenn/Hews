@@ -32,9 +32,14 @@ public class SettingsActivity extends AppCompatActivity
         String theme = SharedPrefsManager.getTheme(prefs);
         if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
             setTheme(R.style.AppTheme_Sepia);
-        }
-        if (theme.equals(SharedPrefsManager.THEME_DARK)) {
+        } else if (theme.equals(SharedPrefsManager.THEME_DARK)) {
             setTheme(R.style.AppTheme_Dark);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(R.color.grey_900));
+            }
+        } else if (theme.equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
+            setTheme(R.style.AppTheme_AMOLEDBlack);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                 getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));

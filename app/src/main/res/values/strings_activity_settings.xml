@@ -8,12 +8,14 @@
         <item>Light</item>
         <item>Sepia</item>
         <item>Dark</item>
+        <item>AMOLED black</item>
     </string-array>
 
     <string-array name="pref_themes_value">
-        <item>2</item>
-        <item>1</item>
         <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 
     <!-- Floating actino button -->

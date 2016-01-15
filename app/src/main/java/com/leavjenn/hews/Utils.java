@@ -81,6 +81,8 @@ public class Utils {
     public static void setupIntentBuilder(CustomTabsIntent.Builder intentBuilder, Context context, SharedPreferences prefs) {
         if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
             intentBuilder.setToolbarColor(context.getResources().getColor(R.color.grey_900));
+        } else if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
+            intentBuilder.setToolbarColor(context.getResources().getColor(android.R.color.black));
         } else {
             // use darker orange color here so chrome toolbar will fit dark theme
             intentBuilder.setToolbarColor(context.getResources().getColor(R.color.orange_800));
