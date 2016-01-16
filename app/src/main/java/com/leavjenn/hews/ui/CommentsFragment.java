@@ -3,6 +3,7 @@ package com.leavjenn.hews.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -13,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
@@ -25,7 +28,6 @@ import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
-import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 
 import org.parceler.Parcels;
 
@@ -45,9 +47,10 @@ public class CommentsFragment extends Fragment
     private Post mPost;
     private long mPostId;
     private boolean isBookmarked;
+    private RelativeLayout layoutRoot;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
-    private Snackbar bookmarkSnackbar;
+    private Snackbar snackbarBookmark;
 
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
@@ -109,6 +112,7 @@ public class CommentsFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
+        layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_fragment_comment_root);
         initRecyclerView(rootView);
         //setupFab(rootView);
 
@@ -267,7 +271,12 @@ public class CommentsFragment extends Fragment
     }
 
     public void addBookmark() {
-//        bookmarkSnackbar = Snackbar.make(null, "saving...", Snackbar.LENGTH_INDEFINITE);
+        snackbarBookmark = Snackbar.make(layoutRoot, "saving...", Snackbar.LENGTH_INDEFINITE);
+        // snack bar text color cannot be changed directly
+        TextView tvSnackbarText = (TextView) snackbarBookmark.getView()
+                .findViewById(android.support.design.R.id.snackbar_text);
+        tvSnackbarText.setTextColor(Color.WHITE);
+        snackbarBookmark.show();
         if (isFetchingCompleted) {
             putPostDataToDb(mPost);
         } else {
@@ -285,9 +294,14 @@ public class CommentsFragment extends Fragment
                     @Override
                     public void onCompleted() {
                         isWaitingforBookmark = false;
-//                        if (bookmarkSnackbar.isShown())
-//                            bookmarkSnackbar.setText("saving succeed!");
-//                        bookmarkSnackbar.setDuration(Snackbar.LENGTH_SHORT);
+                        if (snackbarBookmark.isShown()) {
+                            Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "saving succeed!",
+                                    Snackbar.LENGTH_LONG);
+                            TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
+                                    .findViewById(android.support.design.R.id.snackbar_text);
+                            tvSnackbarText.setTextColor(Color.WHITE);
+                            snackbarSucceed.show();
+                        }
                     }
 
                     @Override
