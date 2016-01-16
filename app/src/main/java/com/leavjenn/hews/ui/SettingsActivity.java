@@ -3,6 +3,7 @@ package com.leavjenn.hews.ui;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.PreferenceFragment;
@@ -11,10 +12,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
-import com.leavjenn.hews.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 
 public class SettingsActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -30,9 +32,18 @@ public class SettingsActivity extends AppCompatActivity
         String theme = SharedPrefsManager.getTheme(prefs);
         if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
             setTheme(R.style.AppTheme_Sepia);
-        }
-        if (theme.equals(SharedPrefsManager.THEME_DARK)) {
+        } else if (theme.equals(SharedPrefsManager.THEME_DARK)) {
             setTheme(R.style.AppTheme_Dark);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(R.color.grey_900));
+            }
+        } else if (theme.equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
+            setTheme(R.style.AppTheme_AMOLEDBlack);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));
+            }
         }
         setContentView(R.layout.activity_settings);
         //Setup Toolbar

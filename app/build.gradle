@@ -12,14 +12,14 @@ buildscript {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.leavjenn.hews"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 15
-        versionName "1.6.2"
+        versionCode 17
+        versionName "1.6.4"
     }
     buildTypes {
         release {
@@ -50,6 +50,8 @@ dependencies {
     compile 'com.android.support:customtabs:23.1.0'
     compile 'org.jsoup:jsoup:1.7.3'
     compile 'com.nhaarman.supertooltips:library:3.0.0'
+    compile 'org.parceler:parceler-api:1.0.4'
+    apt 'org.parceler:parceler:1.0.4'
     compile 'com.pushtorefresh.storio:sqlite:1.6.1'
     compile 'com.pushtorefresh.storio:sqlite-annotations:1.6.1'
     apt 'com.pushtorefresh.storio:sqlite-annotations-processor:1.6.1'

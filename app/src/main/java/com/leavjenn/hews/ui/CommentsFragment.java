@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,27 +17,25 @@ import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
-import com.leavjenn.hews.network.HackerNewsService;
-import com.leavjenn.hews.network.RetrofitHelper;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 
+import org.parceler.Parcels;
+
 import java.util.List;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -53,19 +52,20 @@ public class CommentsFragment extends Fragment
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
     private DataManager mDataManager;
+    private Subscription mPostSubscription, mCommentsSubscription;
     private CompositeSubscription mCompositeSubscription;
-    private Subscription mSubscription;
-    private HackerNewsService mService;
     OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
-    private static final String ARG_POST = "post";
+    private static final String ARG_POST_PARCEL = "post_parcel";
     private static final String ARG_POST_ID = "post_id";
 
+    public CommentsFragment() {
+    }
 
-    public static CommentsFragment newInstance(Post post) {
+    public static CommentsFragment newInstance(Parcelable postParcel) {
         CommentsFragment fragment = new CommentsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_POST, post);
+        args.putParcelable(ARG_POST_PARCEL, postParcel);
         fragment.setArguments(args);
         return fragment;
     }
@@ -76,51 +76,6 @@ public class CommentsFragment extends Fragment
         args.putLong(ARG_POST_ID, postId);
         fragment.setArguments(args);
         return fragment;
-    }
-
-
-    public CommentsFragment() {
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            if (getArguments().containsKey(ARG_POST)) {
-                mPost = getArguments().getParcelable(ARG_POST);
-            } else if (getArguments().containsKey(ARG_POST_ID)) {
-                mPostId = getArguments().getLong(ARG_POST_ID);
-            }
-        }
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        prefs.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
-        initRecyclerView(rootView);
-        //setupFab(rootView);
-
-        mDataManager = new DataManager(Schedulers.io());
-        mCompositeSubscription = new CompositeSubscription();
-        isFetchingCompleted = false;
-        isWaitingforBookmark = false;
-        if (mPost != null) {
-            mCommentAdapter.addFooter(new HNItem.Footer());
-            mCommentAdapter.addHeader(mPost);
-            getComments(mPost);
-        } else {
-            if (savedInstanceState != null) {
-                mPostId = savedInstanceState.getLong(ARG_POST_ID);
-            }
-            mService = new RetrofitHelper().getHackerNewsService();
-//            getPost(mPostId);
-            getPostInfo(mPostId);
-        }
-        return rootView;
     }
 
     @Override
@@ -135,6 +90,45 @@ public class CommentsFragment extends Fragment
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            if (getArguments().containsKey(ARG_POST_PARCEL)) {
+                mPost = Parcels.unwrap(getArguments().getParcelable(ARG_POST_PARCEL));
+            } else if (getArguments().containsKey(ARG_POST_ID)) {
+                mPostId = getArguments().getLong(ARG_POST_ID);
+            }
+        }
+
+        mCompositeSubscription = new CompositeSubscription();
+        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        prefs.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
+        initRecyclerView(rootView);
+        //setupFab(rootView);
+
+        isFetchingCompleted = false;
+        isWaitingforBookmark = false;
+        mDataManager = new DataManager();
+        if (mPost != null) {
+            mCommentAdapter.addFooter(new HNItem.Footer());
+            mCommentAdapter.addHeader(mPost);
+            getComments(mPost);
+        } else {
+            if (savedInstanceState != null) {
+                mPostId = savedInstanceState.getLong(ARG_POST_ID);
+            }
+            getPost(mPostId);
+        }
+        return rootView;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mPostId = mPost.getId();
@@ -143,19 +137,12 @@ public class CommentsFragment extends Fragment
 
     @Override
     public void onDetach() {
-        super.onDetach();
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-        }
-        prefs.unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
+        mOnRecyclerViewCreateListener = null;
+        super.onDetach();
     }
 
     private void initRecyclerView(View rootView) {
@@ -167,71 +154,48 @@ public class CommentsFragment extends Fragment
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
     }
 
-    void getPost(long postId) {
-        mSubscription = (mService.getStory(String.valueOf(postId))
-                .subscribeOn(mDataManager.getScheduler())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Post>() {
-                    @Override
-                    public void onCompleted() {
-                        getComments(mPost);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Post post) {
-                        mPost = post;
-                    }
-                }));
-    }
-
     public void refresh() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-        }
         mCommentAdapter.clear();
         mCommentAdapter.notifyDataSetChanged();
         isFetchingCompleted = false;
-        if (mPost != null) {
-            getPostInfo(mPost.getId());
-        } else {
-            getPostInfo(mPostId);
-        }
+        getPost(mPost != null ? mPost.getId() : mPostId);
     }
 
-    public void getPostInfo(long postId) {
+    public void getPost(long postId) {
         mCommentAdapter.addFooter(new HNItem.Footer());
         mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
-        mService = new RetrofitHelper().getHackerNewsService();
-        mService.getItem(String.valueOf(postId), new Callback<Post>() {
-            @Override
-            public void success(Post post, Response response) {
-                mPost = post;
-                mCommentAdapter.addHeader(mPost);
-                getComments(mPost);
-                ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.e("getPostInfo", error.toString());
-            }
-        });
+        if (mPostSubscription != null) {
+            mPostSubscription.unsubscribe();
+        }
+        mPostSubscription = mDataManager.getPost(postId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Post>() {
+                    @Override
+                    public void call(Post post) {
+                        mPost = post;
+                        mCommentAdapter.addHeader(mPost);
+                        getComments(mPost);
+                        ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("getPost", throwable.toString());
+                    }
+                });
+        mCompositeSubscription.add(mPostSubscription);
     }
 
     public void getComments(Post post) {
         if (post.getKids() != null && !post.getKids().isEmpty()) {
-            if (mSubscription != null) {
-                mSubscription.unsubscribe();
+            if (mCommentsSubscription != null) {
+                mCommentsSubscription.unsubscribe();
             }
-            mSubscription =
+            mCommentsSubscription =
 //                    mDataManager.getCommentsUseFirebase(commentIds, 0))
                     mDataManager.getComments(post, 0)
-                            .subscribeOn(mDataManager.getScheduler())
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Subscriber<List<Comment>>() {
                                 @Override
@@ -239,7 +203,7 @@ public class CommentsFragment extends Fragment
                                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                                     isFetchingCompleted = true;
                                     if (isWaitingforBookmark) {
-                                        putPostDataToDb(mPost, mCommentAdapter.getCommentList());
+                                        putPostDataToDb(mPost);
                                     }
                                 }
 
@@ -258,7 +222,7 @@ public class CommentsFragment extends Fragment
                                     }
                                 }
                             });
-            mCompositeSubscription.add(mSubscription);
+            mCompositeSubscription.add(mCommentsSubscription);
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
         }
@@ -303,25 +267,27 @@ public class CommentsFragment extends Fragment
     }
 
     public void addBookmark() {
-        bookmarkSnackbar = Snackbar.make(null, "saving...", Snackbar.LENGTH_INDEFINITE);
+//        bookmarkSnackbar = Snackbar.make(null, "saving...", Snackbar.LENGTH_INDEFINITE);
         if (isFetchingCompleted) {
-            putPostDataToDb(mPost, mCommentAdapter.getCommentList());
+            putPostDataToDb(mPost);
         } else {
             isWaitingforBookmark = true;
         }
     }
 
-    private void putPostDataToDb(Post post, List<Comment> commentList) {
-        mCompositeSubscription.add(Observable.merge(mDataManager.putPostToDb(getActivity(), post),
-                mDataManager.putCommentsToDb(getActivity(), commentList))
+    private void putPostDataToDb(Post post) {
+//        mCompositeSubscription.add(Observable.merge(mDataManager.putPostToDb(getActivity(), post),
+//                mDataManager.putCommentsToDb(getActivity(), commentList))
+                mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
                         isWaitingforBookmark = false;
-                        if (bookmarkSnackbar.isShown())
-                            bookmarkSnackbar.setText("saving succeed!");
-                        bookmarkSnackbar.setDuration(Snackbar.LENGTH_SHORT);
+//                        if (bookmarkSnackbar.isShown())
+//                            bookmarkSnackbar.setText("saving succeed!");
+//                        bookmarkSnackbar.setDuration(Snackbar.LENGTH_SHORT);
                     }
 
                     @Override
@@ -334,9 +300,9 @@ public class CommentsFragment extends Fragment
                         if (o instanceof PutResult) {
                             Log.i("---", "save post succeeded");
                         }
-                        if (o instanceof PutResults) {
-                            Log.i("---", "save comments succeeded");
-                        }
+//                        if (o instanceof PutResults) {
+//                            Log.i("---", "save comments succeeded");
+//                        }
                     }
                 }));
     }

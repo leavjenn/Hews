@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.model.Comment;
@@ -113,7 +113,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             }
         });
         SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
         return rootView;
     }
@@ -148,7 +148,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mCompositeSubscription.add(
                 mDataManager.getSearchResult(keyword, "created_at_i>" + dateRange.substring(0, 10)
                         + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate)
-                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<HNItem.SearchResult>() {
                             @Override
@@ -174,8 +174,8 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     }
 
     void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(mDataManager.getPostFromList(list)
-                .subscribeOn(mDataManager.getScheduler())
+        mCompositeSubscription.add(mDataManager.getPosts(list)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Post>() {
                     @Override
@@ -205,7 +205,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     void loadSummary(final Post post) {
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
-                        .subscribeOn(mDataManager.getScheduler())
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Subscriber<Comment>() {
                             @Override

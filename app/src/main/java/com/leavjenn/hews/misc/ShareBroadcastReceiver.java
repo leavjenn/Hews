@@ -1,4 +1,4 @@
-package com.leavjenn.hews;
+package com.leavjenn.hews.misc;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

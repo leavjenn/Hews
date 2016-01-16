@@ -14,21 +14,17 @@ public final class Constants {
     public static final String KEY_URL = "url";
     public static final String KEY_TEXT = "text";
     public static final String KEY_ERROR = "error";
-    public static final String KEY_POST = "post";
+    public static final String KEY_POST_PARCEL = "post";
     public static final String YCOMBINATOR_ITEM_URL = "https://news.ycombinator.com/item?id=";
     public static final String TYPE_SEARCH = "search";
     public static final String TYPE_BOOKMARK = "type_bookmark";
     public static final String TYPE_STORY = "type_story";
-    public static final String STORY_TYPE_TOP_URL
-            = "https://hacker-news.firebaseio.com/v0/topstories";
-    public static final String STORY_TYPE_NEW_URL
-            = "https://hacker-news.firebaseio.com/v0/newstories";
-    public static final String STORY_TYPE_ASK_HN_URL
-            = "https://hacker-news.firebaseio.com/v0/askstories";
-    public static final String STORY_TYPE_SHOW_HN_URL
-            = "https://hacker-news.firebaseio.com/v0/showstories";
     public static final String KEY_API_URL = "https://hacker-news.firebaseio.com/v0";
     public static final String KEY_ITEM_URL = "https://hacker-news.firebaseio.com/v0/item/";
+    public static final String STORY_TYPE_TOP_PATH = "topstories";
+    public static final String STORY_TYPE_NEW_PATH = "newstories";
+    public static final String STORY_TYPE_ASK_HN_PATH = "askstories";
+    public static final String STORY_TYPE_SHOW_HN_PATH = "showstories";
 
     public static final String SEARCH_BASE_URL = "https://hn.algolia.com/api/v1/";
 

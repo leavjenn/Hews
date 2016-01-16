@@ -1,7 +1,9 @@
-package com.leavjenn.hews;
+package com.leavjenn.hews.misc;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.leavjenn.hews.R;
 
 public class SharedPrefsManager {
     public static final String KEY_POST_FONT = "key_post_font";
@@ -15,9 +17,11 @@ public class SharedPrefsManager {
     public static final String KEY_LOGIN_COOKIE = "login_cookie";
     public static final String KEY_REPLY_TEXT = "replying_text";
     public static final String KEY_SHOW_TOOLTIP = "key_show_tooltip";
-    public static final String THEME_DARK = "0";
+    public static final String KEY_POST_IS_READ = "key_post_is_read";
+    public static final String THEME_LIGHT = "0";
     public static final String THEME_SEPIA = "1";
-    public static final String THEME_LIGHT = "2";
+    public static final String THEME_DARK = "2";
+    public static final String THEME_AMOLED_BLACK = "3";
     public static final String KEY_FAB_MODE = "fabkey";
     public static final String FAB_DISABLE = "0";
     public static final String FAB_DRAG_SCROLL_DOWN = "1";
@@ -69,7 +73,7 @@ public class SharedPrefsManager {
     }
 
     public static String getCommentFont(SharedPreferences sp) {
-        return sp.getString(KEY_COMMENT_FONT, "Roboto");
+        return sp.getString(KEY_COMMENT_FONT, "Open Sans");
     }
 
     public static void setCommentFont(SharedPreferences sp, String fontName) {
@@ -89,7 +93,7 @@ public class SharedPrefsManager {
     }
 
     public static float getCommentLineHeight(SharedPreferences sp) {
-        return sp.getFloat(KEY_COMMENT_LINE_HEIGHT, 1.2f);
+        return sp.getFloat(KEY_COMMENT_LINE_HEIGHT, 1.0f);
     }
 
     public static void setCommentLineHeight(SharedPreferences sp, float add) {
@@ -136,6 +140,16 @@ public class SharedPrefsManager {
 
     public static boolean getIsShowTooltip(SharedPreferences sp) {
         return sp.getBoolean(KEY_SHOW_TOOLTIP, true);
+    }
+
+    public static void setPostRead(SharedPreferences sp, long postId) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(KEY_POST_IS_READ + postId, true);
+        editor.apply();
+    }
+
+    public static boolean isPostRead(SharedPreferences sp,long postId) {
+        return sp.getBoolean(KEY_POST_IS_READ + postId, false);
     }
 
     //Settings

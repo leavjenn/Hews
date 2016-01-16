@@ -2,25 +2,22 @@ package com.leavjenn.hews.ui;
 
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
 
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class BasePostListFragment extends Fragment implements PostAdapter.OnReachBottomListener,
@@ -60,7 +57,7 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
         View v = inflater.inflate(R.layout.fragment_base_post_list, container, false);
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_layout);

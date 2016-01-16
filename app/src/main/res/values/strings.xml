@@ -15,6 +15,7 @@
     <string name="go_to_comment">Go to comment</string>
     <string name="share_link_to">Share link to</string>
     <string name="no_comment_promt">No comment yet</string>
+    <string name="comments_collapsed_prompt">%d collapsed</string>
 
     <!-- Nav drawer -->
     <string name="nav_login">Login</string>
@@ -69,12 +70,12 @@
     </string-array>
 
     <!--Login dialog-->
-    <string name="login_hint_privacy">* Your password will NOT be saved</string>
-    <string name="login_hint_logging_in">Logging in...</string>
-    <string name="login_hint_error_empty_username">Catch you, anonymous!</string>
-    <string name="login_hint_error_short_password">You got a short...password</string>
-    <string name="login_hint_error_offline">Where\'s the Internet? Can\'t get it</string>
-    <string name="login_hint_error_wrong_info">Arrr...wrong username/password</string>
+    <string name="login_prompt_privacy">* Your password will NOT be saved</string>
+    <string name="login_prompt_logging_in">Logging in...</string>
+    <string name="login_prompt_error_empty_username">Catch you, anonymous!</string>
+    <string name="login_prompt_error_short_password">You got a short...password</string>
+    <string name="login_prompt_error_offline">Where\'s the Internet? Can\'t get it</string>
+    <string name="login_prompt_error_wrong_info">Arrr...wrong username/password</string>
 
     <string name="tooltip_post_action">\u0020Click item: open comment\u0020\n
         Long click: open post link\u0020\n\n\n

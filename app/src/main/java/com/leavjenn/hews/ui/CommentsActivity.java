@@ -6,10 +6,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.CoordinatorLayout;
@@ -30,17 +31,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
-import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
+
+import org.parceler.Parcels;
 
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -73,9 +76,18 @@ public class CommentsActivity extends AppCompatActivity implements
         String theme = SharedPrefsManager.getTheme(prefs);
         if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
             setTheme(R.style.AppTheme_Sepia);
-        }
-        if (theme.equals(SharedPrefsManager.THEME_DARK)) {
+        } else if (theme.equals(SharedPrefsManager.THEME_DARK)) {
             setTheme(R.style.AppTheme_Dark);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(R.color.grey_900));
+            }
+        } else if (theme.equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
+            setTheme(R.style.AppTheme_AMOLEDBlack);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));
+            }
         }
         setContentView(R.layout.activity_comments);
         Firebase.setAndroidContext(this);
@@ -98,9 +110,10 @@ public class CommentsActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         CommentsFragment commentsFragment = null;
 
-        Post post = intent.getParcelableExtra(Constants.KEY_POST);
-        if (post != null) {
-            commentsFragment = CommentsFragment.newInstance(post);
+        Parcelable postParcel = intent.getParcelableExtra(Constants.KEY_POST_PARCEL);
+        if (postParcel != null) {
+            commentsFragment = CommentsFragment.newInstance(postParcel);
+            Post post = Parcels.unwrap(postParcel);
             //TODO how the url could be null?!
             mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
             mPostId = post.getId();
@@ -121,7 +134,7 @@ public class CommentsActivity extends AppCompatActivity implements
             }
         }
 
-        mDataManager = new DataManager(Schedulers.io());
+        mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
     }
 
@@ -183,17 +196,7 @@ public class CommentsActivity extends AppCompatActivity implements
                     if (mChromeCustomTabsHelper != null) {
                         // build CustomTabs UI
                         CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                        if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
-                            intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
-                        } else {
-                            //TODO use darker orange color here so chrome toolbar will fit dark theme
-                            intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_800));
-                        }
-
-                        intentBuilder.setShowTitle(true);
-                        intentBuilder.setCloseButtonIcon(
-                                BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
-
+                        Utils.setupIntentBuilder(intentBuilder, this, prefs);
                         ChromeCustomTabsHelper.openCustomTab(this, intentBuilder.build(),
                                 Utils.validateAndParseUri(mUrl, mPostId), null);
                     } else {
@@ -521,6 +524,14 @@ public class CommentsActivity extends AppCompatActivity implements
                                 }
                             }
                         }));
+    }
+
+    public ChromeCustomTabsHelper getChromeCustomTabsHelper() {
+        return mChromeCustomTabsHelper;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return prefs;
     }
 
     @Override

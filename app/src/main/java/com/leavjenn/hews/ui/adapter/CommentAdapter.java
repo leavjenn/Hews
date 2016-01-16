@@ -1,25 +1,31 @@
 package com.leavjenn.hews.ui.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.preference.PreferenceManager;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
@@ -41,7 +47,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     ArrayList<HNItem> mItemList;
     Map<Long, List<Comment>> mCollapsedChildrenCommentsIndex;
     Map<Long, List<Comment>> mCollapsedOlderCommentsIndex;
-    static SharedPreferences prefs;
+    SharedPreferences prefs;
     Typeface mFont;
     float mTextSize, mLineHeight;
     int mLoadingState = 0;
@@ -53,7 +59,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mItemList = new ArrayList<>();
         mCollapsedChildrenCommentsIndex = new HashMap<>();
         mCollapsedOlderCommentsIndex = new HashMap<>();
-        prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        prefs = ((CommentsActivity) mContext).getSharedPreferences();
         updateCommentPrefs();
         setCommentIndentStyle();
     }
@@ -67,31 +73,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 v = LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.list_item_comment,
                         viewGroup, false);
-                CommentViewHolder vh = new CommentViewHolder(v,
-                        new CommentViewHolder.ViewHolderClickListener() {
-                            @Override
-                            public void onClick(int position) {
-                                if (isInBetweenCommentsCollapsed(position)) {
-                                    expandInBetweenComments(position);
-                                } else {
-                                    collapseInBetweenComments(position);
-                                }
-                            }
-
-                            @Override
-                            public void onClickComment(int position) {
-                                if (isChildrenCommentsCollapsed(position)) {
-                                    expandChildrenComments(position);
-                                } else {
-                                    collapseChildrenComment(position);
-                                }
-                            }
-
-                            @Override
-                            public void onLongClick(int position) {
-                                showDialog(position);
-                            }
-                        });
+                CommentViewHolder vh = new CommentViewHolder(v, setupViewHolderClickListener());
 
                 vh.tvComment.setTypeface(mFont);
                 vh.tvComment.setPaintFlags(vh.tvComment.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
@@ -114,88 +96,158 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return viewHolder;
     }
 
+    private CommentViewHolder.ViewHolderClickListener setupViewHolderClickListener() {
+        return new CommentViewHolder.ViewHolderClickListener() {
+            @Override
+            public void onClick(int position) {
+                if (isInBetweenCommentsCollapsed(position)) {
+                    expandInBetweenComments(position);
+                } else {
+                    collapseInBetweenComments(position);
+                }
+            }
+
+            @Override
+            public void onClickComment(int position) {
+                if (isChildrenCommentsCollapsed(position)) {
+                    expandChildrenComments(position);
+                } else {
+                    collapseChildrenComment(position);
+                }
+            }
+
+            @Override
+            public void onLongClick(int position) {
+                showDialog(position);
+            }
+        };
+    }
+
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         if (viewHolder instanceof CommentViewHolder) {
             // which one is better?
 //        if (getItemViewType(position) == VIEW_TYPE_COMMENT) {
-            CommentViewHolder commentViewHolder = (CommentViewHolder) viewHolder;
-            Comment comment = (Comment) mItemList.get(position);
-            commentViewHolder.setCommentIndent(comment.getLevel());
-            CharSequence text = comment.getDeleted() ? "[deleted]"
-                    : Html.fromHtml(comment.getText()
-                    .replace("<p>", "<br /><br />").replace("\n", "<br />"));
-            commentViewHolder.tvComment.setText(text);
-            commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
-            if (!comment.getDeleted()) {
-                commentViewHolder.tvAuthor.setText(comment.getBy());
-            }
-
-            if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
-                commentViewHolder.tvComment.setText(
-                        (mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1)
-                                + " comments collapsed");
-                commentViewHolder.tvComment.setMinLines(2);
-                commentViewHolder.tvComment.setGravity(Gravity.CENTER);
-            } else {
-                commentViewHolder.tvComment.setText(text);
-                commentViewHolder.tvComment.setMinLines(Integer.MIN_VALUE);
-                commentViewHolder.tvComment.setGravity(Gravity.LEFT);
-            }
-
-            if (mCollapsedOlderCommentsIndex.containsKey(comment.getId())) {
-                commentViewHolder.tvCollapseOlderComments.setVisibility(View.VISIBLE);
-                commentViewHolder.tvCollapseOlderComments.setText(
-                        " +" + mCollapsedOlderCommentsIndex.get(comment.getId()).size()
-                                + (mCollapsedOlderCommentsIndex.get(comment.getId()).size() > 1 ?
-                                " comments " : " comment "));
-            } else {
-                commentViewHolder.tvCollapseOlderComments.setVisibility(View.GONE);
-            }
+            bindCommentViewHolder(viewHolder, position);
         } else if (viewHolder instanceof CommentHeaderViewHolder) {
-            CommentHeaderViewHolder commentHeaderViewHolder = (CommentHeaderViewHolder) viewHolder;
-            Post post = (Post) mItemList.get(0);
-            commentHeaderViewHolder.tvTitle.setText(post.getTitle());
-            Typeface postFont = Typeface.createFromAsset(mContext.getAssets(),
-                    SharedPrefsManager.getPostFont(prefs) + ".ttf");
-            commentHeaderViewHolder.tvTitle.setTypeface(postFont);
-            commentHeaderViewHolder.tvTitle
-                    .setTextSize(SharedPrefsManager.getCommentFontSize(prefs) * 1.5f);
-            commentHeaderViewHolder.tvTitle.setPaintFlags(
-                    commentHeaderViewHolder.tvTitle.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
-            commentHeaderViewHolder.tvUrl.setText(post.getUrl());
-            commentHeaderViewHolder.tvPoints.setText("+" + String.valueOf(post.getScore()));
-            commentHeaderViewHolder.tvComments.setText(String.valueOf(post.getDescendants())
-                    + (post.getDescendants() > 1 ? " comments" : " comment"));
-            commentHeaderViewHolder.tvTime.setText(Utils.formatTime(post.getTime()));
-            commentHeaderViewHolder.tvPoster.setText("by: " + post.getBy());
-            if (post.getText() != null && !post.getText().isEmpty()) {
-                commentHeaderViewHolder.tvContent.setVisibility(View.VISIBLE);
-                commentHeaderViewHolder.tvContent.setText(Html.fromHtml(post.getText()));
-                commentHeaderViewHolder.tvContent
-                        .setTextSize(SharedPrefsManager.getCommentFontSize(prefs));
-                Typeface commentFont = Typeface.createFromAsset(mContext.getAssets(),
-                        SharedPrefsManager.getCommentFont(prefs) + ".ttf");
-                commentHeaderViewHolder.tvContent.setTypeface(commentFont);
-                commentHeaderViewHolder.tvContent.
-                        setLineSpacing(0, SharedPrefsManager.getCommentLineHeight(prefs));
-            }
+            bindHeaderViewHolder(viewHolder);
         } else if (viewHolder instanceof CommentFooterViewHolder) {
-            CommentFooterViewHolder commentFooterViewHolder = (CommentFooterViewHolder) viewHolder;
-            if (mLoadingState == Constants.LOADING_FINISH
-                    || mLoadingState == Constants.LOADING_ERROR) {
-                commentFooterViewHolder.progressBar.setVisibility(View.GONE);
-                commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
-            } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
-                commentFooterViewHolder.progressBar.setVisibility(View.GONE);
-                commentFooterViewHolder.tvNoCommentPromt.setText(
-                        mContext.getResources().getString(R.string.no_comment_promt));
-            } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
-                commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
-                commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
-            }
+            bindFooterViewHolder(viewHolder);
         }
     }
+
+    private void bindCommentViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        CommentViewHolder commentViewHolder = (CommentViewHolder) viewHolder;
+        Comment comment = (Comment) mItemList.get(position);
+        commentViewHolder.setCommentIndent(comment.getLevel());
+        commentViewHolder.tvTime.setText(Utils.formatTime(comment.getTime()));
+        if (!comment.getDeleted()) {
+            commentViewHolder.tvAuthor.setText(comment.getBy());
+        }
+
+        if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
+            commentViewHolder.tvComment.setText(mContext.getString(R.string.comments_collapsed_prompt,
+                    mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1));
+            commentViewHolder.tvComment.setMinLines(2);
+            commentViewHolder.tvComment.setGravity(Gravity.CENTER);
+        } else {
+            setTextViewHTML(commentViewHolder.tvComment, comment.getText());
+            commentViewHolder.tvComment.setMinLines(Integer.MIN_VALUE);
+            commentViewHolder.tvComment.setGravity(Gravity.LEFT);
+        }
+
+        if (mCollapsedOlderCommentsIndex.containsKey(comment.getId())) {
+            commentViewHolder.tvCollapseOlderComments.setVisibility(View.VISIBLE);
+            commentViewHolder.tvCollapseOlderComments.setText(
+                    mContext.getString(R.string.comments_collapsed_prompt,
+                    mCollapsedOlderCommentsIndex.get(comment.getId()).size()));
+        } else {
+            commentViewHolder.tvCollapseOlderComments.setVisibility(View.GONE);
+        }
+    }
+
+    private void bindHeaderViewHolder(RecyclerView.ViewHolder viewHolder) {
+        CommentHeaderViewHolder commentHeaderViewHolder = (CommentHeaderViewHolder) viewHolder;
+        Post post = (Post) mItemList.get(0);
+        commentHeaderViewHolder.tvTitle.setText(post.getTitle());
+        Typeface postFont = Typeface.createFromAsset(mContext.getAssets(),
+                SharedPrefsManager.getPostFont(prefs) + ".ttf");
+        commentHeaderViewHolder.tvTitle.setTypeface(postFont);
+        commentHeaderViewHolder.tvTitle
+                .setTextSize(SharedPrefsManager.getCommentFontSize(prefs) * 1.5f);
+        commentHeaderViewHolder.tvTitle.setPaintFlags(
+                commentHeaderViewHolder.tvTitle.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
+        commentHeaderViewHolder.tvUrl.setText(post.getUrl());
+        commentHeaderViewHolder.tvPoints.setText("+" + String.valueOf(post.getScore()));
+        commentHeaderViewHolder.tvComments.setText(String.valueOf(post.getDescendants())
+                + (post.getDescendants() > 1 ? " comments" : " comment"));
+        commentHeaderViewHolder.tvTime.setText(Utils.formatTime(post.getTime()));
+        commentHeaderViewHolder.tvPoster.setText("by: " + post.getBy());
+        if (post.getText() != null && !post.getText().isEmpty()) {
+            commentHeaderViewHolder.tvContent.setVisibility(View.VISIBLE);
+            commentHeaderViewHolder.tvContent.setText(Html.fromHtml(post.getText()));
+            commentHeaderViewHolder.tvContent
+                    .setTextSize(SharedPrefsManager.getCommentFontSize(prefs));
+            Typeface commentFont = Typeface.createFromAsset(mContext.getAssets(),
+                    SharedPrefsManager.getCommentFont(prefs) + ".ttf");
+            commentHeaderViewHolder.tvContent.setTypeface(commentFont);
+            commentHeaderViewHolder.tvContent.
+                    setLineSpacing(0, SharedPrefsManager.getCommentLineHeight(prefs));
+        }
+    }
+
+    private void bindFooterViewHolder(RecyclerView.ViewHolder viewHolder) {
+        CommentFooterViewHolder commentFooterViewHolder = (CommentFooterViewHolder) viewHolder;
+        if (mLoadingState == Constants.LOADING_FINISH
+                || mLoadingState == Constants.LOADING_ERROR) {
+            commentFooterViewHolder.progressBar.setVisibility(View.GONE);
+            commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
+        } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
+            commentFooterViewHolder.progressBar.setVisibility(View.GONE);
+            commentFooterViewHolder.tvNoCommentPromt.setText(
+                    mContext.getResources().getString(R.string.no_comment_promt));
+        } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
+            commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
+            commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
+        }
+    }
+
+    private void setTextViewHTML(TextView textView, String string) {
+        // trim two trailing blank lines
+        CharSequence sequence =
+                Html.fromHtml(string.replace("<p>", "<br /><br />").replace("\n", "<br />"));
+        // use Chrome custom tab if it is available
+        if (mContext instanceof CommentsActivity
+                && ((CommentsActivity) mContext).getChromeCustomTabsHelper() != null) {
+            SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
+            URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
+            for (URLSpan span : urls) {
+                makeLinkClickable(strBuilder, span);
+            }
+            textView.setText(strBuilder);
+        } else {
+            textView.setText(sequence);
+        }
+    }
+
+    private void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {
+        int start = strBuilder.getSpanStart(span);
+        int end = strBuilder.getSpanEnd(span);
+        int flags = strBuilder.getSpanFlags(span);
+        ClickableSpan clickable = new ClickableSpan() {
+            public void onClick(View view) {
+                Uri uri = Uri.parse(span.getURL());
+                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                Utils.setupIntentBuilder(intentBuilder, mContext,
+                        ((CommentsActivity) mContext).getSharedPreferences());
+                ChromeCustomTabsHelper.openCustomTab((Activity) mContext, intentBuilder.build(),
+                        uri, null);
+            }
+        };
+        strBuilder.setSpan(clickable, start, end, flags);
+        strBuilder.removeSpan(span);
+    }
+
 
     @Override
     public int getItemCount() {
@@ -414,6 +466,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
             mCommentIndentColorOrange = 0xFFe65100; //orange_900
             mCommentIndentColorBg = 0xFF212121; //grey_900
+        } else if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
+            mCommentIndentColorOrange = 0xFFe65100; //orange_900
+            mCommentIndentColorBg = 0xFF000000; //black
         } else {
             mCommentIndentColorOrange = 0xFFffa726; //orange_400
             mCommentIndentColorBg = 0xFFF4ECD8; //sepia

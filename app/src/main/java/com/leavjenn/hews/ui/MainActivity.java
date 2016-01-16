@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -39,13 +40,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
-import com.leavjenn.hews.ChromeCustomTabsHelper;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.ShareBroadcastReceiver;
-import com.leavjenn.hews.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
@@ -55,6 +55,8 @@ import com.leavjenn.hews.ui.widget.FeedbackDialogFragment;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
+
+import org.parceler.Parcels;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -106,9 +108,18 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         String theme = SharedPrefsManager.getTheme(prefs);
         if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
             setTheme(R.style.AppTheme_Sepia);
-        }
-        if (theme.equals(SharedPrefsManager.THEME_DARK)) {
+        } else if (theme.equals(SharedPrefsManager.THEME_DARK)) {
             setTheme(R.style.AppTheme_Dark);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(R.color.grey_900));
+            }
+        } else if (theme.equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
+            setTheme(R.style.AppTheme_AMOLEDBlack);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));
+            }
         }
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(this);
@@ -155,12 +166,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
         if (getFragmentManager().findFragmentById(R.id.container) == null) {
             Log.i("act oncreate", "null frag");
-            mStoryType = Constants.STORY_TYPE_TOP_URL;
-            mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+            mStoryType = Constants.TYPE_STORY;
+            mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
-
-            mDataManager = new DataManager(Schedulers.io());
         }
     }
 
@@ -170,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         //init mCompositeSubscription here due to onCreate() will not be called
 //        when theme changed (call recreate())
         mCompositeSubscription = new CompositeSubscription();
+        mDataManager = new DataManager();
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
                 && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
@@ -211,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
-            //TODO if ChromeCustomTabsHelper was not null and called unbind, erroe would occur
+            // if ChromeCustomTabsHelper was not null and called unbind, error would occur
             mChromeCustomTabsHelper = null;
         }
     }
@@ -264,6 +274,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 break;
 
             case android.R.id.home:
+                if (mWindow.isWindowShowing()) {
+                    mWindow.dismiss();
+                }
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 break;
         }
@@ -364,19 +377,19 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         final int type = menuItem.getItemId();
                         switch (type) {
                             case R.id.nav_top_story:
-                                mStoryTypeSpec = Constants.STORY_TYPE_TOP_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
                                 mDrawerSelectedItem = 0;
                                 break;
                             case R.id.nav_new_story:
-                                mStoryTypeSpec = Constants.STORY_TYPE_NEW_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_NEW_PATH;
                                 mDrawerSelectedItem = 1;
                                 break;
                             case R.id.nav_ask_hn:
-                                mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_PATH;
                                 mDrawerSelectedItem = 2;
                                 break;
                             case R.id.nav_show_hn:
-                                mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_URL;
+                                mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_PATH;
                                 mDrawerSelectedItem = 3;
                                 break;
                             case R.id.nav_popular:
@@ -849,7 +862,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     public void onOpenComment(Post post) {
         Intent intent = new Intent(this, CommentsActivity.class);
-        intent.putExtra(Constants.KEY_POST, post);
+        intent.putExtra(Constants.KEY_POST_PARCEL, Parcels.wrap(post));
         startActivity(intent);
     }
 
@@ -858,39 +871,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         if (mChromeCustomTabsHelper != null) {
             // build CustomTabs UI
             CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-            if (SharedPrefsManager.getTheme(prefs).equals(SharedPrefsManager.THEME_DARK)) {
-                intentBuilder.setToolbarColor(getResources().getColor(R.color.grey_900));
-            } else {
-                //TODO use darker orange color here so chrome toolbar will fit dark theme
-                intentBuilder.setToolbarColor(getResources().getColor(R.color.orange_800));
-            }
-            intentBuilder.enableUrlBarHiding();
-            intentBuilder.setShowTitle(true);
-            intentBuilder.setCloseButtonIcon(
-                    BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
-
-            // TODO Use this way, it will show share to option when long click
-//            String shareLabel = getString(R.string.share_link_to);
-//            Intent shareIntent = new Intent();
-//            shareIntent.setAction(Intent.ACTION_SEND);
-//            String postUrl = post.getUrl();
-//            shareIntent.putExtra(Intent.EXTRA_TEXT, postUrl);
-//            shareIntent.setType("text/plain");
-//            shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            Intent chooserIntent = Intent.createChooser(shareIntent, getString(R.string.share_link_to));
-//            startActivity(chooserIntent);
-//            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
-//                    shareIntent, 0);
-//            intentBuilder.addMenuItem(shareLabel, pendingIntent);
-
-
-            String menuItemTitle = getString(R.string.share_link_to);
-            PendingIntent menuItemPendingIntent = createPendingIntent();
-            intentBuilder.addMenuItem(menuItemTitle, menuItemPendingIntent);
-
+            Utils.setupIntentBuilder(intentBuilder, this, prefs);
+            // open comments section option
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_comment);
             Intent goToCommentIntent = new Intent(this, CommentsActivity.class);
-            goToCommentIntent.putExtra(Constants.KEY_POST, post);
+            goToCommentIntent.putExtra(Constants.KEY_POST_PARCEL, Parcels.wrap(post));
             PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0,
                     goToCommentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             intentBuilder.setActionButton(icon, getString(R.string.go_to_comment), pi);
@@ -902,12 +887,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             urlIntent.setData(Utils.validateAndParseUri(post.getUrl(), post.getId()));
             startActivity(urlIntent);
         }
-    }
-
-    private PendingIntent createPendingIntent() {
-        Intent actionIntent = new Intent(
-                this.getApplicationContext(), ShareBroadcastReceiver.class);
-        return PendingIntent.getBroadcast(getApplicationContext(), 0, actionIntent, 0);
     }
 
     @Override
