@@ -146,9 +146,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
-            commentViewHolder.tvComment.setText(
-                    (mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1)
-                            + " comments collapsed");
+            commentViewHolder.tvComment.setText(mContext.getString(R.string.comments_collapsed_prompt,
+                    mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1));
             commentViewHolder.tvComment.setMinLines(2);
             commentViewHolder.tvComment.setGravity(Gravity.CENTER);
         } else {
@@ -160,9 +159,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (mCollapsedOlderCommentsIndex.containsKey(comment.getId())) {
             commentViewHolder.tvCollapseOlderComments.setVisibility(View.VISIBLE);
             commentViewHolder.tvCollapseOlderComments.setText(
-                    " +" + mCollapsedOlderCommentsIndex.get(comment.getId()).size()
-                            + (mCollapsedOlderCommentsIndex.get(comment.getId()).size() > 1 ?
-                            " comments " : " comment "));
+                    mContext.getString(R.string.comments_collapsed_prompt,
+                    mCollapsedOlderCommentsIndex.get(comment.getId()).size()));
         } else {
             commentViewHolder.tvCollapseOlderComments.setVisibility(View.GONE);
         }
