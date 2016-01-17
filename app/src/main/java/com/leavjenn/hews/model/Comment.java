@@ -1,5 +1,7 @@
 package com.leavjenn.hews.model;
 
+import com.google.gson.annotations.SerializedName;
+import com.leavjenn.hews.data.table.CommentTable;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteColumn;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
 
@@ -8,30 +10,31 @@ import java.util.ArrayList;
 @StorIOSQLiteType(table = "comment")
 public class Comment extends HNItem {
 
-    @StorIOSQLiteColumn(name = "id", key = true)
-    long id;
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_COMMENT_ID, key = true)
+    @SerializedName(CommentTable.COLUMN_COMMENT_ID)
+    long commentId;
 
-    @StorIOSQLiteColumn(name = "index")
-    int index;
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_INDEX)
+    int _index;
 
-    @StorIOSQLiteColumn(name = "by")
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_BY)
     String by;
 
-    @StorIOSQLiteColumn(name = "deleted")
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_DELETED)
     boolean deleted;
 
-    @StorIOSQLiteColumn(name = "parent")
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_PARENT)
     long parent;
 
     ArrayList<Long> kids;
 
-    @StorIOSQLiteColumn(name = "time")
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_TIME)
     long time;
 
-    @StorIOSQLiteColumn(name = "text")
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_TEXT)
     String text;
 
-    @StorIOSQLiteColumn(name = "level")
+    @StorIOSQLiteColumn(name = CommentTable.COLUMN_LEVEL)
     int level;
 
     public ArrayList<Comment> comments;
@@ -43,14 +46,21 @@ public class Comment extends HNItem {
         comments = new ArrayList<>();
     }
 
-    public Comment(int index, String by, long id, long parent, ArrayList<Long> kids, long time, String text) {
-        this.index = index;
+    public Comment(long commentId, String by, long parent, ArrayList<Long> kids, long time, String text) {
+        this.commentId = commentId;
         this.by = by;
-        this.id = id;
         this.parent = parent;
         this.kids = kids;
         this.time = time;
         this.text = text;
+    }
+
+    public int getIndex() {
+        return _index;
+    }
+
+    public void setIndex(int _index) {
+        this._index = _index;
     }
 
     public String getText() {
@@ -61,14 +71,6 @@ public class Comment extends HNItem {
         this.text = text;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
     public String getBy() {
         return by;
     }
@@ -77,12 +79,12 @@ public class Comment extends HNItem {
         this.by = by;
     }
 
-    public long getId() {
-        return id;
+    public long getCommentId() {
+        return commentId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setCommentId(long commentId) {
+        this.commentId = commentId;
     }
 
     public void setDeleted(boolean deleted) {

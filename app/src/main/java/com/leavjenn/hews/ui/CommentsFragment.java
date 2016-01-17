@@ -28,6 +28,7 @@ import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
+import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 
 import org.parceler.Parcels;
 
@@ -43,10 +44,13 @@ import rx.subscriptions.CompositeSubscription;
 
 public class CommentsFragment extends Fragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private boolean isFetchingCompleted, isWaitingforBookmark;
+    private static final String ARG_POST_PARCEL = "post_parcel";
+    private static final String ARG_IS_BOOKMARKED = "is_bookmarked";
+    private static final String ARG_POST_ID = "post_id";
+
+    private boolean isBookmarked, isFetchingCompleted, isWaitingForBookmark;
     private Post mPost;
     private long mPostId;
-    private boolean isBookmarked;
     private RelativeLayout layoutRoot;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
@@ -59,16 +63,14 @@ public class CommentsFragment extends Fragment
     private CompositeSubscription mCompositeSubscription;
     OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
-    private static final String ARG_POST_PARCEL = "post_parcel";
-    private static final String ARG_POST_ID = "post_id";
-
     public CommentsFragment() {
     }
 
-    public static CommentsFragment newInstance(Parcelable postParcel) {
+    public static CommentsFragment newInstance(Parcelable postParcel, boolean isBookmarked) {
         CommentsFragment fragment = new CommentsFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_POST_PARCEL, postParcel);
+        args.putBoolean(ARG_IS_BOOKMARKED, isBookmarked);
         fragment.setArguments(args);
         return fragment;
     }
@@ -98,6 +100,7 @@ public class CommentsFragment extends Fragment
         if (getArguments() != null) {
             if (getArguments().containsKey(ARG_POST_PARCEL)) {
                 mPost = Parcels.unwrap(getArguments().getParcelable(ARG_POST_PARCEL));
+                isBookmarked = getArguments().getBoolean(ARG_IS_BOOKMARKED);
             } else if (getArguments().containsKey(ARG_POST_ID)) {
                 mPostId = getArguments().getLong(ARG_POST_ID);
             }
@@ -117,12 +120,16 @@ public class CommentsFragment extends Fragment
         //setupFab(rootView);
 
         isFetchingCompleted = false;
-        isWaitingforBookmark = false;
+        isWaitingForBookmark = false;
         mDataManager = new DataManager();
         if (mPost != null) {
             mCommentAdapter.addFooter(new HNItem.Footer());
             mCommentAdapter.addHeader(mPost);
-            getComments(mPost);
+            if (isBookmarked) {
+                getCommentsFromDb(mPost);
+            } else {
+                getComments(mPost);
+            }
         } else {
             if (savedInstanceState != null) {
                 mPostId = savedInstanceState.getLong(ARG_POST_ID);
@@ -191,7 +198,7 @@ public class CommentsFragment extends Fragment
         mCompositeSubscription.add(mPostSubscription);
     }
 
-    public void getComments(Post post) {
+    public void getComments(final Post post) {
         if (post.getKids() != null && !post.getKids().isEmpty()) {
             if (mCommentsSubscription != null) {
                 mCommentsSubscription.unsubscribe();
@@ -205,9 +212,14 @@ public class CommentsFragment extends Fragment
                                 @Override
                                 public void onCompleted() {
                                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                                    for (int i = 0; i < mCommentAdapter.getCommentList().size(); i++) {
+                                        Comment comment = mCommentAdapter.getCommentList().get(i);
+                                        comment.setParent(post.getId());
+                                        comment.setIndex(i);
+                                    }
                                     isFetchingCompleted = true;
-                                    if (isWaitingforBookmark) {
-                                        putPostDataToDb(mPost);
+                                    if (isWaitingForBookmark) {
+                                        putPostAndCommentToDb(mPost, mCommentAdapter.getCommentList());
                                     }
                                 }
 
@@ -232,26 +244,20 @@ public class CommentsFragment extends Fragment
         }
     }
 
-    private void getPostDataFromDb(Post post) {
-        mCompositeSubscription.add(Observable.concat(
-                mDataManager.getPostFromDb(getActivity(), post.getId()),
-                mDataManager.getStoryCommentsFromDb(getActivity(), post.getId()))
+    private void getCommentsFromDb(Post post) {
+        mCompositeSubscription.add(mDataManager.getStoryCommentsFromDb(getActivity(), post.getId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<? extends HNItem>>() {
+                .subscribe(new Action1<List<Comment>>() {
                     @Override
-                    public void onCompleted() {
-
+                    public void call(List<Comment> comments) {
+                        mCommentAdapter.addAll(comments);
+                        mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                     }
-
+                }, new Action1<Throwable>() {
                     @Override
-                    public void onError(Throwable e) {
-                        Log.e("getCommentFromDb", e.toString());
-                    }
-
-                    @Override
-                    public void onNext(List<? extends HNItem> hnItems) {
-                        mCommentAdapter.addAll(hnItems);
+                    public void call(Throwable throwable) {
+                        Log.e("getCommentFromDb", throwable.toString());
                     }
                 }));
     }
@@ -278,45 +284,45 @@ public class CommentsFragment extends Fragment
         tvSnackbarText.setTextColor(Color.WHITE);
         snackbarBookmark.show();
         if (isFetchingCompleted) {
-            putPostDataToDb(mPost);
+            putPostAndCommentToDb(mPost, mCommentAdapter.getCommentList());
         } else {
-            isWaitingforBookmark = true;
+            isWaitingForBookmark = true;
         }
     }
 
-    private void putPostDataToDb(Post post) {
-//        mCompositeSubscription.add(Observable.merge(mDataManager.putPostToDb(getActivity(), post),
-//                mDataManager.putCommentsToDb(getActivity(), commentList))
-                mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
+    private void putPostAndCommentToDb(Post post, List<Comment> commentList) {
+        mCompositeSubscription.add(Observable.merge(mDataManager.putPostToDb(getActivity(), post),
+                mDataManager.putCommentsToDb(getActivity(), commentList))
+//                mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
-                        isWaitingforBookmark = false;
-                        if (snackbarBookmark.isShown()) {
-                            Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "saving succeed!",
-                                    Snackbar.LENGTH_LONG);
-                            TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
-                                    .findViewById(android.support.design.R.id.snackbar_text);
-                            tvSnackbarText.setTextColor(Color.WHITE);
-                            snackbarSucceed.show();
-                        }
+                        isWaitingForBookmark = false;
+                        // new snack bar will replace the old one
+                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "saving succeed!",
+                                Snackbar.LENGTH_LONG);
+                        TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
+                                .findViewById(android.support.design.R.id.snackbar_text);
+                        tvSnackbarText.setTextColor(Color.WHITE);
+                        snackbarSucceed.show();
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("---putPostDataToDb", e.toString());
+                        Log.e("---putPost&CommentToDb", e.toString());
                     }
 
                     @Override
                     public void onNext(Object o) {
                         if (o instanceof PutResult) {
-                            Log.i("---", "save post succeeded");
+                            Log.i("---", "post saved");
                         }
-//                        if (o instanceof PutResults) {
-//                            Log.i("---", "save comments succeeded");
-//                        }
+                        if (o instanceof PutResults) {
+                            Log.i("---", (((PutResults) o).numberOfInserts() + ((PutResults) o).numberOfUpdates())
+                                    + " comments saved");
+                        }
                     }
                 }));
     }

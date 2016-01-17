@@ -74,6 +74,12 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final int DRAWER_CLOSE_DELAY_MS = 250;
     private static final String STATE_DRAWER_SELECTED_ITEM = "state_drawer_selected_item";
     private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
+    private static final int NAV_TOP = 0;
+    private static final int NAV_NEW = 1;
+    private static final int NAV_ASK_HN = 2;
+    private static final int NAV_SHOW_HN = 3;
+    private static final int NAV_SEARCH = 4;
+    private static final int NAV_BOOKMARK = 5;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private View drawerHeader;
@@ -196,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         menu.getItem(mDrawerSelectedItem + 2).setChecked(true);
         //TODO bug: item including login part
         Log.i("mDrawerSelectedItem", String.valueOf(mDrawerSelectedItem));
-        if (mDrawerSelectedItem == 4) { // popular
+        if (mDrawerSelectedItem == NAV_SEARCH) {
             Log.i("mDrawerSelectedItem", "DateRange");
             setUpSpinnerPopularDateRange();
             int selectedDateRange = savedInstanceState.getInt(STATE_POPULAR_DATE_RANGE, 0);
@@ -378,26 +384,26 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         switch (type) {
                             case R.id.nav_top_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
-                                mDrawerSelectedItem = 0;
+                                mDrawerSelectedItem = NAV_TOP;
                                 break;
                             case R.id.nav_new_story:
                                 mStoryTypeSpec = Constants.STORY_TYPE_NEW_PATH;
-                                mDrawerSelectedItem = 1;
+                                mDrawerSelectedItem = NAV_NEW;
                                 break;
                             case R.id.nav_ask_hn:
                                 mStoryTypeSpec = Constants.STORY_TYPE_ASK_HN_PATH;
-                                mDrawerSelectedItem = 2;
+                                mDrawerSelectedItem = NAV_ASK_HN;
                                 break;
                             case R.id.nav_show_hn:
                                 mStoryTypeSpec = Constants.STORY_TYPE_SHOW_HN_PATH;
-                                mDrawerSelectedItem = 3;
+                                mDrawerSelectedItem = NAV_SHOW_HN;
                                 break;
                             case R.id.nav_popular:
                                 mStoryTypeSpec = Constants.TYPE_SEARCH;
-                                mDrawerSelectedItem = 4;
+                                mDrawerSelectedItem = NAV_SEARCH;
                             case R.id.nav_bookmark:
                                 mStoryTypeSpec = Constants.TYPE_BOOKMARK;
-                                mDrawerSelectedItem = 5;
+                                mDrawerSelectedItem = NAV_BOOKMARK;
                                 break;
                             case R.id.nav_settings:
                                 break;
@@ -434,7 +440,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                         transaction.commit();
                                     }
                                 } else if (type == R.id.nav_bookmark) {
-                                    //TODO
                                     menuItem.setChecked(true);
                                     BookmarkFragment bookmarkFragment = new BookmarkFragment();
                                     FragmentTransaction transaction = getFragmentManager()
@@ -863,6 +868,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     public void onOpenComment(Post post) {
         Intent intent = new Intent(this, CommentsActivity.class);
         intent.putExtra(Constants.KEY_POST_PARCEL, Parcels.wrap(post));
+        intent.putExtra(Constants.KEY_IS_BOOKMARKED, mDrawerSelectedItem == NAV_BOOKMARK);
         startActivity(intent);
     }
 

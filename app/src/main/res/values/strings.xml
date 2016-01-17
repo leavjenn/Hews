@@ -10,6 +10,7 @@
     <string name="menu_refresh">Refresh</string>
     <string name="menu_share_link">Share link</string>
     <string name="menu_bookmark">Bookmark</string>
+    <string name="menu_unbookmark">Unbookmark</string>
     <string name="menu_display">Display</string>
     <string name="send_to">Send to</string>
     <string name="go_to_comment">Go to comment</string>

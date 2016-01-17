@@ -62,6 +62,7 @@ public class CommentsActivity extends AppCompatActivity implements
     CompositeSubscription mCompositeSubscription;
 
     private boolean isReplyEnabled;
+    private Menu mMenu;
     private CoordinatorLayout coordinatorLayout;
     private EditText etReply;
     private FloatingActionButton btnReplySend;
@@ -112,9 +113,10 @@ public class CommentsActivity extends AppCompatActivity implements
 
         Parcelable postParcel = intent.getParcelableExtra(Constants.KEY_POST_PARCEL);
         if (postParcel != null) {
-            commentsFragment = CommentsFragment.newInstance(postParcel);
+            commentsFragment = CommentsFragment.newInstance(postParcel,
+                    intent.getBooleanExtra(Constants.KEY_IS_BOOKMARKED, false));
             Post post = Parcels.unwrap(postParcel);
-            //TODO how the url could be null?!
+            //FIXME how the url could be null?!
             mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
             mPostId = post.getId();
         } else {
@@ -172,6 +174,7 @@ public class CommentsActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_comments, menu);
+        mMenu = menu;
         return true;
     }
 
@@ -236,7 +239,8 @@ public class CommentsActivity extends AppCompatActivity implements
                 break;
 
             case R.id.action_bookmark:
-                //TODO bookmark
+                //TODO change to unbookmark if it already bookmarked
+                MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
                 CommentsFragment commentsFragment =
                         (CommentsFragment) getFragmentManager().findFragmentByTag("CommentFragTag");
                 commentsFragment.addBookmark();

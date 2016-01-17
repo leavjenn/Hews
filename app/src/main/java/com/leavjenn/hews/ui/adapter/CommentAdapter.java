@@ -145,9 +145,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             commentViewHolder.tvAuthor.setText(comment.getBy());
         }
 
-        if (mCollapsedChildrenCommentsIndex.containsKey(comment.getId())) {
+        if (mCollapsedChildrenCommentsIndex.containsKey(comment.getCommentId())) {
             commentViewHolder.tvComment.setText(mContext.getString(R.string.comments_collapsed_prompt,
-                    mCollapsedChildrenCommentsIndex.get(comment.getId()).size() + 1));
+                    mCollapsedChildrenCommentsIndex.get(comment.getCommentId()).size() + 1));
             commentViewHolder.tvComment.setMinLines(2);
             commentViewHolder.tvComment.setGravity(Gravity.CENTER);
         } else {
@@ -156,11 +156,11 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             commentViewHolder.tvComment.setGravity(Gravity.LEFT);
         }
 
-        if (mCollapsedOlderCommentsIndex.containsKey(comment.getId())) {
+        if (mCollapsedOlderCommentsIndex.containsKey(comment.getCommentId())) {
             commentViewHolder.tvCollapseOlderComments.setVisibility(View.VISIBLE);
             commentViewHolder.tvCollapseOlderComments.setText(
                     mContext.getString(R.string.comments_collapsed_prompt,
-                    mCollapsedOlderCommentsIndex.get(comment.getId()).size()));
+                            mCollapsedOlderCommentsIndex.get(comment.getCommentId()).size()));
         } else {
             commentViewHolder.tvCollapseOlderComments.setVisibility(View.GONE);
         }
@@ -285,7 +285,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public void addAll(List<? extends HNItem> hnItemList) {
-        mItemList.addAll(hnItemList);
+        mItemList.addAll(mItemList.size() - 1, hnItemList);
     }
 
     public void updateFooter(int loadingState) {
@@ -324,7 +324,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         if (!childrenComments.isEmpty()) {
-            mCollapsedChildrenCommentsIndex.put(parentComment.getId(), childrenComments);
+            mCollapsedChildrenCommentsIndex.put(parentComment.getCommentId(), childrenComments);
             for (Comment comment : childrenComments) {
                 mItemList.remove(comment);
             }
@@ -336,7 +336,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void expandChildrenComments(int position) {
         Comment parentComment = (Comment) mItemList.get(position);
         List<Comment> collapsedComments =
-                mCollapsedChildrenCommentsIndex.get(parentComment.getId());
+                mCollapsedChildrenCommentsIndex.get(parentComment.getCommentId());
         int insertPosition = mItemList.indexOf(parentComment) + 1;
         for (Comment comment : collapsedComments) {
             mItemList.add(insertPosition, comment);
@@ -345,12 +345,12 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyItemRangeInserted(mItemList.indexOf(parentComment) + 1,
                 collapsedComments.size());
         notifyItemChanged(position);
-        mCollapsedChildrenCommentsIndex.remove(parentComment.getId());
+        mCollapsedChildrenCommentsIndex.remove(parentComment.getCommentId());
     }
 
     public boolean isChildrenCommentsCollapsed(int position) {
         Comment Comment = (Comment) mItemList.get(position);
-        return mCollapsedChildrenCommentsIndex.containsKey(Comment.getId());
+        return mCollapsedChildrenCommentsIndex.containsKey(Comment.getCommentId());
     }
 
     public void collapseInBetweenComments(int position) {
@@ -365,7 +365,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         if (!olderComments.isEmpty()) {
-            mCollapsedOlderCommentsIndex.put(curComment.getId(), olderComments);
+            mCollapsedOlderCommentsIndex.put(curComment.getCommentId(), olderComments);
             for (Comment comment : olderComments) {
                 mItemList.remove(comment);
             }
@@ -376,7 +376,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public void expandInBetweenComments(int position) {
         Comment clingedComment = (Comment) mItemList.get(position);
-        List<Comment> olderComments = mCollapsedOlderCommentsIndex.get(clingedComment.getId());
+        List<Comment> olderComments = mCollapsedOlderCommentsIndex.get(clingedComment.getCommentId());
         int insertPosition = position;
         for (Comment comment : olderComments) {
             mItemList.add(insertPosition, comment);
@@ -385,13 +385,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         notifyItemChanged(position);
         notifyItemRangeInserted(position, olderComments.size());
-        mCollapsedOlderCommentsIndex.remove(clingedComment.getId());
+        mCollapsedOlderCommentsIndex.remove(clingedComment.getCommentId());
 
     }
 
     public boolean isInBetweenCommentsCollapsed(int position) {
         Comment Comment = (Comment) mItemList.get(position);
-        return mCollapsedOlderCommentsIndex.containsKey(Comment.getId());
+        return mCollapsedOlderCommentsIndex.containsKey(Comment.getCommentId());
     }
 
 
@@ -405,7 +405,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 (new CommentDialogFragment.OnCommentDialogClickListener() {
                     @Override
                     public void onUpvote() {
-                        ((CommentsActivity) mContext).vote(comment.getId());
+                        ((CommentsActivity) mContext).vote(comment.getCommentId());
                     }
 
                     @Override
@@ -413,7 +413,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         // scrollToPosition() not working
                         ((LinearLayoutManager) mRecyclerView.getLayoutManager())
                                 .scrollToPositionWithOffset(position, 0);
-                        ((CommentsActivity) mContext).enableReplyMode(true, comment.getId());
+                        ((CommentsActivity) mContext).enableReplyMode(true, comment.getCommentId());
                     }
 
                     @Override
@@ -430,7 +430,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         Intent sendIntent = new Intent();
                         sendIntent.setAction(Intent.ACTION_SEND);
                         String url = "https://news.ycombinator.com/item?id="
-                                + comment.getId();
+                                + comment.getCommentId();
                         sendIntent.putExtra(Intent.EXTRA_TEXT, url);
                         sendIntent.setType("text/plain");
                         mContext.startActivity(Intent.createChooser(sendIntent,

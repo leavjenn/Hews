@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.data.StorIOHelper;
+import com.leavjenn.hews.data.table.CommentTable;
+import com.leavjenn.hews.data.table.PostTable;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
@@ -150,7 +152,7 @@ public class DataManager {
                 .flatMap(new Func1<Comment, Observable<Comment>>() {
                     @Override
                     public Observable<Comment> call(Comment comment) {
-                        Log.i("---getOneBranchComments", String.valueOf(comment.getId()));
+                        Log.i("---getOneBranchComments", String.valueOf(comment.getCommentId()));
                         return getInnerComments(comment, level);
                     }
                 })
@@ -244,7 +246,7 @@ public class DataManager {
     private List<Comment> sortComments(List<Long> firstLevelCommentIds, List<Comment> allComments) {
         HashMap<Long, Comment> allCommentsMap = new HashMap<>();
         for (Comment childComment : allComments) {
-            allCommentsMap.put(childComment.getId(), childComment);
+            allCommentsMap.put(childComment.getCommentId(), childComment);
         }
         List<Comment> validFirstLevelCommentList = new ArrayList<>();
         for (Long id : firstLevelCommentIds) {
@@ -437,7 +439,10 @@ public class DataManager {
         return StorIOHelper.getStorIOSQLite(context)
                 .get()
                 .listOfObjects(Post.class)
-                .withQuery(Query.builder().table("post").where("COLUMN_ID=" + postId).build())
+                .withQuery(Query.builder()
+                        .table(PostTable.TABLE)
+                        .where(PostTable.COLUMN_ID + " = " + postId)
+                        .build())
                 .prepare()
                 .createObservable();
     }
@@ -446,7 +451,7 @@ public class DataManager {
         return StorIOHelper.getStorIOSQLite(context)
                 .get()
                 .listOfObjects(Post.class)
-                .withQuery(Query.builder().table("post").build())
+                .withQuery(Query.builder().table(PostTable.TABLE).build())
                 .prepare()
                 .createObservable();
     }
@@ -464,9 +469,9 @@ public class DataManager {
                 .get()
                 .listOfObjects(Comment.class)
                 .withQuery(Query.builder()
-                        .table("comment")
-                        .where("parent = " + String.valueOf(postId))
-                        .orderBy("index DESC")
+                        .table(CommentTable.TABLE)
+                        .where(CommentTable.COLUMN_PARENT + " = " + postId)
+                        .orderBy(CommentTable.COLUMN_INDEX + " ASC")
                         .build())
                 .prepare()
                 .createObservable();
