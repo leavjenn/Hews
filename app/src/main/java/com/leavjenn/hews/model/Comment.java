@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class Comment extends HNItem {
 
     @StorIOSQLiteColumn(name = CommentTable.COLUMN_COMMENT_ID, key = true)
-    @SerializedName(CommentTable.COLUMN_COMMENT_ID)
+    @SerializedName("id")
     long commentId;
 
     @StorIOSQLiteColumn(name = CommentTable.COLUMN_INDEX)
