@@ -13,6 +13,8 @@ import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
+import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResult;
+import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResults;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 import com.pushtorefresh.storio.sqlite.queries.Query;
@@ -456,6 +458,14 @@ public class DataManager {
                 .createObservable();
     }
 
+    public Observable<DeleteResult> deletePostFromDb(Context context, Post post) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .delete()
+                .object(post)
+                .prepare()
+                .createObservable();
+    }
+
     public Observable<PutResults<Comment>> putCommentsToDb(Context context, List<Comment> commentList) {
         return StorIOHelper.getStorIOSQLite(context)
                 .put()
@@ -473,6 +483,14 @@ public class DataManager {
                         .where(CommentTable.COLUMN_PARENT + " = " + postId)
                         .orderBy(CommentTable.COLUMN_INDEX + " ASC")
                         .build())
+                .prepare()
+                .createObservable();
+    }
+
+    public Observable<DeleteResults<Comment>> deleteStoryCommentsFromDb(Context context, List<Comment> comments) {
+        return StorIOHelper.getStorIOSQLite(context)
+                .delete()
+                .objects(comments)
                 .prepare()
                 .createObservable();
     }

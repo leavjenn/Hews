@@ -175,6 +175,11 @@ public class CommentsActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_comments, menu);
         mMenu = menu;
+        if (SharedPrefsManager.isPostBookmarked(prefs, mPostId)) {
+            MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
+            itemBookmark.setTitle(getString(R.string.menu_unbookmark));
+            itemBookmark.setIcon(R.drawable.ic_unbookmark);
+        }
         return true;
     }
 
@@ -239,11 +244,7 @@ public class CommentsActivity extends AppCompatActivity implements
                 break;
 
             case R.id.action_bookmark:
-                //TODO change to unbookmark if it already bookmarked
-                MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
-                CommentsFragment commentsFragment =
-                        (CommentsFragment) getFragmentManager().findFragmentByTag("CommentFragTag");
-                commentsFragment.addBookmark();
+                changeBookmarkState();
                 break;
 
             case R.id.action_display:
@@ -332,6 +333,23 @@ public class CommentsActivity extends AppCompatActivity implements
 
     public void setUrl(String url) {
         mUrl = url;
+    }
+
+    private void changeBookmarkState() {
+        CommentsFragment commentsFragment =
+                (CommentsFragment) getFragmentManager().findFragmentByTag("CommentFragTag");
+        MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
+        if (SharedPrefsManager.isPostBookmarked(prefs, mPostId)) {
+            commentsFragment.removeBookmark();
+            itemBookmark.setTitle(getString(R.string.menu_bookmark));
+            itemBookmark.setIcon(R.drawable.ic_bookmark);
+            SharedPrefsManager.setPostUnbookmarked(prefs, mPostId);
+        } else {
+            commentsFragment.addBookmark();
+            itemBookmark.setTitle(getString(R.string.menu_unbookmark));
+            itemBookmark.setIcon(R.drawable.ic_unbookmark);
+            SharedPrefsManager.setPostBookmarked(prefs, mPostId);
+        }
     }
 
     public void vote(final long itemId) {

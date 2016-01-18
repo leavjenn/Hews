@@ -3,7 +3,6 @@ package com.leavjenn.hews.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -27,6 +26,8 @@ import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.leavjenn.hews.network.DataManager;
 import com.leavjenn.hews.ui.adapter.CommentAdapter;
+import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResult;
+import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResults;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 
@@ -125,11 +126,11 @@ public class CommentsFragment extends Fragment
         if (mPost != null) {
             mCommentAdapter.addFooter(new HNItem.Footer());
             mCommentAdapter.addHeader(mPost);
-            if (isBookmarked) {
-                getCommentsFromDb(mPost);
-            } else {
-                getComments(mPost);
-            }
+//            if (isBookmarked) {
+//                getCommentsFromDb(mPost);
+//            } else {
+            getComments(mPost);
+//            }
         } else {
             if (savedInstanceState != null) {
                 mPostId = savedInstanceState.getLong(ARG_POST_ID);
@@ -219,7 +220,7 @@ public class CommentsFragment extends Fragment
                                     }
                                     isFetchingCompleted = true;
                                     if (isWaitingForBookmark) {
-                                        putPostAndCommentToDb(mPost, mCommentAdapter.getCommentList());
+//                                        putPostAndCommentToDb(mPost, mCommentAdapter.getCommentList());
                                     }
                                 }
 
@@ -277,17 +278,66 @@ public class CommentsFragment extends Fragment
     }
 
     public void addBookmark() {
-        snackbarBookmark = Snackbar.make(layoutRoot, "saving...", Snackbar.LENGTH_INDEFINITE);
+//        snackbarBookmark = Snackbar.make(layoutRoot, "Saving...", Snackbar.LENGTH_INDEFINITE);
         // snack bar text color cannot be changed directly
-        TextView tvSnackbarText = (TextView) snackbarBookmark.getView()
-                .findViewById(android.support.design.R.id.snackbar_text);
-        tvSnackbarText.setTextColor(Color.WHITE);
-        snackbarBookmark.show();
-        if (isFetchingCompleted) {
-            putPostAndCommentToDb(mPost, mCommentAdapter.getCommentList());
-        } else {
-            isWaitingForBookmark = true;
+//        TextView tvSnackbarText = (TextView) snackbarBookmark.getView()
+//                .findViewById(android.support.design.R.id.snackbar_text);
+//        tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
+//        snackbarBookmark.show();
+        putPostToDb(mPost);
+//        if (isFetchingCompleted) {
+//            putPostAndCommentToDb(mPost, mCommentAdapter.getCommentList());
+//        } else {
+        isWaitingForBookmark = true;
+//        }
+    }
+
+    public void removeBookmark() {
+        if (isWaitingForBookmark) {
+            isWaitingForBookmark = false;
         }
+        deletePostAndCommentFromDb();
+    }
+
+    private void putPostToDb(Post post) {
+        mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<PutResult>() {
+                    @Override
+                    public void call(PutResult putResult) {
+                        isWaitingForBookmark = false;
+                        // new snack bar will replace the old one
+                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Post saved!",
+                                Snackbar.LENGTH_LONG);
+                        TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
+                                .findViewById(android.support.design.R.id.snackbar_text);
+                        tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
+                        snackbarSucceed.show();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("---putPostToDb", throwable.toString());
+                    }
+                }));
+    }
+
+    private void putCommentsToDb(List<Comment> comments) {
+        mCompositeSubscription.add(mDataManager.putCommentsToDb(getActivity(), comments)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<PutResults<Comment>>() {
+                    @Override
+                    public void call(PutResults<Comment> commentPutResults) {
+
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("---putCommentsToDb", throwable.toString());
+                    }
+                }));
     }
 
     private void putPostAndCommentToDb(Post post, List<Comment> commentList) {
@@ -301,11 +351,11 @@ public class CommentsFragment extends Fragment
                     public void onCompleted() {
                         isWaitingForBookmark = false;
                         // new snack bar will replace the old one
-                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "saving succeed!",
+                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Post saved!",
                                 Snackbar.LENGTH_LONG);
                         TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
                                 .findViewById(android.support.design.R.id.snackbar_text);
-                        tvSnackbarText.setTextColor(Color.WHITE);
+                        tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
                         snackbarSucceed.show();
                     }
 
@@ -322,6 +372,39 @@ public class CommentsFragment extends Fragment
                         if (o instanceof PutResults) {
                             Log.i("---", (((PutResults) o).numberOfInserts() + ((PutResults) o).numberOfUpdates())
                                     + " comments saved");
+                        }
+                    }
+                }));
+    }
+
+    private void deletePostAndCommentFromDb() {
+        mCompositeSubscription.add(Observable.merge(mDataManager.deletePostFromDb(getActivity(), mPost),
+                mDataManager.deleteStoryCommentsFromDb(getActivity(), mCommentAdapter.getCommentList()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Object>() {
+                    @Override
+                    public void onCompleted() {
+                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Unbookmark succeed!",
+                                Snackbar.LENGTH_LONG);
+                        TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
+                                .findViewById(android.support.design.R.id.snackbar_text);
+                        tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
+                        snackbarSucceed.show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("-delPost&CommentFromDb", e.toString());
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+                        if (o instanceof DeleteResult) {
+                            Log.i("---", "post deleted");
+                        }
+                        if (o instanceof DeleteResults) {
+                            Log.i("---", "comments deleted");
                         }
                     }
                 }));
