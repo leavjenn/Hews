@@ -124,13 +124,13 @@ public class CommentsFragment extends Fragment
         isWaitingForBookmark = false;
         mDataManager = new DataManager();
         if (mPost != null) {
-            mCommentAdapter.addFooter(new HNItem.Footer());
-            mCommentAdapter.addHeader(mPost);
-//            if (isBookmarked) {
-//                getCommentsFromDb(mPost);
-//            } else {
-            getComments(mPost);
-//            }
+            if (isBookmarked) {
+                getPost(mPost.getId());
+            } else {
+                mCommentAdapter.addFooter(new HNItem.Footer());
+                mCommentAdapter.addHeader(mPost);
+                getComments(mPost);
+            }
         } else {
             if (savedInstanceState != null) {
                 mPostId = savedInstanceState.getLong(ARG_POST_ID);
