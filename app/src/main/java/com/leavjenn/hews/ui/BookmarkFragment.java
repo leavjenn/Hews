@@ -32,11 +32,18 @@ public class BookmarkFragment extends BasePostListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
-        getPostBookmarks();
         return v;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        getPostBookmarks();
+    }
+
     private void getPostBookmarks() {
+        mPostAdapter.clear();
+        mPostAdapter.notifyDataSetChanged();
         mCompositeSubscription.add(mDataManager.getAllPostsFromDb(getActivity())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Post>>() {
