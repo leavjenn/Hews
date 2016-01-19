@@ -43,7 +43,6 @@ public class BookmarkFragment extends BasePostListFragment {
 
     private void getPostBookmarks() {
         mPostAdapter.clear();
-        mPostAdapter.notifyDataSetChanged();
         mCompositeSubscription.add(mDataManager.getAllPostsFromDb(getActivity())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<List<Post>>() {

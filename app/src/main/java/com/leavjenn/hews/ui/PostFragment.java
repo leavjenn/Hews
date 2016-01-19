@@ -348,7 +348,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 }
             });
             mPostAdapter.clear();
-            mPostAdapter.notifyDataSetChanged();
             if (type.equals(Constants.TYPE_SEARCH)) {
                 loadPostListFromSearch(spec, 0);
             } else if (type.equals(Constants.TYPE_STORY)) {

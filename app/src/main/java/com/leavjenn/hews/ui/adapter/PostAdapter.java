@@ -20,8 +20,6 @@ import com.leavjenn.hews.model.Post;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit.http.HEAD;
-
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     final static int UNREAD_ITEM_LEFT_FOR_RELOADING = 10;
     static SharedPreferences prefs;
@@ -119,6 +117,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public void clear() {
         mPostList.clear();
+        notifyDataSetChanged();
         mMaxRead = 0;
     }
 

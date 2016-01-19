@@ -240,7 +240,6 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mCompositeSubscription.clear();
             mSwipeRefreshLayout.setRefreshing(true);
             mPostAdapter.clear();
-            mPostAdapter.notifyDataSetChanged();
             loadPostListFromSearch(keyword, dateRange, 0, isSortByDate);
         } else {
             if (mSwipeRefreshLayout.isRefreshing()) {
