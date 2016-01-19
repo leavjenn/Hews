@@ -19,6 +19,7 @@ public class SharedPrefsManager {
     public static final String KEY_SHOW_TOOLTIP = "key_show_tooltip";
     public static final String KEY_POST_IS_READ = "key_post_is_read";
     public static final String KEY_POST_IS_BOOKMARKED = "key_post_is_bookmarked";
+    public static final String KEY_COMMENTS_ARE_BOOKMARKED = "key_comments_are_bookmarked";
     public static final String THEME_LIGHT = "0";
     public static final String THEME_SEPIA = "1";
     public static final String THEME_DARK = "2";
@@ -167,6 +168,22 @@ public class SharedPrefsManager {
 
     public static boolean isPostBookmarked(SharedPreferences sp, long postId) {
         return sp.getBoolean(KEY_POST_IS_BOOKMARKED + postId, false);
+    }
+
+    public static void setCommentsBookmarked(SharedPreferences sp, long postId) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, true);
+        editor.apply();
+    }
+
+    public static void setCommentsUnbookmarked(SharedPreferences sp, long postId) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, false);
+        editor.apply();
+    }
+
+    public static boolean areCommentsBookmarked(SharedPreferences sp, long postId) {
+        return sp.getBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, false);
     }
 
     //Settings

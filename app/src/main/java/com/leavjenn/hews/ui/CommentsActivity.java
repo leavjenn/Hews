@@ -215,6 +215,10 @@ public class CommentsActivity extends AppCompatActivity implements
                 }
                 break;
 
+            case R.id.action_bookmark:
+                changeBookmarkState();
+                break;
+
             case R.id.action_upvote:
                 vote(mPostId);
                 break;
@@ -241,10 +245,6 @@ public class CommentsActivity extends AppCompatActivity implements
                 sendIntent.putExtra(Intent.EXTRA_TEXT, commentUrl);
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
-                break;
-
-            case R.id.action_bookmark:
-                changeBookmarkState();
                 break;
 
             case R.id.action_display:
@@ -343,12 +343,10 @@ public class CommentsActivity extends AppCompatActivity implements
             commentsFragment.removeBookmark();
             itemBookmark.setTitle(getString(R.string.menu_bookmark));
             itemBookmark.setIcon(R.drawable.ic_bookmark);
-            SharedPrefsManager.setPostUnbookmarked(prefs, mPostId);
         } else {
             commentsFragment.addBookmark();
             itemBookmark.setTitle(getString(R.string.menu_unbookmark));
             itemBookmark.setIcon(R.drawable.ic_unbookmark);
-            SharedPrefsManager.setPostBookmarked(prefs, mPostId);
         }
     }
 

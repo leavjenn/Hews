@@ -14,9 +14,9 @@ import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResult;
-import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResults;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
 import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
+import com.pushtorefresh.storio.sqlite.queries.DeleteQuery;
 import com.pushtorefresh.storio.sqlite.queries.Query;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -487,10 +487,13 @@ public class DataManager {
                 .createObservable();
     }
 
-    public Observable<DeleteResults<Comment>> deleteStoryCommentsFromDb(Context context, List<Comment> comments) {
+    public Observable<DeleteResult> deleteStoryCommentsFromDb(Context context, long postId) {
         return StorIOHelper.getStorIOSQLite(context)
                 .delete()
-                .objects(comments)
+                .byQuery(DeleteQuery.builder()
+                        .table(CommentTable.TABLE)
+                        .where(CommentTable.COLUMN_PARENT + "=" + postId)
+                        .build())
                 .prepare()
                 .createObservable();
     }
