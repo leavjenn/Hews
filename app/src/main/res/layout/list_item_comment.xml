@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     style="?attr/list_item_bg_color"
     android:layout_width="match_parent"
@@ -24,7 +25,9 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/iv_indent"
-        android:textColor="?attr/text_info_color" />
+        android:textColor="?attr/text_info_color"
+        tools:text="TBWA\Chiat\Day"
+        />
 
     <TextView
         android:id="@+id/tv_time"
@@ -33,7 +36,9 @@
         android:layout_alignBaseline="@id/tv_author"
         android:layout_marginRight="8dp"
         android:layout_toRightOf="@id/tv_author"
-        android:textColor="?attr/text_info_color" />
+        android:textColor="?attr/text_info_color"
+        tools:text="yesterday"
+        />
 
     <TextView
         android:id="@+id/tv_collapse_older_comments"
@@ -51,10 +56,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_author"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
         android:layout_toRightOf="@id/iv_indent"
         android:paddingBottom="8dp"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        tools:text="Here’s to the crazy ones. The misfits. The rebels. The troublemakers. The round pegs in the square holes. The ones who see things differently. They’re not fond of rules. And they have no respect for the status quo. You can quote them, disagree with them, glorify or vilify them. About the only thing you can’t do is ignore them. Because they change things. They push the human race forward. And while some may see them as the crazy ones, we see genius. Because the people who are crazy enough to think they can change the world, are the ones who do."
+        />
 
 </RelativeLayout>
