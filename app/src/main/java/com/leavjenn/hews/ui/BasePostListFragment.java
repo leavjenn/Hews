@@ -22,14 +22,15 @@ import rx.subscriptions.CompositeSubscription;
 
 public class BasePostListFragment extends Fragment implements PostAdapter.OnReachBottomListener,
         SharedPreferences.OnSharedPreferenceChangeListener{
-    DataManager mDataManager;
-    CompositeSubscription mCompositeSubscription;
-    SwipeRefreshLayout mSwipeRefreshLayout;
+    SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView rvPostList;
+    
     LinearLayoutManager mLinearLayoutManager;
     PostAdapter mPostAdapter;
     PostAdapter.OnItemClickListener mOnItemClickListener;
     OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
+    DataManager mDataManager;
+    CompositeSubscription mCompositeSubscription;
 
     public BasePostListFragment() {
     }
@@ -60,7 +61,7 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
         mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
         View v = inflater.inflate(R.layout.fragment_base_post_list, container, false);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_layout);
+        swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_layout);
         rvPostList = (RecyclerView) v.findViewById(R.id.list_post);
         setupList();
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(rvPostList);
@@ -85,18 +86,17 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
     }
 
     private void setupSwipeRefreshLayout() {
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
                 R.color.orange_900, R.color.orange_900, R.color.orange_600);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                refresh(mStoryType, mStoryTypeSpec);
+                refresh();
             }
         });
     }
 
     public void refresh() {
-
     }
 
     private void reformatListStyle() {

@@ -58,7 +58,7 @@ public class BookmarkFragment extends BasePostListFragment {
 
                     @Override
                     public void onNext(List<Post> posts) {
-                        mSwipeRefreshLayout.setRefreshing(false);
+                        swipeRefreshLayout.setRefreshing(false);
                         for (Post post : posts) {
                             mPostAdapter.add(post);
                         }
@@ -66,4 +66,11 @@ public class BookmarkFragment extends BasePostListFragment {
                 }));
     }
 
+    @Override
+    public void refresh() {
+        super.refresh();
+        if (swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    }
 }
