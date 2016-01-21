@@ -50,20 +50,20 @@ public class CommentsFragment extends Fragment
     private static final String ARG_IS_BOOKMARKED = "is_bookmarked";
     private static final String ARG_POST_ID = "post_id";
 
-    private boolean isBookmarked, isFetchingCompleted;
-    private Post mPost;
-    private long mPostId;
     private RelativeLayout layoutRoot;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView mRecyclerView;
-    private LinearLayoutManager mLinearLayoutManager;
 
+    private boolean isBookmarked, isFetchingCompleted;
+    private Post mPost;
+    private long mPostId;
+    private LinearLayoutManager mLinearLayoutManager;
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
     private DataManager mDataManager;
     private Subscription mPostSubscription, mCommentsSubscription;
     private CompositeSubscription mCompositeSubscription;
-    OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
+    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
     public CommentsFragment() {
     }
@@ -108,6 +108,7 @@ public class CommentsFragment extends Fragment
             }
         }
 
+        mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
@@ -119,7 +120,9 @@ public class CommentsFragment extends Fragment
         View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
         layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_fragment_comment_root);
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
-        initRecyclerView(rootView);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.comment_list);
+
+        setupRecyclerView();
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
                 R.color.orange_900, R.color.orange_900, R.color.orange_600);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -129,7 +132,6 @@ public class CommentsFragment extends Fragment
             }
         });
 
-        mDataManager = new DataManager();
         if (mPost != null) {
             if (isBookmarked && !SharedPrefsManager.areCommentsBookmarked(prefs, mPost.getId())) {
                 // post is bookmarked but comments are not
@@ -169,8 +171,7 @@ public class CommentsFragment extends Fragment
         super.onDetach();
     }
 
-    private void initRecyclerView(View rootView) {
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.comment_list);
+    private void setupRecyclerView() {
         mCommentAdapter = new CommentAdapter(getActivity(), mRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
@@ -236,9 +237,7 @@ public class CommentsFragment extends Fragment
             if (mCommentsSubscription != null) {
                 mCommentsSubscription.unsubscribe();
             }
-            mCommentsSubscription =
-//                    mDataManager.getCommentsUseFirebase(commentIds, 0))
-                    mDataManager.getComments(post, 0)
+            mCommentsSubscription = mDataManager.getComments(post, 0)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Subscriber<List<Comment>>() {

@@ -36,6 +36,7 @@ import java.util.List;
 
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -116,9 +117,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
-
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_post);
+
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
@@ -226,21 +227,17 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mCompositeSubscription.add(mDataManager.getPostList(storyTypeUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Long>>() {
+                .subscribe(new Action1<List<Long>>() {
                     @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("loadPostList", e.toString());
-                    }
-
-                    @Override
-                    public void onNext(List<Long> longs) {
+                    public void call(List<Long> longs) {
                         mPostIdList = longs;
                         loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
                         mLoadingState = Constants.LOADING_IN_PROGRESS;
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("loadPostList", throwable.toString());
                     }
                 }));
     }
@@ -251,18 +248,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                         + "," + "created_at_i<" + timeRangeCombine.substring(11), page)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<HNItem.SearchResult>() {
+                        .subscribe(new Action1<HNItem.SearchResult>() {
                             @Override
-                            public void onCompleted() {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.i("search", e.toString());
-                            }
-
-                            @Override
-                            public void onNext(HNItem.SearchResult searchResult) {
+                            public void call(HNItem.SearchResult searchResult) {
                                 List<Long> list = new ArrayList<>();
                                 mSearchResultTotalPages = searchResult.getNbPages();
                                 for (int i = 0; i < searchResult.getHits().length; i++) {
@@ -270,6 +258,12 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                                 }
                                 loadPostFromList(list);
                                 mLoadingState = Constants.LOADING_IN_PROGRESS;
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Log.i("search", throwable.toString());
+
                             }
                         }));
     }
@@ -403,18 +397,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Comment>() {
+                .subscribe(new Action1<Comment>() {
                     @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("err " + String.valueOf(post.getId()), e.toString());
-                    }
-
-                    @Override
-                    public void onNext(Comment comment) {
+                    public void call(Comment comment) {
                         if (comment != null) {
                             post.setSummary(Html.fromHtml(comment.getText()
                                     .replace("<p>", "<br /><br />").replace("\n", "<br />")).toString());
@@ -423,8 +408,13 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                             post.setSummary(null);
                         }
                     }
-                })
-        );
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("loadSummary: " + String.valueOf(post.getId()), throwable.toString());
+
+                    }
+                }));
     }
 
     public void setSwipeRefreshLayoutState(boolean isEnabled) {

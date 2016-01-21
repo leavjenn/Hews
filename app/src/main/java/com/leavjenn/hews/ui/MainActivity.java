@@ -61,8 +61,8 @@ import org.parceler.Parcels;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -70,7 +70,6 @@ import rx.subscriptions.CompositeSubscription;
 public class MainActivity extends AppCompatActivity implements PostAdapter.OnItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
         AppBarLayout.OnOffsetChangedListener {
-
     private static final int DRAWER_CLOSE_DELAY_MS = 250;
     private static final String STATE_DRAWER_SELECTED_ITEM = "state_drawer_selected_item";
     private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
@@ -80,25 +79,27 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final int NAV_SHOW_HN = 3;
     private static final int NAV_SEARCH = 4;
     private static final int NAV_BOOKMARK = 5;
+
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private View drawerHeader;
     private LinearLayout layoutLogin;
     private TextView tvLoginName;
     private ImageView ivExpander;
-    private boolean isLoginMenuExpanded;
-    private int mDrawerSelectedItem;
-    private final Handler mDrawerActionHandler = new Handler();
-    private ActionBarDrawerToggle mDrawerToggle;
     private AppBarLayout mAppbar;
     private Toolbar toolbar;
     private AlwaysShowDialogSpinner mSpinnerDateRange;
     private Spinner mSpinnerSortOrder;
     private PopupFloatingWindow mWindow;
     private SearchView mSearchView;
+    private FloatingScrollDownButton mFab;
+
+    private boolean isLoginMenuExpanded;
+    private int mDrawerSelectedItem;
+    private final Handler mDrawerActionHandler = new Handler();
+    private ActionBarDrawerToggle mDrawerToggle;
     private MenuItem mSearchItem;
     private boolean isSearchKeywordSubmitted;
-    private FloatingScrollDownButton mFab;
     private String mStoryType, mStoryTypeSpec;
     private SharedPreferences prefs;
     private DataManager mDataManager;
@@ -182,8 +183,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     protected void onStart() {
         super.onStart();
-        //init mCompositeSubscription here due to onCreate() will not be called
-//        when theme changed (call recreate())
+        // init mCompositeSubscription here due to onCreate() will not be called
+        // when theme changed (call reCreate())
         mCompositeSubscription = new CompositeSubscription();
         mDataManager = new DataManager();
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
@@ -497,18 +498,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         mCompositeSubscription.add(mDataManager.login(username, password)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Subscriber<String>() {
+                                .subscribe(new Action1<String>() {
                                     @Override
-                                    public void onCompleted() {
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        Log.e("login err", e.toString());
-                                    }
-
-                                    @Override
-                                    public void onNext(String s) {
+                                    public void call(String s) {
                                         if (s.isEmpty()) {// login failed
                                             loginDialogFragment.resetLogin();
                                         } else {
@@ -518,6 +510,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             SharedPrefsManager.setLoginCookie(prefs, s);
                                             updateLoginName();
                                         }
+                                    }
+                                }, new Action1<Throwable>() {
+                                    @Override
+                                    public void call(Throwable throwable) {
+                                        Log.e("login err", throwable.toString());
                                     }
                                 }));
                     }

@@ -46,29 +46,29 @@ import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
 
 import org.parceler.Parcels;
 
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class CommentsActivity extends AppCompatActivity implements
         SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
-        AppBarLayout.OnOffsetChangedListener{
+        AppBarLayout.OnOffsetChangedListener {
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
-    private String mUrl;
-    private long mPostId;
-    private SharedPreferences prefs;
-    private ChromeCustomTabsHelper mChromeCustomTabsHelper;
-    DataManager mDataManager;
-    CompositeSubscription mCompositeSubscription;
-
-    private boolean isReplyEnabled;
-    private Menu mMenu;
     private CoordinatorLayout coordinatorLayout;
+    private LinearLayout layoutReply;
     private EditText etReply;
     private FloatingActionButton btnReplySend;
-    private LinearLayout layoutReply;
+
+    private String mUrl;
+    private long mPostId;
+    private boolean isReplyEnabled;
+    private Menu mMenu;
+    private SharedPreferences prefs;
+    private ChromeCustomTabsHelper mChromeCustomTabsHelper;
+    private DataManager mDataManager;
+    private CompositeSubscription mCompositeSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +94,6 @@ public class CommentsActivity extends AppCompatActivity implements
         }
         setContentView(R.layout.activity_comments);
         Firebase.setAndroidContext(this);
-        //Setup Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
@@ -110,9 +109,9 @@ public class CommentsActivity extends AppCompatActivity implements
         layoutReply = (LinearLayout) findViewById(R.id.layout_reply);
         btnReplySend = (FloatingActionButton) findViewById(R.id.btn_reply_send);
         etReply = (EditText) findViewById(R.id.et_reply);
+
         Intent intent = getIntent();
         CommentsFragment commentsFragment = null;
-
         Parcelable postParcel = intent.getParcelableExtra(Constants.KEY_POST_PARCEL);
         if (postParcel != null) {
             commentsFragment = CommentsFragment.newInstance(postParcel,
@@ -365,19 +364,9 @@ public class CommentsActivity extends AppCompatActivity implements
         mCompositeSubscription.add(mDataManager.vote(itemId, prefs)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Integer>() {
+                .subscribe(new Action1<Integer>() {
                     @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        snackbarProcessing.dismiss();
-                        Log.e("post vote err", e.toString());
-                    }
-
-                    @Override
-                    public void onNext(Integer integer) {
+                    public void call(Integer integer) {
                         snackbarProcessing.dismiss();
                         AlertDialog.Builder builder =
                                 new AlertDialog.Builder(CommentsActivity.this)
@@ -425,6 +414,13 @@ public class CommentsActivity extends AppCompatActivity implements
                                 break;
                         }
                     }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        snackbarProcessing.dismiss();
+                        Log.e("post vote err", throwable.toString());
+
+                    }
                 }));
     }
 
@@ -437,18 +433,9 @@ public class CommentsActivity extends AppCompatActivity implements
                         mCompositeSubscription.add(mDataManager.login(username, password)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Subscriber<String>() {
+                                .subscribe(new Action1<String>() {
                                     @Override
-                                    public void onCompleted() {
-                                    }
-
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        Log.e("login err", e.toString());
-                                    }
-
-                                    @Override
-                                    public void onNext(String s) {
+                                    public void call(String s) {
                                         if (s.isEmpty()) {// login failed
                                             loginDialogFragment.resetLogin();
                                         } else {
@@ -457,6 +444,12 @@ public class CommentsActivity extends AppCompatActivity implements
                                             SharedPrefsManager.setUsername(prefs, username);
                                             SharedPrefsManager.setLoginCookie(prefs, s);
                                         }
+                                    }
+                                }, new Action1<Throwable>() {
+                                    @Override
+                                    public void call(Throwable throwable) {
+                                        Log.e("login err", throwable.toString());
+
                                     }
                                 }));
                     }
@@ -488,19 +481,9 @@ public class CommentsActivity extends AppCompatActivity implements
                 mDataManager.reply(itemId, replyText, SharedPrefsManager.getLoginCookie(prefs))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Integer>() {
+                        .subscribe(new Action1<Integer>() {
                             @Override
-                            public void onCompleted() {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                snackbarProcessing.dismiss();
-                                Log.e("post reply err", e.toString());
-                            }
-
-                            @Override
-                            public void onNext(Integer integer) {
+                            public void call(Integer integer) {
                                 snackbarProcessing.dismiss();
                                 AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
                                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -544,6 +527,13 @@ public class CommentsActivity extends AppCompatActivity implements
                                                 }).create().show();
                                         break;
                                 }
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                snackbarProcessing.dismiss();
+                                Log.e("post reply err", throwable.toString());
+
                             }
                         }));
     }
