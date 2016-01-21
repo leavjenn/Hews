@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -51,7 +52,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class CommentsActivity extends AppCompatActivity implements
-        SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
+        AppBarLayout.OnOffsetChangedListener{
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
     private String mUrl;
@@ -131,7 +133,7 @@ public class CommentsActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             if (commentsFragment != null) {
                 getFragmentManager().beginTransaction()
-                        .add(R.id.container, commentsFragment, "CommentFragTag")
+                        .add(R.id.container, commentsFragment, Constants.FRAGMENT_TAG_COMMENT)
                         .commit();
             }
         }
@@ -225,7 +227,7 @@ public class CommentsActivity extends AppCompatActivity implements
 
             case R.id.action_reply:
                 if (!Utils.isOnline(this)) {
-                    Utils.showOfflineToast(this);
+                    Utils.showLongToast(this, R.string.no_connection_prompt);
                     return false;
                 }
                 enableReplyMode(true, mPostId);
@@ -233,7 +235,7 @@ public class CommentsActivity extends AppCompatActivity implements
 
             case R.id.action_refresh:
                 CommentsFragment commentFragment =
-                        (CommentsFragment) getFragmentManager().findFragmentByTag("CommentFragTag");
+                        (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
                 commentFragment.refresh();
                 break;
 
@@ -337,7 +339,7 @@ public class CommentsActivity extends AppCompatActivity implements
 
     private void changeBookmarkState() {
         CommentsFragment commentsFragment =
-                (CommentsFragment) getFragmentManager().findFragmentByTag("CommentFragTag");
+                (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
         MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
         if (SharedPrefsManager.isPostBookmarked(prefs, mPostId)) {
             commentsFragment.removeBookmark();
@@ -352,7 +354,7 @@ public class CommentsActivity extends AppCompatActivity implements
 
     public void vote(final long itemId) {
         if (!Utils.isOnline(this)) {
-            Utils.showOfflineToast(this);
+            Utils.showLongToast(this, R.string.no_connection_prompt);
             return;
         }
         final Snackbar snackbarProcessing = Snackbar.make(coordinatorLayout, "Upvoting...", Snackbar.LENGTH_INDEFINITE);
@@ -470,7 +472,7 @@ public class CommentsActivity extends AppCompatActivity implements
 
     void reply(final long itemId, String replyText) {
         if (!Utils.isOnline(this)) {
-            Utils.showOfflineToast(this);
+            Utils.showLongToast(this, R.string.no_connection_prompt);
             return;
         }
         if (etReply.getText().toString().isEmpty()) {
@@ -574,5 +576,13 @@ public class CommentsActivity extends AppCompatActivity implements
     public void onRecyclerViewCreate(RecyclerView recyclerView) {
         mFab.setRecyclerView(recyclerView);
         setupFAB();
+    }
+
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+        if (getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT) instanceof CommentsFragment) {
+            ((CommentsFragment) getFragmentManager().findFragmentById(R.id.container))
+                    .setSwipeRefreshLayoutState(i == 0);
+        }
     }
 }

@@ -359,7 +359,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             if (mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
-            Toast.makeText(getActivity(), "No connection :(", Toast.LENGTH_LONG).show();
+            Utils.showLongToast(getActivity(), R.string.no_connection_prompt);
         }
     }
 
@@ -427,8 +427,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         );
     }
 
-    public void setSwipeRefreshLayoutState(boolean isEnable) {
-        mSwipeRefreshLayout.setEnabled(isEnable);
+    public void setSwipeRefreshLayoutState(boolean isEnabled) {
+        mSwipeRefreshLayout.setEnabled(isEnabled);
     }
 
     @Override

@@ -205,7 +205,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
             commentFooterViewHolder.progressBar.setVisibility(View.GONE);
             commentFooterViewHolder.tvNoCommentPromt.setText(
-                    mContext.getResources().getString(R.string.no_comment_promt));
+                    mContext.getResources().getString(R.string.no_comment_prompt));
         } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
             commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
             commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);

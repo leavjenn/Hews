@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
+import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
@@ -52,6 +54,7 @@ public class CommentsFragment extends Fragment
     private Post mPost;
     private long mPostId;
     private RelativeLayout layoutRoot;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
 
@@ -115,8 +118,17 @@ public class CommentsFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
         layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_fragment_comment_root);
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         initRecyclerView(rootView);
-        //setupFab(rootView);
+        swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
+                R.color.orange_900, R.color.orange_900, R.color.orange_600);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh();
+            }
+        });
+
         mDataManager = new DataManager();
         if (mPost != null) {
             if (isBookmarked && !SharedPrefsManager.areCommentsBookmarked(prefs, mPost.getId())) {
@@ -167,24 +179,44 @@ public class CommentsFragment extends Fragment
     }
 
     public void refresh() {
-        mCommentAdapter.clear();
-        mCommentAdapter.notifyDataSetChanged();
-        isFetchingCompleted = false;
-        getPost(mPost != null ? mPost.getId() : mPostId);
+        // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
+        // https://code.google.com/p/android/issues/detail?id=77712
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(true);
+            }
+        });
+        if (Utils.isOnline(getActivity())) {
+            mCommentAdapter.clear();
+            mCommentAdapter.notifyDataSetChanged();
+            isFetchingCompleted = false;
+            getPost(mPost != null ? mPost.getId() : mPostId);
+        } else {
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+            Utils.showLongToast(getActivity(), R.string.no_connection_prompt);
+        }
     }
 
     public void getPost(long postId) {
-        mCommentAdapter.addFooter(new HNItem.Footer());
-        mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
-        if (mPostSubscription != null) {
+        if (mPostSubscription != null && mPostSubscription.isUnsubscribed()) {
             mPostSubscription.unsubscribe();
         }
+        if (mCommentsSubscription != null && mCommentsSubscription.isUnsubscribed()) {
+            mCommentsSubscription.unsubscribe();
+        }
+        mCompositeSubscription.clear();
         mPostSubscription = mDataManager.getPost(postId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Post>() {
                     @Override
                     public void call(Post post) {
+                        swipeRefreshLayout.setRefreshing(false);
+                        mCommentAdapter.addFooter(new HNItem.Footer());
+                        mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
                         mPost = post;
                         mCommentAdapter.addHeader(mPost);
                         getComments(mPost);
@@ -367,5 +399,9 @@ public class CommentsFragment extends Fragment
             mRecyclerView.setAdapter(newAdapter);
             mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
         }
+    }
+
+    public void setSwipeRefreshLayoutState(boolean isEnabled) {
+        swipeRefreshLayout.setEnabled(isEnabled);
     }
 }

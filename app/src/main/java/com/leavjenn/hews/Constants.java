@@ -45,4 +45,6 @@ public final class Constants {
     public static final int OPERATE_ERROR_COOKIE_EXPIRED = 2;
     public static final int OPERATE_ERROR_HAVE_VOTED = 3;
     public static final int OPERATE_ERROR_UNKNOWN = 4;
+
+    public static final String FRAGMENT_TAG_COMMENT = "comment_fragment";
 }

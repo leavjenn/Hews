@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.support.annotation.StringRes;
 import android.support.customtabs.CustomTabsIntent;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
@@ -54,12 +55,12 @@ public class Utils {
         return connectivityManager.getActiveNetworkInfo() != null;
     }
 
-    public static void showOfflineToast(Context context) {
-        Toast.makeText(context, "No connection:)", Toast.LENGTH_LONG).show();
-    }
-
     public static void showLongToast(Context context, CharSequence text) {
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+    }
+
+    public static void showLongToast(Context context, @StringRes int ResId) {
+        Toast.makeText(context, ResId, Toast.LENGTH_LONG).show();
     }
 
     // uri scheme can only lower case char
