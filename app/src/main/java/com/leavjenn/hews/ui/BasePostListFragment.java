@@ -52,21 +52,26 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDataManager = new DataManager();
+        mCompositeSubscription = new CompositeSubscription();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mDataManager = new DataManager();
-        mCompositeSubscription = new CompositeSubscription();
         View v = inflater.inflate(R.layout.fragment_base_post_list, container, false);
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_layout);
         rvPostList = (RecyclerView) v.findViewById(R.id.list_post);
+        return v;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         setupList();
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(rvPostList);
         setupSwipeRefreshLayout();
-        return v;
     }
 
     @Override

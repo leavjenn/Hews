@@ -120,20 +120,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_post);
 
-        mLinearLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
-        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
-        mRecyclerView.setAdapter(mPostAdapter);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-                R.color.orange_900, R.color.orange_900, R.color.orange_600);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refresh(mStoryType, mStoryTypeSpec);
-            }
-        });
-
         if (SharedPrefsManager.getIsShowTooltip(prefs)) {
             tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
             toolTip = new ToolTip()
@@ -148,6 +134,20 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mLinearLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
+        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
+        mRecyclerView.setAdapter(mPostAdapter);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
+                R.color.orange_900, R.color.orange_900, R.color.orange_600);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh(mStoryType, mStoryTypeSpec);
+            }
+        });
+
         showPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
         if (savedInstanceState != null) {
             mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);

@@ -90,6 +90,8 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
+        mDataManager = new DataManager();
+        mCompositeSubscription = new CompositeSubscription();
     }
 
     @Override
@@ -99,6 +101,12 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_search);
+        return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
@@ -113,14 +121,6 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             }
         });
         SHOW_POST_SUMMARY = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
-        mDataManager = new DataManager();
-        mCompositeSubscription = new CompositeSubscription();
-        return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
