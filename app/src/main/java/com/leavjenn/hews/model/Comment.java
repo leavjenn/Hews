@@ -5,8 +5,11 @@ import com.leavjenn.hews.data.table.CommentTable;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteColumn;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
 
+import org.parceler.Parcel;
+
 import java.util.ArrayList;
 
+@Parcel
 @StorIOSQLiteType(table = "comment")
 public class Comment extends HNItem {
 
@@ -37,13 +40,10 @@ public class Comment extends HNItem {
     @StorIOSQLiteColumn(name = CommentTable.COLUMN_LEVEL)
     int level;
 
-    public ArrayList<Comment> comments;
-
     //FIXME necessary?
     public String error;
 
     public Comment() {
-        comments = new ArrayList<>();
     }
 
     public Comment(long commentId, String by, long parent, ArrayList<Long> kids, long time, String text) {

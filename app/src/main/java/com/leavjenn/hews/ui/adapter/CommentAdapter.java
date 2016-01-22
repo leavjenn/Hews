@@ -293,8 +293,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyItemChanged(mItemList.size() - 1);
     }
 
-    public List<Comment> getCommentList() {
-        List<Comment> commentList = new ArrayList<>();
+    public ArrayList<Comment> getCommentList() {
+        ArrayList<Comment> commentList = new ArrayList<>();
         for (HNItem hnItem : mItemList) {
             if (hnItem instanceof Comment) {
                 commentList.add((Comment) hnItem);

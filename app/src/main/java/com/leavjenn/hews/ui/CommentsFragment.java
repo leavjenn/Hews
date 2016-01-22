@@ -34,6 +34,7 @@ import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
 
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -46,17 +47,21 @@ import rx.subscriptions.CompositeSubscription;
 
 public class CommentsFragment extends Fragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private static final String ARG_POST_PARCEL = "post_parcel";
-    private static final String ARG_IS_BOOKMARKED = "is_bookmarked";
-    private static final String ARG_POST_ID = "post_id";
+    private static final String KEY_POST_PARCEL = "arg_post_parcel";
+    private static final String KEY_IS_BOOKMARKED = "arg_is_bookmarked";
+    private static final String KEY_POST_ID = "arg_post_id";
+    private static final String KEY_IS_FETCH_COMPLETED = "arg_is_fetch_completed";
+    private static final String KEY_COMMENTS_PARCEL = "arg_comments_parcel";
+    private static final String KEY_LAST_TIME_POSITION = "key_last_time_position";
 
     private RelativeLayout layoutRoot;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView mRecyclerView;
 
-    private boolean isBookmarked, isFetchingCompleted;
+    private boolean mIsBookmarked, isFetchingCompleted;
     private Post mPost;
     private long mPostId;
+    private int mLastTimeListPosition;
     private LinearLayoutManager mLinearLayoutManager;
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
@@ -71,8 +76,8 @@ public class CommentsFragment extends Fragment
     public static CommentsFragment newInstance(Parcelable postParcel, boolean isBookmarked) {
         CommentsFragment fragment = new CommentsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_POST_PARCEL, postParcel);
-        args.putBoolean(ARG_IS_BOOKMARKED, isBookmarked);
+        args.putParcelable(KEY_POST_PARCEL, postParcel);
+        args.putBoolean(KEY_IS_BOOKMARKED, isBookmarked);
         fragment.setArguments(args);
         return fragment;
     }
@@ -80,7 +85,7 @@ public class CommentsFragment extends Fragment
     public static CommentsFragment newInstance(Long postId) {
         CommentsFragment fragment = new CommentsFragment();
         Bundle args = new Bundle();
-        args.putLong(ARG_POST_ID, postId);
+        args.putLong(KEY_POST_ID, postId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -100,11 +105,11 @@ public class CommentsFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            if (getArguments().containsKey(ARG_POST_PARCEL)) {
-                mPost = Parcels.unwrap(getArguments().getParcelable(ARG_POST_PARCEL));
-                isBookmarked = getArguments().getBoolean(ARG_IS_BOOKMARKED);
-            } else if (getArguments().containsKey(ARG_POST_ID)) {
-                mPostId = getArguments().getLong(ARG_POST_ID);
+            if (getArguments().containsKey(KEY_POST_PARCEL)) {
+                mPost = Parcels.unwrap(getArguments().getParcelable(KEY_POST_PARCEL));
+                mIsBookmarked = getArguments().getBoolean(KEY_IS_BOOKMARKED);
+            } else if (getArguments().containsKey(KEY_POST_ID)) {
+                mPostId = getArguments().getLong(KEY_POST_ID);
             }
         }
 
@@ -121,7 +126,6 @@ public class CommentsFragment extends Fragment
         layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_fragment_comment_root);
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.comment_list);
-
         setupRecyclerView();
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
                 R.color.orange_900, R.color.orange_900, R.color.orange_600);
@@ -131,34 +135,68 @@ public class CommentsFragment extends Fragment
                 refresh();
             }
         });
+        return rootView;
+    }
 
-        if (mPost != null) {
-            if (isBookmarked && !SharedPrefsManager.areCommentsBookmarked(prefs, mPost.getId())) {
-                // post is bookmarked but comments are not
-                getPost(mPost.getId());
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            mPostId = savedInstanceState.getLong(KEY_POST_ID);
+            mPost = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_PARCEL));
+            mIsBookmarked = savedInstanceState.getBoolean(KEY_IS_BOOKMARKED);
+            isFetchingCompleted = savedInstanceState.getBoolean(KEY_IS_FETCH_COMPLETED);
+            if (isFetchingCompleted) { // restore loaded comments
+                if (mCommentAdapter.getItemCount() == 0) {
+                    mCommentAdapter.addFooter(new HNItem.Footer());
+                    mCommentAdapter.addHeader(mPost);
+                    mCommentAdapter.addAll((ArrayList<Comment>) Parcels.unwrap(
+                            savedInstanceState.getParcelable(KEY_COMMENTS_PARCEL)));
+                    mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                }
+                mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
+                mRecyclerView.getLayoutManager().scrollToPosition(mLastTimeListPosition);
             } else {
                 mCommentAdapter.addFooter(new HNItem.Footer());
                 mCommentAdapter.addHeader(mPost);
-                if (isBookmarked) {
+                if (mIsBookmarked) {
                     getCommentsFromDb(mPost);
                 } else {
                     getComments(mPost);
                 }
             }
-        } else {
-            if (savedInstanceState != null) {
-                mPostId = savedInstanceState.getLong(ARG_POST_ID);
+        } else if (mPost != null) { // new instance, no saved instance state
+            if (mIsBookmarked && !SharedPrefsManager.areCommentsBookmarked(prefs, mPost.getId())) {
+                // post is bookmarked but comments are not
+                getPost(mPost.getId());
+            } else {
+                mCommentAdapter.addFooter(new HNItem.Footer());
+                mCommentAdapter.addHeader(mPost);
+                if (mIsBookmarked) {
+                    getCommentsFromDb(mPost);
+                } else {
+                    getComments(mPost);
+                }
             }
+        } else { // start from other app
             getPost(mPostId);
         }
-        return rootView;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mPostId = mPost.getId();
-        outState.putLong(ARG_POST_ID, mPostId);
+        outState.putLong(KEY_POST_ID, mPostId);
+        outState.putParcelable(KEY_POST_PARCEL, Parcels.wrap(mPost));
+        outState.putBoolean(KEY_IS_BOOKMARKED, mIsBookmarked);
+        outState.putBoolean(KEY_IS_FETCH_COMPLETED, isFetchingCompleted);
+        if (isFetchingCompleted) {
+            outState.putParcelable(KEY_COMMENTS_PARCEL, Parcels.wrap(mCommentAdapter.getCommentList()));
+            mLastTimeListPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
+                    findFirstVisibleItemPosition();
+            outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
+        }
     }
 
     @Override
@@ -238,38 +276,38 @@ public class CommentsFragment extends Fragment
                 mCommentsSubscription.unsubscribe();
             }
             mCommentsSubscription = mDataManager.getComments(post, 0)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Subscriber<List<Comment>>() {
-                                @Override
-                                public void onCompleted() {
-                                    mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
-                                    for (int i = 0; i < mCommentAdapter.getCommentList().size(); i++) {
-                                        Comment comment = mCommentAdapter.getCommentList().get(i);
-                                        comment.setParent(post.getId());
-                                        comment.setIndex(i);
-                                    }
-                                    isFetchingCompleted = true;
-                                    if (SharedPrefsManager.isPostBookmarked(prefs, post.getId())) {
-                                        putCommentsToDb(mCommentAdapter.getCommentList());
-                                    }
-                                }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<List<Comment>>() {
+                        @Override
+                        public void onCompleted() {
+                            mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                            for (int i = 0; i < mCommentAdapter.getCommentList().size(); i++) {
+                                Comment comment = mCommentAdapter.getCommentList().get(i);
+                                comment.setParent(post.getId());
+                                comment.setIndex(i);
+                            }
+                            isFetchingCompleted = true;
+                            if (SharedPrefsManager.isPostBookmarked(prefs, post.getId())) {
+                                putCommentsToDb(mCommentAdapter.getCommentList());
+                            }
+                        }
 
-                                @Override
-                                public void onError(Throwable e) {
-                                    mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
-                                    Toast.makeText(getActivity(), "Comments loading error",
-                                            Toast.LENGTH_LONG).show();
-                                    Log.e("error", "There was an error retrieving the comments " + e);
-                                }
+                        @Override
+                        public void onError(Throwable e) {
+                            mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
+                            Toast.makeText(getActivity(), "Comments loading error",
+                                    Toast.LENGTH_LONG).show();
+                            Log.e("error", "There was an error retrieving the comments " + e);
+                        }
 
-                                @Override
-                                public void onNext(List<Comment> commentList) {
-                                    for (Comment comment : commentList) {
-                                        mCommentAdapter.addComment(comment);
-                                    }
-                                }
-                            });
+                        @Override
+                        public void onNext(List<Comment> commentList) {
+                            for (Comment comment : commentList) {
+                                mCommentAdapter.addComment(comment);
+                            }
+                        }
+                    });
             mCompositeSubscription.add(mCommentsSubscription);
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
