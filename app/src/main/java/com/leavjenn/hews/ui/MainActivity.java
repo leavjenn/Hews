@@ -830,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             isSortByDate = true;
                             break;
                     }
-                    ((SearchFragment) currentFrag).setIsSortByDate(isSortByDate);
+                    ((SearchFragment) currentFrag).setSortByDate(isSortByDate);
                     if (((SearchFragment) currentFrag).getKeyword() != null
                             && isSearchKeywordSubmitted) {
                         ((SearchFragment) currentFrag).refresh(isSortByDate);

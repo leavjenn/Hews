@@ -15,9 +15,10 @@
     <string name="send_to">Send to</string>
     <string name="go_to_comment">Go to comment</string>
     <string name="share_link_to">Share link to</string>
-    <string name="no_connection_prompt">No connection :(</string>
-    <string name="no_comment_prompt">No comment yet</string>
     <string name="comments_collapsed_prompt">%d collapsed</string>
+    <string name="no_connection_prompt">No connection :(</string>
+    <string name="no_more_posts_prompt">No more posts</string>
+    <string name="no_comment_prompt">No comment yet</string>
 
     <!-- Nav drawer -->
     <string name="nav_login">Login</string>
