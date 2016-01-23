@@ -259,7 +259,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.i("loadPostListFromSearch", throwable.toString());
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Log.e("loadPostListFromSearch", throwable.toString());
 
                     }
                 }));
@@ -277,6 +278,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
                 @Override
                 public void onError(Throwable e) {
+                    mSwipeRefreshLayout.setRefreshing(false);
                     Log.e("loadPostFromList", e.toString());
                 }
 
