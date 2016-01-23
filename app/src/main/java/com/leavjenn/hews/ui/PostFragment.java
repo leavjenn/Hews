@@ -158,7 +158,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
             mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
             if (mPostAdapter.getItemCount() == 0) {
-                mPostAdapter.addAll((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
+                mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
             }
             mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
             mRecyclerView.getLayoutManager().scrollToPosition(mLastTimeListPosition);
@@ -231,7 +231,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 public void call(List<Long> longs) {
                     mPostIdList = longs;
                     loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
-                    mLoadingState = Constants.LOADING_IN_PROGRESS;
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -256,12 +255,11 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                             list.add(searchResult.getHits()[i].getObjectID());
                         }
                         loadPostFromList(list);
-                        mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.i("search", throwable.toString());
+                        Log.i("loadPostListFromSearch", throwable.toString());
 
                     }
                 }));
@@ -274,7 +272,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             .subscribe(new Subscriber<Post>() {
                 @Override
                 public void onCompleted() {
-                    mLoadingState = Constants.LOADING_IDLE;
+                    updateLoadingState(Constants.LOADING_IDLE);
                 }
 
                 @Override
@@ -284,22 +282,17 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
                 @Override
                 public void onNext(Post post) {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                    if (mSwipeRefreshLayout.isRefreshing()) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
                     mRecyclerView.setVisibility(View.VISIBLE);
                     if (post != null) {
                         post.setIndex(mPostAdapter.getItemCount() - 1);
-                        // setup url and pretty url
-                        String url = post.getUrl();
-                        if (url == null || url.isEmpty()) {
-                            url = Constants.YCOMBINATOR_ITEM_URL + post.getId();
-                            post.setUrl(url);
+                        Utils.setupPostUrl(post);
+                        mPostAdapter.addPost(post);
+                        if (mLoadingState != Constants.LOADING_IN_PROGRESS) {
+                            updateLoadingState(Constants.LOADING_IN_PROGRESS);
                         }
-                        String[] splitUrl = url.split("/");
-                        if (splitUrl.length > 2) {
-                            url = splitUrl[2];
-                            post.setPrettyUrl(url);
-                        }
-                        mPostAdapter.add(post);
                         if (mShowPostSummary
                             && !mStoryTypeSpec.equals(Constants.STORY_TYPE_ASK_HN_PATH)
                             && !mStoryTypeSpec.equals(Constants.STORY_TYPE_SHOW_HN_PATH)
@@ -340,6 +333,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 }
             });
             mPostAdapter.clear();
+            mPostAdapter.addFooter(new HNItem.Footer());
             switch (type) {
                 case Constants.TYPE_SEARCH:
                     loadPostListFromSearch(spec, 0);
@@ -363,36 +357,27 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         refresh(mStoryType, mStoryTypeSpec);
     }
 
+    private void updateLoadingState(int loadingState) {
+        mLoadingState = loadingState;
+        mPostAdapter.updateFooter(mLoadingState);
+    }
     private void loadMore() {
         if (mStoryType.equals(Constants.TYPE_STORY)
             && Constants.NUM_LOADING_ITEM * (mLoadedTime + 1) < mPostIdList.size()) {
             int start = Constants.NUM_LOADING_ITEM * mLoadedTime,
                 end = Constants.NUM_LOADING_ITEM * (++mLoadedTime);
+            updateLoadingState(Constants.LOADING_IN_PROGRESS);
             loadPostFromList(mPostIdList.subList(start, end));
-            mLoadingState = Constants.LOADING_IN_PROGRESS;
-            //Toast.makeText(getActivity(), "Loading more", Toast.LENGTH_SHORT).show();
             Log.i("loading", String.valueOf(start) + " - " + end);
         } else if (mStoryType.equals(Constants.TYPE_SEARCH)
             && mLoadedTime < mSearchResultTotalPages) {
             Log.i(String.valueOf(mSearchResultTotalPages), String.valueOf(mLoadedTime));
+            updateLoadingState(Constants.LOADING_IN_PROGRESS);
             loadPostListFromSearch(mStoryTypeSpec, mLoadedTime++);
-            mLoadingState = Constants.LOADING_IN_PROGRESS;
         } else {
             Utils.showLongToast(getActivity(), R.string.no_more_posts_prompt);
-            mLoadingState = Constants.LOADING_FINISH;
+            updateLoadingState(Constants.LOADING_FINISH);
         }
-    }
-
-    private void reformatListStyle() {
-        int position = mLinearLayoutManager.findFirstVisibleItemPosition();
-        int offset = 0;
-        View firstChild = mLinearLayoutManager.getChildAt(0);
-        if (firstChild != null) {
-            offset = firstChild.getTop();
-        }
-        PostAdapter newAdapter = (PostAdapter) mRecyclerView.getAdapter();
-        mRecyclerView.setAdapter(newAdapter);
-        mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
     }
 
     void loadSummary(final Post post) {
@@ -417,6 +402,18 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
                 }
             }));
+    }
+
+    private void reformatListStyle() {
+        int position = mLinearLayoutManager.findFirstVisibleItemPosition();
+        int offset = 0;
+        View firstChild = mLinearLayoutManager.getChildAt(0);
+        if (firstChild != null) {
+            offset = firstChild.getTop();
+        }
+        PostAdapter newAdapter = (PostAdapter) mRecyclerView.getAdapter();
+        mRecyclerView.setAdapter(newAdapter);
+        mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
     }
 
     public void setSwipeRefreshLayoutState(boolean isEnabled) {

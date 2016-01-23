@@ -13,13 +13,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
@@ -146,7 +145,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mIsSortByDate = getArguments().getBoolean(KEY_SORT_METHOD);
             mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
             if (mPostAdapter.getItemCount() == 0) {
-                mPostAdapter.addAll((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
+                mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
             }
             mSearchResultTotalPages = savedInstanceState.getInt(KEY_SEARCH_RESULT_TOTAL_PAGE);
             mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
@@ -193,18 +192,25 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
                 .subscribe(new Action1<HNItem.SearchResult>() {
                     @Override
                     public void call(HNItem.SearchResult searchResult) {
+                        if (searchResult.getHits().length == 0) {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mPostAdapter.updatePrompt(R.string.no_search_result_prompt);
+                            updateLoadingState(Constants.LOADING_PROMPT_NO_CONTENT);
+                            mPostAdapter.notifyDataSetChanged();
+                            return;
+                        }
                         List<Long> list = new ArrayList<>();
                         mSearchResultTotalPages = searchResult.getNbPages();
                         for (int i = 0; i < searchResult.getHits().length; i++) {
                             list.add(searchResult.getHits()[i].getObjectID());
                         }
                         loadPostFromList(list);
-                        mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.i("search", throwable.toString());
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Log.i("loadPostListFromSearch", throwable.toString());
                     }
                 }));
     }
@@ -216,21 +222,29 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             .subscribe(new Subscriber<Post>() {
                 @Override
                 public void onCompleted() {
-                    mLoadingState = Constants.LOADING_IDLE;
+                    updateLoadingState(Constants.LOADING_IDLE);
                 }
 
                 @Override
                 public void onError(Throwable e) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    updateLoadingState(Constants.LOADING_ERROR);
                     Log.e("loadPostFromList", e.toString());
                 }
 
                 @Override
                 public void onNext(Post post) {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                    if (mSwipeRefreshLayout.isRefreshing()) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
                     mRecyclerView.setVisibility(View.VISIBLE);
                     if (post != null) {
-                        mPostAdapter.add(post);
                         post.setIndex(mPostAdapter.getItemCount() - 1);
+                        Utils.setupPostUrl(post);
+                        mPostAdapter.addPost(post);
+                        if (mLoadingState != Constants.LOADING_IN_PROGRESS) {
+                            updateLoadingState(Constants.LOADING_IN_PROGRESS);
+                        }
                         if (mShowPostSummary && post.getKids() != null) {
                             loadSummary(post);
                         }
@@ -272,12 +286,13 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mCompositeSubscription.clear();
             mSwipeRefreshLayout.setRefreshing(true);
             mPostAdapter.clear();
+            mPostAdapter.addFooter(new HNItem.Footer());
             loadPostListFromSearch(keyword, dateRange, 0, isSortByDate);
         } else {
             if (mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
-            Toast.makeText(getActivity(), "No connection :(", Toast.LENGTH_LONG).show();
+            Utils.showLongToast(getActivity(), R.string.no_connection_prompt);
         }
     }
 
@@ -323,16 +338,19 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mSwipeRefreshLayout.setEnabled(isEnable);
     }
 
+    private void updateLoadingState(int loadingState) {
+        mLoadingState = loadingState;
+        mPostAdapter.updateFooter(mLoadingState);
+    }
+
     private void loadMore() {
-        if (mLoadingState == Constants.LOADING_IDLE) {
-            if (mLoadedTime < mSearchResultTotalPages) {
-                Log.i(String.valueOf(mSearchResultTotalPages), String.valueOf(mLoadedTime));
-                loadPostListFromSearch(mKeyword, mDateRange, mLoadedTime++, mIsSortByDate);
-                mLoadingState = Constants.LOADING_IN_PROGRESS;
-            } else {
-                Utils.showLongToast(getActivity(), R.string.no_more_posts_prompt);
-                mLoadingState = Constants.LOADING_FINISH;
-            }
+        if (mLoadedTime < mSearchResultTotalPages) {
+            Log.i(String.valueOf(mSearchResultTotalPages), String.valueOf(mLoadedTime));
+            updateLoadingState(Constants.LOADING_IN_PROGRESS);
+            loadPostListFromSearch(mKeyword, mDateRange, mLoadedTime++, mIsSortByDate);
+        } else {
+            Utils.showLongToast(getActivity(), R.string.no_more_posts_prompt);
+            updateLoadingState(Constants.LOADING_FINISH);
         }
     }
 
@@ -350,7 +368,9 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     @Override
     public void OnReachBottom() {
-        loadMore();
+        if (mLoadingState == Constants.LOADING_IDLE) {
+            loadMore();
+        }
     }
 
     @Override

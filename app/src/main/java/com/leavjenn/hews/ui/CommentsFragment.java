@@ -150,7 +150,7 @@ public class CommentsFragment extends Fragment
                 if (mCommentAdapter.getItemCount() == 0) {
                     mCommentAdapter.addFooter(new HNItem.Footer());
                     mCommentAdapter.addHeader(mPost);
-                    mCommentAdapter.addAll((ArrayList<Comment>) Parcels.unwrap(
+                    mCommentAdapter.addAllComments((ArrayList<Comment>) Parcels.unwrap(
                         savedInstanceState.getParcelable(KEY_COMMENTS_PARCEL)));
                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                 }
@@ -253,7 +253,9 @@ public class CommentsFragment extends Fragment
             .subscribe(new Action1<Post>() {
                 @Override
                 public void call(Post post) {
-                    swipeRefreshLayout.setRefreshing(false);
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
                     mCommentAdapter.addFooter(new HNItem.Footer());
                     mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
                     mPost = post;
@@ -321,7 +323,7 @@ public class CommentsFragment extends Fragment
             .subscribe(new Action1<List<Comment>>() {
                 @Override
                 public void call(List<Comment> comments) {
-                    mCommentAdapter.addAll(comments);
+                    mCommentAdapter.addAllComments(comments);
                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                 }
             }, new Action1<Throwable>() {

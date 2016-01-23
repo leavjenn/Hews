@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.leavjenn.hews.misc.ShareBroadcastReceiver;
 import com.leavjenn.hews.misc.SharedPrefsManager;
+import com.leavjenn.hews.model.Post;
 
 public class Utils {
     public static CharSequence formatTime(long timeStamp) {
@@ -77,6 +78,20 @@ public class Utils {
             return Uri.parse("https://news.ycombinator.com/item?id=" + postId);
         }
 //        }
+    }
+
+    // setup url and pretty url
+    public static void setupPostUrl(Post post) {
+        String url = post.getUrl();
+        if (url == null || url.isEmpty()) {
+            url = Constants.YCOMBINATOR_ITEM_URL + post.getId();
+            post.setUrl(url);
+        }
+        String[] splitUrl = url.split("/");
+        if (splitUrl.length > 2) {
+            url = splitUrl[2];
+            post.setPrettyUrl(url);
+        }
     }
 
     public static void setupIntentBuilder(CustomTabsIntent.Builder intentBuilder, Context context, SharedPreferences prefs) {

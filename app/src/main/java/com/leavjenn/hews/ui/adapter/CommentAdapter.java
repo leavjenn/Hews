@@ -73,7 +73,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 v = LayoutInflater.from(viewGroup.getContext()).inflate(
                     R.layout.list_item_comment, viewGroup, false);
                 CommentViewHolder vh = new CommentViewHolder(v, setupViewHolderClickListener());
-
                 vh.tvComment.setTypeface(mFont);
                 vh.tvComment.setPaintFlags(vh.tvComment.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
                 vh.tvComment.setTextSize(mTextSize);
@@ -89,8 +88,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 break;
             case VIEW_TYPE_FOOTER:
                 v = LayoutInflater.from(viewGroup.getContext())
-                    .inflate(R.layout.list_item_comment_footer, viewGroup, false);
-                viewHolder = new CommentFooterViewHolder(v);
+                    .inflate(R.layout.list_item_footer, viewGroup, false);
+                viewHolder = new FooterViewHolder(v);
         }
         return viewHolder;
     }
@@ -130,7 +129,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             bindCommentViewHolder(viewHolder, position);
         } else if (viewHolder instanceof CommentHeaderViewHolder) {
             bindHeaderViewHolder(viewHolder);
-        } else if (viewHolder instanceof CommentFooterViewHolder) {
+        } else if (viewHolder instanceof FooterViewHolder) {
             bindFooterViewHolder(viewHolder);
         }
     }
@@ -194,18 +193,18 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     private void bindFooterViewHolder(RecyclerView.ViewHolder viewHolder) {
-        CommentFooterViewHolder commentFooterViewHolder = (CommentFooterViewHolder) viewHolder;
+        FooterViewHolder footerViewHolder = (FooterViewHolder) viewHolder;
         if (mLoadingState == Constants.LOADING_FINISH
             || mLoadingState == Constants.LOADING_ERROR) {
-            commentFooterViewHolder.progressBar.setVisibility(View.GONE);
-            commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
+            footerViewHolder.progressBar.setVisibility(View.GONE);
+            footerViewHolder.tvPrompt.setVisibility(View.GONE);
         } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
-            commentFooterViewHolder.progressBar.setVisibility(View.GONE);
-            commentFooterViewHolder.tvNoCommentPromt.setText(
+            footerViewHolder.progressBar.setVisibility(View.GONE);
+            footerViewHolder.tvPrompt.setText(
                 mContext.getResources().getString(R.string.no_comment_prompt));
         } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
-            commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
-            commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
+            footerViewHolder.progressBar.setVisibility(View.VISIBLE);
+            footerViewHolder.tvPrompt.setVisibility(View.GONE);
         }
     }
 
@@ -281,13 +280,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyItemInserted(mItemList.size() - 1);
     }
 
-    public void addAll(List<? extends HNItem> hnItemList) {
+    public void addAllComments(List<? extends HNItem> hnItemList) {
         mItemList.addAll(mItemList.size() - 1, hnItemList);
+        notifyDataSetChanged();
     }
 
     public void updateFooter(int loadingState) {
         mLoadingState = loadingState;
-        notifyItemChanged(mItemList.size() - 1);
     }
 
     public ArrayList<Comment> getCommentList() {

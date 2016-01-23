@@ -7,13 +7,13 @@ import android.widget.TextView;
 
 import com.leavjenn.hews.R;
 
-public class CommentFooterViewHolder extends RecyclerView.ViewHolder {
+public class FooterViewHolder extends RecyclerView.ViewHolder {
     ProgressBar progressBar;
-    TextView tvNoCommentPromt;
+    TextView tvPrompt;
 
-    public CommentFooterViewHolder(View v) {
+    public FooterViewHolder(View v) {
         super(v);
         progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
-        tvNoCommentPromt = (TextView) v.findViewById(R.id.tv_no_comment_promt);
+        tvPrompt = (TextView) v.findViewById(R.id.tv_prompt);
     }
 }

@@ -7,6 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.leavjenn.hews.Constants;
+import com.leavjenn.hews.R;
+import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
 
 import java.util.List;
@@ -39,25 +42,31 @@ public class BookmarkFragment extends BasePostListFragment {
     @Override
     public void onResume() {
         super.onResume();
-        getPostBookmarks();
+        getBookmarkedPosts();
     }
 
-    private void getPostBookmarks() {
+    private void getBookmarkedPosts() {
         mPostAdapter.clear();
+        mPostAdapter.addFooter(new HNItem.Footer());
         mCompositeSubscription.add(mDataManager.getAllPostsFromDb(getActivity())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<List<Post>>() {
                 @Override
                 public void call(List<Post> posts) {
                     swipeRefreshLayout.setRefreshing(false);
-                    for (Post post : posts) {
-                        mPostAdapter.add(post);
+                    mPostAdapter.addAllPosts(posts);
+                    if (posts.isEmpty()) { // no bookmarked post
+                        mPostAdapter.updatePrompt(R.string.no_bookmark_prompt);
+                        mPostAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
+                        mPostAdapter.notifyDataSetChanged();
+                    } else {
+                        mPostAdapter.updateFooter(Constants.LOADING_FINISH);
                     }
                 }
             }, new Action1<Throwable>() {
                 @Override
                 public void call(Throwable throwable) {
-                    Log.e("getPostBookmarks", throwable.toString());
+                    Log.e("getBookmarkedPosts", throwable.toString());
                 }
             }));
     }

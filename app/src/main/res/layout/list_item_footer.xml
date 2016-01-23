@@ -14,7 +14,7 @@
         android:translationZ="2dp" />
 
     <TextView
-        android:id="@+id/tv_no_comment_promt"
+        android:id="@+id/tv_prompt"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
