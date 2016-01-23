@@ -46,9 +46,9 @@ public class LoginDialogFragment extends DialogFragment {
         progress = (ProgressBar) v.findViewById(R.id.progressbar_login);
         tvPrompt = (TextView) v.findViewById(R.id.tv_prompt);
         builder.setView(v)
-                .setPositiveButton("Login", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+            .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 //                                String username = tiLayoutName.getEditText().getText().toString();
 //                                String password = tiLayoutPassword.getEditText().getText().toString();
 //                                if (Utils.isOnline(LoginDialogFragment.this.getActivity())) {
@@ -66,16 +66,16 @@ public class LoginDialogFragment extends DialogFragment {
 //                                    Toast.makeText(LoginDialogFragment.this.getActivity(),
 //                                            "No connection:)", Toast.LENGTH_LONG).show();
 //                                }
-                            }
-                        }
-                )
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        }
-                )
-                .setTitle("Login");
+                    }
+                }
+            )
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }
+            )
+            .setTitle("Login");
 
         return builder.create();
     }

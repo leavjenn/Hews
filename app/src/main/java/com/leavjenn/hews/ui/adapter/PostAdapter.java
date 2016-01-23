@@ -45,7 +45,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_post,
-                viewGroup, false);
+            viewGroup, false);
         ViewHolder vh = new ViewHolder(v);
         vh.tvTitle.setTypeface(mFont);
         vh.tvTitle.setTextSize(mTextSize);
@@ -127,7 +127,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public void updatePostPrefs() {
         mFont = Typeface.createFromAsset(mContext.getAssets(),
-                SharedPrefsManager.getPostFont(prefs) + ".ttf");
+            SharedPrefsManager.getPostFont(prefs) + ".ttf");
         mTextSize = SharedPrefsManager.getPostFontSize(prefs);
         mLineHeight = SharedPrefsManager.getPostLineHeight(prefs);
     }

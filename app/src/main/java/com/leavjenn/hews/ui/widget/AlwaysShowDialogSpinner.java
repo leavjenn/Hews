@@ -6,7 +6,7 @@ import android.widget.Spinner;
 
 public class AlwaysShowDialogSpinner extends Spinner {
     boolean isSameSelectionEnable = false;
-        OnItemSelectedListener listener;
+    OnItemSelectedListener listener;
     private int lastSelected = 0;
 
     public AlwaysShowDialogSpinner(Context context) {
@@ -37,7 +37,7 @@ public class AlwaysShowDialogSpinner extends Spinner {
         super.setSelection(position);
 
         if (position == getSelectedItemPosition()) {
-            if(getSelectedView()!=null){
+            if (getSelectedView() != null) {
                 listener.onItemSelected(null, getSelectedView(), position, 0);
             }
         }

@@ -21,10 +21,10 @@ import com.leavjenn.hews.ui.adapter.PostAdapter;
 import rx.subscriptions.CompositeSubscription;
 
 public class BasePostListFragment extends Fragment implements PostAdapter.OnReachBottomListener,
-        SharedPreferences.OnSharedPreferenceChangeListener{
+    SharedPreferences.OnSharedPreferenceChangeListener {
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView rvPostList;
-    
+
     LinearLayoutManager mLinearLayoutManager;
     PostAdapter mPostAdapter;
     PostAdapter.OnItemClickListener mOnItemClickListener;
@@ -44,8 +44,8 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
             mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement (PostAdapter.OnItemClickListener" +
-                    " && MainActivity.OnRecyclerViewCreateListener)");
+                + " must implement (PostAdapter.OnItemClickListener" +
+                " && MainActivity.OnRecyclerViewCreateListener)");
         }
     }
 
@@ -92,7 +92,7 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
 
     private void setupSwipeRefreshLayout() {
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-                R.color.orange_900, R.color.orange_900, R.color.orange_600);
+            R.color.orange_900, R.color.orange_900, R.color.orange_600);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -124,8 +124,8 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(SharedPrefsManager.KEY_POST_FONT)
-                || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
-                || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
+            || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
+            || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
             mPostAdapter.updatePostPrefs();
             reformatListStyle();
         }

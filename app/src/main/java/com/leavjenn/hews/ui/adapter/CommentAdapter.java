@@ -71,8 +71,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         switch (viewType) {
             case VIEW_TYPE_COMMENT:
                 v = LayoutInflater.from(viewGroup.getContext()).inflate(
-                        R.layout.list_item_comment,
-                        viewGroup, false);
+                    R.layout.list_item_comment, viewGroup, false);
                 CommentViewHolder vh = new CommentViewHolder(v, setupViewHolderClickListener());
 
                 vh.tvComment.setTypeface(mFont);
@@ -80,17 +79,17 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 vh.tvComment.setTextSize(mTextSize);
                 vh.tvComment.setLineSpacing(0, mLineHeight);
                 vh.setCommentIndentStripeStyle(mCommentIndentColorOrange,
-                        mCommentIndentColorBg, mCommentIndentWidth);
+                    mCommentIndentColorBg, mCommentIndentWidth);
                 viewHolder = vh;
                 break;
             case VIEW_TYPE_HEADER:
                 v = LayoutInflater.from(viewGroup.getContext())
-                        .inflate(R.layout.list_item_comment_header, viewGroup, false);
+                    .inflate(R.layout.list_item_comment_header, viewGroup, false);
                 viewHolder = new CommentHeaderViewHolder(v);
                 break;
             case VIEW_TYPE_FOOTER:
                 v = LayoutInflater.from(viewGroup.getContext())
-                        .inflate(R.layout.list_item_comment_footer, viewGroup, false);
+                    .inflate(R.layout.list_item_comment_footer, viewGroup, false);
                 viewHolder = new CommentFooterViewHolder(v);
         }
         return viewHolder;
@@ -147,7 +146,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         if (mCollapsedChildrenCommentsIndex.containsKey(comment.getCommentId())) {
             commentViewHolder.tvComment.setText(mContext.getString(R.string.comments_collapsed_prompt,
-                    mCollapsedChildrenCommentsIndex.get(comment.getCommentId()).size() + 1));
+                mCollapsedChildrenCommentsIndex.get(comment.getCommentId()).size() + 1));
             commentViewHolder.tvComment.setMinLines(2);
             commentViewHolder.tvComment.setGravity(Gravity.CENTER);
         } else {
@@ -159,8 +158,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (mCollapsedOlderCommentsIndex.containsKey(comment.getCommentId())) {
             commentViewHolder.tvCollapseOlderComments.setVisibility(View.VISIBLE);
             commentViewHolder.tvCollapseOlderComments.setText(
-                    mContext.getString(R.string.comments_collapsed_prompt,
-                            mCollapsedOlderCommentsIndex.get(comment.getCommentId()).size()));
+                mContext.getString(R.string.comments_collapsed_prompt,
+                    mCollapsedOlderCommentsIndex.get(comment.getCommentId()).size()));
         } else {
             commentViewHolder.tvCollapseOlderComments.setVisibility(View.GONE);
         }
@@ -171,41 +170,39 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Post post = (Post) mItemList.get(0);
         commentHeaderViewHolder.tvTitle.setText(post.getTitle());
         Typeface postFont = Typeface.createFromAsset(mContext.getAssets(),
-                SharedPrefsManager.getPostFont(prefs) + ".ttf");
+            SharedPrefsManager.getPostFont(prefs) + ".ttf");
         commentHeaderViewHolder.tvTitle.setTypeface(postFont);
-        commentHeaderViewHolder.tvTitle
-                .setTextSize(SharedPrefsManager.getCommentFontSize(prefs) * 1.5f);
+        commentHeaderViewHolder.tvTitle.setTextSize(SharedPrefsManager.getCommentFontSize(prefs) * 1.5f);
         commentHeaderViewHolder.tvTitle.setPaintFlags(
-                commentHeaderViewHolder.tvTitle.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
+            commentHeaderViewHolder.tvTitle.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
         commentHeaderViewHolder.tvUrl.setText(post.getUrl());
         commentHeaderViewHolder.tvPoints.setText("+" + String.valueOf(post.getScore()));
         commentHeaderViewHolder.tvComments.setText(String.valueOf(post.getDescendants())
-                + (post.getDescendants() > 1 ? " comments" : " comment"));
+            + (post.getDescendants() > 1 ? " comments" : " comment"));
         commentHeaderViewHolder.tvTime.setText(Utils.formatTime(post.getTime()));
         commentHeaderViewHolder.tvPoster.setText("by: " + post.getBy());
         if (post.getText() != null && !post.getText().isEmpty()) {
             commentHeaderViewHolder.tvContent.setVisibility(View.VISIBLE);
             commentHeaderViewHolder.tvContent.setText(Html.fromHtml(post.getText()));
-            commentHeaderViewHolder.tvContent
-                    .setTextSize(SharedPrefsManager.getCommentFontSize(prefs));
+            commentHeaderViewHolder.tvContent.setTextSize(SharedPrefsManager.getCommentFontSize(prefs));
             Typeface commentFont = Typeface.createFromAsset(mContext.getAssets(),
-                    SharedPrefsManager.getCommentFont(prefs) + ".ttf");
+                SharedPrefsManager.getCommentFont(prefs) + ".ttf");
             commentHeaderViewHolder.tvContent.setTypeface(commentFont);
             commentHeaderViewHolder.tvContent.
-                    setLineSpacing(0, SharedPrefsManager.getCommentLineHeight(prefs));
+                setLineSpacing(0, SharedPrefsManager.getCommentLineHeight(prefs));
         }
     }
 
     private void bindFooterViewHolder(RecyclerView.ViewHolder viewHolder) {
         CommentFooterViewHolder commentFooterViewHolder = (CommentFooterViewHolder) viewHolder;
         if (mLoadingState == Constants.LOADING_FINISH
-                || mLoadingState == Constants.LOADING_ERROR) {
+            || mLoadingState == Constants.LOADING_ERROR) {
             commentFooterViewHolder.progressBar.setVisibility(View.GONE);
             commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
         } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
             commentFooterViewHolder.progressBar.setVisibility(View.GONE);
             commentFooterViewHolder.tvNoCommentPromt.setText(
-                    mContext.getResources().getString(R.string.no_comment_prompt));
+                mContext.getResources().getString(R.string.no_comment_prompt));
         } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
             commentFooterViewHolder.progressBar.setVisibility(View.VISIBLE);
             commentFooterViewHolder.tvNoCommentPromt.setVisibility(View.GONE);
@@ -215,10 +212,10 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void setTextViewHTML(TextView textView, String string) {
         // trim two trailing blank lines
         CharSequence sequence =
-                Html.fromHtml(string.replace("<p>", "<br /><br />").replace("\n", "<br />"));
+            Html.fromHtml(string.replace("<p>", "<br /><br />").replace("\n", "<br />"));
         // use Chrome custom tab if it is available
         if (mContext instanceof CommentsActivity
-                && ((CommentsActivity) mContext).getChromeCustomTabsHelper() != null) {
+            && ((CommentsActivity) mContext).getChromeCustomTabsHelper() != null) {
             SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
             URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
             for (URLSpan span : urls) {
@@ -239,9 +236,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Uri uri = Uri.parse(span.getURL());
                 CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
                 Utils.setupIntentBuilder(intentBuilder, mContext,
-                        ((CommentsActivity) mContext).getSharedPreferences());
+                    ((CommentsActivity) mContext).getSharedPreferences());
                 ChromeCustomTabsHelper.openCustomTab((Activity) mContext, intentBuilder.build(),
-                        uri, null);
+                    uri, null);
             }
         };
         strBuilder.setSpan(clickable, start, end, flags);
@@ -318,7 +315,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         for (int curPosition = position + 1;
              (mItemList.get(curPosition) instanceof Comment
-                     && ((Comment) mItemList.get(curPosition)).getLevel() > parentComment.getLevel());
+                 && ((Comment) mItemList.get(curPosition)).getLevel() > parentComment.getLevel());
              curPosition++) {
             childrenComments.add((Comment) mItemList.get(curPosition));
         }
@@ -336,14 +333,14 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void expandChildrenComments(int position) {
         Comment parentComment = (Comment) mItemList.get(position);
         List<Comment> collapsedComments =
-                mCollapsedChildrenCommentsIndex.get(parentComment.getCommentId());
+            mCollapsedChildrenCommentsIndex.get(parentComment.getCommentId());
         int insertPosition = mItemList.indexOf(parentComment) + 1;
         for (Comment comment : collapsedComments) {
             mItemList.add(insertPosition, comment);
             insertPosition++;
         }
         notifyItemRangeInserted(mItemList.indexOf(parentComment) + 1,
-                collapsedComments.size());
+            collapsedComments.size());
         notifyItemChanged(position);
         mCollapsedChildrenCommentsIndex.remove(parentComment.getCommentId());
     }
@@ -358,8 +355,8 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Comment curComment = (Comment) mItemList.get(position);
         for (int curPosition = position - 1;
              curComment.getLevel() > 0
-                     && ((Comment) mItemList.get(curPosition)).getLevel() >= curComment.getLevel()
-                     && curPosition > 0;
+                 && ((Comment) mItemList.get(curPosition)).getLevel() >= curComment.getLevel()
+                 && curPosition > 0;
              curPosition--) {
             olderComments.add(0, (Comment) mItemList.get(curPosition));
         }
@@ -397,63 +394,62 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private void showDialog(final int position) {
         final Comment comment = (Comment) mItemList.get(position);
-        final Post post = (Post) mItemList.get(0);
         CommentDialogFragment dialog = new CommentDialogFragment();
         dialog.show(((FragmentActivity) mContext)
-                .getSupportFragmentManager(), "ListDialog");
+            .getSupportFragmentManager(), "ListDialog");
         dialog.setOnListDialogClickListener
-                (new CommentDialogFragment.OnCommentDialogClickListener() {
-                    @Override
-                    public void onUpvote() {
-                        ((CommentsActivity) mContext).vote(comment.getCommentId());
-                    }
+            (new CommentDialogFragment.OnCommentDialogClickListener() {
+                @Override
+                public void onUpvote() {
+                    ((CommentsActivity) mContext).vote(comment.getCommentId());
+                }
 
-                    @Override
-                    public void onReply() {
-                        // scrollToPosition() not working
-                        ((LinearLayoutManager) mRecyclerView.getLayoutManager())
-                                .scrollToPositionWithOffset(position, 0);
-                        ((CommentsActivity) mContext).enableReplyMode(true, comment.getCommentId());
-                    }
+                @Override
+                public void onReply() {
+                    // scrollToPosition() not working
+                    ((LinearLayoutManager) mRecyclerView.getLayoutManager())
+                        .scrollToPositionWithOffset(position, 0);
+                    ((CommentsActivity) mContext).enableReplyMode(true, comment.getCommentId());
+                }
 
-                    @Override
-                    public void onAuthorProfile() {
-                        Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                        String url = "https://news.ycombinator.com/user?id="
-                                + comment.getBy();
-                        urlIntent.setData(Uri.parse(url));
-                        mContext.startActivity(urlIntent);
-                    }
+                @Override
+                public void onAuthorProfile() {
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                    String url = "https://news.ycombinator.com/user?id="
+                        + comment.getBy();
+                    urlIntent.setData(Uri.parse(url));
+                    mContext.startActivity(urlIntent);
+                }
 
-                    @Override
-                    public void onShare() {
-                        Intent sendIntent = new Intent();
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        String url = "https://news.ycombinator.com/item?id="
-                                + comment.getCommentId();
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, url);
-                        sendIntent.setType("text/plain");
-                        mContext.startActivity(Intent.createChooser(sendIntent,
-                                mContext.getString(R.string.share_link_to)));
-                    }
+                @Override
+                public void onShare() {
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    String url = "https://news.ycombinator.com/item?id="
+                        + comment.getCommentId();
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                    sendIntent.setType("text/plain");
+                    mContext.startActivity(Intent.createChooser(sendIntent,
+                        mContext.getString(R.string.share_link_to)));
+                }
 
-                    @Override
-                    public void onShareCommentTextTo() {
-                        Intent sendIntent = new Intent();
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        String text = comment.getBy() + ":\n"
-                                + Html.fromHtml(comment.getText());
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
-                        sendIntent.setType("text/plain");
-                        mContext.startActivity(Intent.createChooser(sendIntent,
-                                mContext.getString(R.string.send_to)));
-                    }
-                });
+                @Override
+                public void onShareCommentTextTo() {
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    String text = comment.getBy() + ":\n"
+                        + Html.fromHtml(comment.getText());
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+                    sendIntent.setType("text/plain");
+                    mContext.startActivity(Intent.createChooser(sendIntent,
+                        mContext.getString(R.string.send_to)));
+                }
+            });
     }
 
     public void updateCommentPrefs() {
         mFont = Typeface.createFromAsset(mContext.getAssets(),
-                SharedPrefsManager.getCommentFont(prefs) + ".ttf");
+            SharedPrefsManager.getCommentFont(prefs) + ".ttf");
         mTextSize = SharedPrefsManager.getCommentFontSize(prefs);
         mLineHeight = SharedPrefsManager.getCommentLineHeight(prefs);
     }
@@ -474,6 +470,5 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mCommentIndentColorBg = 0xFFF4ECD8; //sepia
         }
     }
-
 }
 

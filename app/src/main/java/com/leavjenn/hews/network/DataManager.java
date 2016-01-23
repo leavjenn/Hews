@@ -59,54 +59,54 @@ public class DataManager {
 
     public Observable<Post> getPosts(List<Long> postIds) {
         return Observable.from(postIds)
-                .flatMap(new Func1<Long, Observable<Post>>() {
-                    @Override
-                    public Observable<Post> call(Long aLong) {
-                        return mHackerNewsService.getStory(String.valueOf(aLong));
-                    }
-                })
-                .onErrorReturn(new Func1<Throwable, Post>() {
-                    @Override
-                    public Post call(Throwable throwable) {
-                        Log.e("getPosts", throwable.toString());
-                        return null;
-                    }
-                })
-                .filter(new Func1<Post, Boolean>() {
-                    @Override
-                    public Boolean call(Post post) {
-                        return post != null && post.getTitle() != null;
-                    }
-                });
+            .flatMap(new Func1<Long, Observable<Post>>() {
+                @Override
+                public Observable<Post> call(Long aLong) {
+                    return mHackerNewsService.getStory(String.valueOf(aLong));
+                }
+            })
+            .onErrorReturn(new Func1<Throwable, Post>() {
+                @Override
+                public Post call(Throwable throwable) {
+                    Log.e("getPosts", throwable.toString());
+                    return null;
+                }
+            })
+            .filter(new Func1<Post, Boolean>() {
+                @Override
+                public Boolean call(Post post) {
+                    return post != null && post.getTitle() != null;
+                }
+            });
     }
 
     public Observable<Comment> getSummary(List<Long> commentIds) {
         return Observable.from(commentIds)
-                .flatMap(new Func1<Long, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Long aLong) {
-                        return mHackerNewsService.getComment(aLong);
+            .flatMap(new Func1<Long, Observable<Comment>>() {
+                @Override
+                public Observable<Comment> call(Long aLong) {
+                    return mHackerNewsService.getComment(aLong);
+                }
+            }).filter(new Func1<Comment, Boolean>() {
+                @Override
+                public Boolean call(Comment comment) {
+                    if (comment != null
+                        && comment.getBy() != null && !comment.getBy().trim().isEmpty()
+                        && comment.getText() != null && !comment.getText().trim().isEmpty()
+                        && comment.getText().length() > MINIMUM_STRING * 4) {
+                        //TODO length num improve needed.
+                        String s = Html.fromHtml(comment.getText()).toString().substring(0,
+                            MINIMUM_STRING)
+                            .toLowerCase();
+                        return s.contains("summary")
+                            || s.contains("tldr")
+                            || s.contains("tl;dr")
+                            || s.contains("tl; dr");
+                    } else {
+                        return false;
                     }
-                }).filter(new Func1<Comment, Boolean>() {
-                    @Override
-                    public Boolean call(Comment comment) {
-                        if (comment != null
-                                && comment.getBy() != null && !comment.getBy().trim().isEmpty()
-                                && comment.getText() != null && !comment.getText().trim().isEmpty()
-                                && comment.getText().length() > MINIMUM_STRING * 4) {
-                            //TODO length num improve needed.
-                            String s = Html.fromHtml(comment.getText()).toString().substring(0,
-                                    MINIMUM_STRING)
-                                    .toLowerCase();
-                            return s.contains("summary")
-                                    || s.contains("tldr")
-                                    || s.contains("tl;dr")
-                                    || s.contains("tl; dr");
-                        } else {
-                            return false;
-                        }
-                    }
-                }).firstOrDefault(null);
+                }
+            }).firstOrDefault(null);
     }
 
     public Observable<List<Comment>> getComments(Post post, int level) {
@@ -115,7 +115,7 @@ public class DataManager {
         if (commentIds.size() > 3 && descendants > 15) {
             Log.i("---getComments", "kids > 3");
             return Observable.concat(getCommentsByBranches(commentIds.subList(0, 3), level),
-                    getCommentsAllAtOnce(commentIds.subList(3, commentIds.size()), level));
+                getCommentsAllAtOnce(commentIds.subList(3, commentIds.size()), level));
         } else if (descendants / commentIds.size() > 15) {
             Log.i("---getComments", "few kids, big branch");
             return getCommentsByBranches(commentIds, level);
@@ -128,82 +128,82 @@ public class DataManager {
     public Observable<List<Comment>> getCommentsByBranches(List<Long> commentIds, final int level) {
         Log.i("---", "getCommentsByBranches");
         return Observable.from(commentIds)
-                .flatMap(new Func1<Long, Observable<List<Comment>>>() {
-                    @Override
-                    public Observable<List<Comment>> call(Long commentId) {
-                        return getOneBranchComments(commentId, level);
-                    }
-                });
+            .flatMap(new Func1<Long, Observable<List<Comment>>>() {
+                @Override
+                public Observable<List<Comment>> call(Long commentId) {
+                    return getOneBranchComments(commentId, level);
+                }
+            });
     }
 
     public Observable<List<Comment>> getOneBranchComments(final long commentId, final int level) {
         return mHackerNewsService.getComment(commentId)
-                .onErrorReturn(new Func1<Throwable, Comment>() {
-                    @Override
-                    public Comment call(Throwable throwable) {
-                        Log.e("getOneBranchComments", throwable.toString());
-                        return null;
-                    }
-                })
-                .filter(new Func1<Comment, Boolean>() {
-                    @Override
-                    public Boolean call(Comment comment) {
-                        return (comment != null) && !comment.getDeleted() && comment.getText() != null;
-                    }
-                })
-                .flatMap(new Func1<Comment, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Comment comment) {
-                        Log.i("---getOneBranchComments", String.valueOf(comment.getCommentId()));
-                        return getInnerComments(comment, level);
-                    }
-                })
-                .toList()
-                .map(new Func1<List<Comment>, List<Comment>>() {
-                    @Override
-                    public List<Comment> call(List<Comment> allComments) {
-                        List<Long> firstLevelCommentAsList = new ArrayList<>();
-                        firstLevelCommentAsList.add(commentId);
-                        return sortComments(firstLevelCommentAsList, allComments);
-                    }
-                });
+            .onErrorReturn(new Func1<Throwable, Comment>() {
+                @Override
+                public Comment call(Throwable throwable) {
+                    Log.e("getOneBranchComments", throwable.toString());
+                    return null;
+                }
+            })
+            .filter(new Func1<Comment, Boolean>() {
+                @Override
+                public Boolean call(Comment comment) {
+                    return (comment != null) && !comment.getDeleted() && comment.getText() != null;
+                }
+            })
+            .flatMap(new Func1<Comment, Observable<Comment>>() {
+                @Override
+                public Observable<Comment> call(Comment comment) {
+                    Log.i("---getOneBranchComments", String.valueOf(comment.getCommentId()));
+                    return getInnerComments(comment, level);
+                }
+            })
+            .toList()
+            .map(new Func1<List<Comment>, List<Comment>>() {
+                @Override
+                public List<Comment> call(List<Comment> allComments) {
+                    List<Long> firstLevelCommentAsList = new ArrayList<>();
+                    firstLevelCommentAsList.add(commentId);
+                    return sortComments(firstLevelCommentAsList, allComments);
+                }
+            });
     }
 
     public Observable<List<Comment>> getCommentsAllAtOnce(final List<Long> firstLevelCommentIds, final int level) {
         Log.i("---", "getCommentsAllAtOnce");
         return Observable.from(firstLevelCommentIds)
-                .flatMap(new Func1<Long, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Long commentId) {
-                        return mHackerNewsService.getComment(commentId)
-                                .onErrorReturn(new Func1<Throwable, Comment>() {
-                                    @Override
-                                    public Comment call(Throwable throwable) {
-                                        Log.e("getCommentsAllAtOnce", throwable.toString());
-                                        return null;
-                                    }
-                                });
-                    }
-                })
-                .filter(new Func1<Comment, Boolean>() {
-                    @Override
-                    public Boolean call(Comment comment) {
-                        return (comment != null) && !comment.getDeleted() && comment.getText() != null;
-                    }
-                })
-                .flatMap(new Func1<Comment, Observable<Comment>>() {
-                    @Override
-                    public Observable<Comment> call(Comment comment) {
-                        return getInnerComments(comment, level);
-                    }
-                })
-                .toList()
-                .map(new Func1<List<Comment>, List<Comment>>() {
-                    @Override
-                    public List<Comment> call(List<Comment> allComments) {
-                        return sortComments(firstLevelCommentIds, allComments);
-                    }
-                });
+            .flatMap(new Func1<Long, Observable<Comment>>() {
+                @Override
+                public Observable<Comment> call(Long commentId) {
+                    return mHackerNewsService.getComment(commentId)
+                        .onErrorReturn(new Func1<Throwable, Comment>() {
+                            @Override
+                            public Comment call(Throwable throwable) {
+                                Log.e("getCommentsAllAtOnce", throwable.toString());
+                                return null;
+                            }
+                        });
+                }
+            })
+            .filter(new Func1<Comment, Boolean>() {
+                @Override
+                public Boolean call(Comment comment) {
+                    return (comment != null) && !comment.getDeleted() && comment.getText() != null;
+                }
+            })
+            .flatMap(new Func1<Comment, Observable<Comment>>() {
+                @Override
+                public Observable<Comment> call(Comment comment) {
+                    return getInnerComments(comment, level);
+                }
+            })
+            .toList()
+            .map(new Func1<List<Comment>, List<Comment>>() {
+                @Override
+                public List<Comment> call(List<Comment> allComments) {
+                    return sortComments(firstLevelCommentIds, allComments);
+                }
+            });
     }
 
     private Observable<Comment> getInnerComments(Comment comment, final int level) {
@@ -213,34 +213,34 @@ public class DataManager {
         comment.setLevel(level);
         if (comment.getKids() != null && !comment.getKids().isEmpty()) {
             return Observable.just(comment)
-                    .mergeWith(Observable.from(comment.getKids())
-                            .flatMap(new Func1<Long, Observable<Comment>>() {
-                                @Override
-                                public Observable<Comment> call(Long commentId) {
-                                    return mHackerNewsService.getComment(commentId)
-                                            .onErrorReturn(new Func1<Throwable, Comment>() {
-                                                @Override
-                                                public Comment call(Throwable throwable) {
-                                                    Log.e("getInnerComments", throwable.toString());
-                                                    return null;
-                                                }
-                                            });
-                                }
-                            })
-                            .filter(new Func1<Comment, Boolean>() {
-                                @Override
-                                public Boolean call(Comment comment) {
-                                    return (comment != null) && !comment.getDeleted()
-                                            && comment.getText() != null;
-                                }
-                            })
-                            .flatMap(new Func1<Comment, Observable<Comment>>() {
-                                @Override
-                                public Observable<Comment> call(Comment comment) {
-                                    return getInnerComments(comment, level + 1);
-                                }
-                            })
-                    );
+                .mergeWith(Observable.from(comment.getKids())
+                    .flatMap(new Func1<Long, Observable<Comment>>() {
+                        @Override
+                        public Observable<Comment> call(Long commentId) {
+                            return mHackerNewsService.getComment(commentId)
+                                .onErrorReturn(new Func1<Throwable, Comment>() {
+                                    @Override
+                                    public Comment call(Throwable throwable) {
+                                        Log.e("getInnerComments", throwable.toString());
+                                        return null;
+                                    }
+                                });
+                        }
+                    })
+                    .filter(new Func1<Comment, Boolean>() {
+                        @Override
+                        public Boolean call(Comment comment) {
+                            return (comment != null) && !comment.getDeleted()
+                                && comment.getText() != null;
+                        }
+                    })
+                    .flatMap(new Func1<Comment, Observable<Comment>>() {
+                        @Override
+                        public Observable<Comment> call(Comment comment) {
+                            return getInnerComments(comment, level + 1);
+                        }
+                    })
+                );
         }
         return Observable.just(comment);
     }
@@ -254,7 +254,7 @@ public class DataManager {
         for (Long id : firstLevelCommentIds) {
             Comment firstLevelComment = allCommentsMap.get(id);
             if (firstLevelComment != null && !firstLevelComment.getDeleted()
-                    && firstLevelComment.getText() != null) {
+                && firstLevelComment.getText() != null) {
                 validFirstLevelCommentList.add(firstLevelComment);
             }
         }
@@ -299,13 +299,13 @@ public class DataManager {
                 try {
                     Connection login = Jsoup.connect(HACKER_NEWS_BASE_URL + "login");
                     login.header("Accept-Encoding", "gzip")
-                            .data("go_to", "news")
-                            .data("acct", username)
-                            .data("pw", password)
-                            .header("Origin", "https://news.ycombinator.com")
-                            .followRedirects(true)
-                            .referrer(HACKER_NEWS_BASE_URL + "login?go_to=news")
-                            .method(Connection.Method.POST);
+                        .data("go_to", "news")
+                        .data("acct", username)
+                        .data("pw", password)
+                        .header("Origin", "https://news.ycombinator.com")
+                        .followRedirects(true)
+                        .referrer(HACKER_NEWS_BASE_URL + "login?go_to=news")
+                        .method(Connection.Method.POST);
                     Connection.Response response = login.execute();
                     String cookie = response.cookie("user");
                     if (cookie == null) {
@@ -331,8 +331,8 @@ public class DataManager {
                 }
                 try {
                     Connection vote = Jsoup.connect(HACKER_NEWS_ITEM_URL + itemId)
-                            .header("Accept-Encoding", "gzip")
-                            .cookie("user", cookieLogin);
+                        .header("Accept-Encoding", "gzip")
+                        .cookie("user", cookieLogin);
                     Document commentsDocument = vote.get();
                     /*
                     votable element:
@@ -363,9 +363,9 @@ public class DataManager {
                         if (voteElement.attr("href").contains("auth=")) {
                             String url = (voteElement.attr("href"));
                             Request voteRequest = new Request.Builder()
-                                    .addHeader("cookie", "user=" + cookieLogin)
-                                    .url(HACKER_NEWS_BASE_URL + url)
-                                    .build();
+                                .addHeader("cookie", "user=" + cookieLogin)
+                                .url(HACKER_NEWS_BASE_URL + url)
+                                .build();
                             Response response = new OkHttpClient().newCall(voteRequest).execute();
                             if (response.code() == 200) {
                                 if (response.body() == null) {
@@ -395,23 +395,23 @@ public class DataManager {
                 }
                 try {
                     Connection reply = Jsoup.connect(HACKER_NEWS_ITEM_URL + itemId)
-                            .header("Accept-Encoding", "gzip")
-                            .cookie("user", cookieLogin);
+                        .header("Accept-Encoding", "gzip")
+                        .cookie("user", cookieLogin);
                     Document replyDocument = reply.get();
                     Element element = replyDocument.select("input[name=hmac]").first();
                     if (element != null) {
                         String replyHmac = element.attr("value");
                         RequestBody requestBody = (new FormEncodingBuilder())
-                                .add("parent", String.valueOf(itemId))
-                                .add("goto", (new StringBuilder()).append("item?id=").append(itemId).toString())
-                                .add("hmac", replyHmac)
-                                .add("text", replyText)
-                                .build();
+                            .add("parent", String.valueOf(itemId))
+                            .add("goto", (new StringBuilder()).append("item?id=").append(itemId).toString())
+                            .add("hmac", replyHmac)
+                            .add("text", replyText)
+                            .build();
                         Request request = new Request.Builder()
-                                .addHeader("cookie", "user=" + cookieLogin)
-                                .url(HACKER_NEWS_BASE_URL + "comment")
-                                .post(requestBody)
-                                .build();
+                            .addHeader("cookie", "user=" + cookieLogin)
+                            .url(HACKER_NEWS_BASE_URL + "comment")
+                            .post(requestBody)
+                            .build();
 
                         Response response = new OkHttpClient().newCall(request).execute();
                         if (response.code() == 200) {
@@ -431,70 +431,70 @@ public class DataManager {
 
     public Observable<PutResult> putPostToDb(Context context, Post post) {
         return StorIOHelper.getStorIOSQLite(context)
-                .put()
-                .object(post)
-                .prepare()
-                .createObservable();
+            .put()
+            .object(post)
+            .prepare()
+            .createObservable();
     }
 
     public Observable<List<Post>> getPostFromDb(Context context, long postId) {
         return StorIOHelper.getStorIOSQLite(context)
-                .get()
-                .listOfObjects(Post.class)
-                .withQuery(Query.builder()
-                        .table(PostTable.TABLE)
-                        .where(PostTable.COLUMN_ID + " = " + postId)
-                        .build())
-                .prepare()
-                .createObservable();
+            .get()
+            .listOfObjects(Post.class)
+            .withQuery(Query.builder()
+                .table(PostTable.TABLE)
+                .where(PostTable.COLUMN_ID + " = " + postId)
+                .build())
+            .prepare()
+            .createObservable();
     }
 
     public Observable<List<Post>> getAllPostsFromDb(Context context) {
         return StorIOHelper.getStorIOSQLite(context)
-                .get()
-                .listOfObjects(Post.class)
-                .withQuery(Query.builder().table(PostTable.TABLE).build())
-                .prepare()
-                .createObservable();
+            .get()
+            .listOfObjects(Post.class)
+            .withQuery(Query.builder().table(PostTable.TABLE).build())
+            .prepare()
+            .createObservable();
     }
 
     public Observable<DeleteResult> deletePostFromDb(Context context, Post post) {
         return StorIOHelper.getStorIOSQLite(context)
-                .delete()
-                .object(post)
-                .prepare()
-                .createObservable();
+            .delete()
+            .object(post)
+            .prepare()
+            .createObservable();
     }
 
     public Observable<PutResults<Comment>> putCommentsToDb(Context context, List<Comment> commentList) {
         return StorIOHelper.getStorIOSQLite(context)
-                .put()
-                .objects(commentList)
-                .prepare()
-                .createObservable();
+            .put()
+            .objects(commentList)
+            .prepare()
+            .createObservable();
     }
 
     public Observable<List<Comment>> getStoryCommentsFromDb(Context context, long postId) {
         return StorIOHelper.getStorIOSQLite(context)
-                .get()
-                .listOfObjects(Comment.class)
-                .withQuery(Query.builder()
-                        .table(CommentTable.TABLE)
-                        .where(CommentTable.COLUMN_PARENT + " = " + postId)
-                        .orderBy(CommentTable.COLUMN_INDEX + " ASC")
-                        .build())
-                .prepare()
-                .createObservable();
+            .get()
+            .listOfObjects(Comment.class)
+            .withQuery(Query.builder()
+                .table(CommentTable.TABLE)
+                .where(CommentTable.COLUMN_PARENT + " = " + postId)
+                .orderBy(CommentTable.COLUMN_INDEX + " ASC")
+                .build())
+            .prepare()
+            .createObservable();
     }
 
     public Observable<DeleteResult> deleteStoryCommentsFromDb(Context context, long postId) {
         return StorIOHelper.getStorIOSQLite(context)
-                .delete()
-                .byQuery(DeleteQuery.builder()
-                        .table(CommentTable.TABLE)
-                        .where(CommentTable.COLUMN_PARENT + "=" + postId)
-                        .build())
-                .prepare()
-                .createObservable();
+            .delete()
+            .byQuery(DeleteQuery.builder()
+                .table(CommentTable.TABLE)
+                .where(CommentTable.COLUMN_PARENT + "=" + postId)
+                .build())
+            .prepare()
+            .createObservable();
     }
 }

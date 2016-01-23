@@ -19,7 +19,7 @@ import com.leavjenn.hews.R;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 
 public class SettingsActivity extends AppCompatActivity
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private SharedPreferences prefs;
 
@@ -110,7 +110,7 @@ public class SettingsActivity extends AppCompatActivity
 
         private void disableOpenLinkOptionPreference() {
             CheckBoxPreference openLinkOptionPref = (CheckBoxPreference) findPreference(
-                    getString(R.string.pref_key_open_link_option));
+                getString(R.string.pref_key_open_link_option));
             openLinkOptionPref.setEnabled(false);
             openLinkOptionPref.setChecked(false);
             openLinkOptionPref.setSummary(R.string.summary_open_link_option_unavailable);

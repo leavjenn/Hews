@@ -29,9 +29,9 @@ public interface HackerNewsService {
 
     @GET("/search?tags=story&typoTolerance=false")
     Observable<HNItem.SearchResult> search(@Query("query") String keyword,
-                                                 @Query("numericFilters") String timeRange,
-                                                 @Query("page") int page,
-                                                 @Query("hitsPerPage") int hitsPerPage);
+                                           @Query("numericFilters") String timeRange,
+                                           @Query("page") int page,
+                                           @Query("hitsPerPage") int hitsPerPage);
 
     @GET("/search_by_date?tags=story&typoTolerance=false")
     Observable<HNItem.SearchResult> searchByDate(@Query("query") String keyword,

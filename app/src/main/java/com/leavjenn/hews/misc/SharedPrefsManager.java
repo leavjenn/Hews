@@ -31,10 +31,10 @@ public class SharedPrefsManager {
     public static final String KEY_SHOW_POST_SUMMARY = "key_show_post_summary";
 
     static String[] fontsForComment = {"PT Sans", "Roboto", "Lato",
-            "Open Sans", "Muli", "Slabo 27px", "Crimson Text", "Roboto Slab",
-            "Vollkorn", "Merriweather"};
+        "Open Sans", "Muli", "Slabo 27px", "Crimson Text", "Roboto Slab",
+        "Vollkorn", "Merriweather"};
     static String[] fontsForPost = {"Open Sans", "Dosis SemiBold", "Roboto Slab", "Merriweather",
-            "RobotoMono"};
+        "RobotoMono"};
 
     public static String[] getPostFontsList() {
         return fontsForPost;
@@ -197,7 +197,7 @@ public class SharedPrefsManager {
 
     public static Boolean getShowPostSummary(SharedPreferences sp, Context context) {
         return sp.getBoolean(context.getResources().getString(R.string.pref_key_show_post_summary),
-                false);
+            false);
     }
 
     public static Boolean getIsOpenLinkInApp(SharedPreferences sp, Context context) {

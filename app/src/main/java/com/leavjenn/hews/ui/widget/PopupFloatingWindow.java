@@ -82,7 +82,7 @@ public class PopupFloatingWindow implements View.OnClickListener {
 
         for (String fontName : fontsName) {
             fontMap.put(fontName,
-                    Typeface.createFromAsset(mContext.getAssets(), fontName + ".ttf"));
+                Typeface.createFromAsset(mContext.getAssets(), fontName + ".ttf"));
             fontList.add(fontName);
         }
 
@@ -106,12 +106,12 @@ public class PopupFloatingWindow implements View.OnClickListener {
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(mContext)
-                            .inflate(android.R.layout.simple_list_item_1, parent, false);
+                        .inflate(android.R.layout.simple_list_item_1, parent, false);
                 }
                 ((TextView) convertView).setTypeface(fontMap.get(fontList.get(position)));
                 ((TextView) convertView).setText(fontList.get(position));
                 ((TextView) convertView).setPaintFlags(((TextView) convertView).getPaintFlags()
-                        | Paint.SUBPIXEL_TEXT_FLAG);
+                    | Paint.SUBPIXEL_TEXT_FLAG);
                 return convertView;
             }
         });
@@ -143,8 +143,7 @@ public class PopupFloatingWindow implements View.OnClickListener {
      */
     protected void preShow() {
         if (mRootView == null)
-            throw new IllegalStateException(
-                    "setContentView was not called with a view to display.");
+            throw new IllegalStateException("setContentView was not called with a view to display.");
 
         if (mBackground == null)
             mWindow.setBackgroundDrawable(mContext.getResources().getDrawable(R.color.grey_400));
@@ -190,13 +189,13 @@ public class PopupFloatingWindow implements View.OnClickListener {
 
     void setView(int layoutID) {
         LayoutInflater layoutInflater =
-                (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRootView = layoutInflater.inflate(layoutID, null);
         //mWindow = new PopupWindow(mContext);
         //mWindow.setContentView(mRootView);
 
         mWindow = new PopupWindow(mRootView, ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+            ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     /**
@@ -206,7 +205,7 @@ public class PopupFloatingWindow implements View.OnClickListener {
      */
     public void setContentView(int layoutResID) {
         LayoutInflater inflator = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRootView = inflator.inflate(layoutResID, null);
         mWindow.setContentView(mRootView);
     }

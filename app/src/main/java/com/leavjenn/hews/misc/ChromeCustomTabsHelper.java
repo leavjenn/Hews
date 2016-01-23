@@ -73,8 +73,8 @@ public class ChromeCustomTabsHelper {
         } else if (packagesSupportingCustomTabs.size() == 1) {
             sPackageNameToUse = packagesSupportingCustomTabs.get(0);
         } else if (!TextUtils.isEmpty(defaultViewHandlerPackageName)
-                && !hasSpecializedHandlerIntents(context, activityIntent)
-                && packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)) {
+            && !hasSpecializedHandlerIntents(context, activityIntent)
+            && packagesSupportingCustomTabs.contains(defaultViewHandlerPackageName)) {
             sPackageNameToUse = defaultViewHandlerPackageName;
         } else if (packagesSupportingCustomTabs.contains(STABLE_PACKAGE)) {
             sPackageNameToUse = STABLE_PACKAGE;
@@ -97,9 +97,8 @@ public class ChromeCustomTabsHelper {
     private static boolean hasSpecializedHandlerIntents(Context context, Intent intent) {
         try {
             PackageManager pm = context.getPackageManager();
-            List<ResolveInfo> handlers = pm.queryIntentActivities(
-                    intent,
-                    PackageManager.GET_RESOLVED_FILTER);
+            List<ResolveInfo> handlers =
+                pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
             if (handlers == null || handlers.size() == 0) {
                 return false;
             }

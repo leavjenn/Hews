@@ -40,7 +40,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class PostFragment extends Fragment implements PostAdapter.OnReachBottomListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     static final String KEY_POST_ID_LIST = "key_post_id_list";
     static final String KEY_LOADED_POSTS = "key_loaded_posts";
@@ -93,8 +93,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement (PostAdapter.OnItemClickListener" +
-                    " && MainActivity.OnRecyclerViewCreateListener)");
+                + " must implement (PostAdapter.OnItemClickListener" +
+                " && MainActivity.OnRecyclerViewCreateListener)");
         }
     }
 
@@ -122,10 +122,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         if (SharedPrefsManager.getIsShowTooltip(prefs)) {
             tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
             toolTip = new ToolTip()
-                    .withText(getString(R.string.tooltip_post_action))
-                    .withTextColor(getResources().getColor(android.R.color.white))
-                    .withColor(getResources().getColor(R.color.orange_600))
-                    .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW);
+                .withText(getString(R.string.tooltip_post_action))
+                .withTextColor(getResources().getColor(android.R.color.white))
+                .withColor(getResources().getColor(R.color.orange_600))
+                .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW);
         }
         return rootView;
     }
@@ -139,7 +139,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
         mRecyclerView.setAdapter(mPostAdapter);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-                R.color.orange_900, R.color.orange_900, R.color.orange_600);
+            R.color.orange_900, R.color.orange_900, R.color.orange_600);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -153,7 +153,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
             if (mStoryType.equals(Constants.TYPE_SEARCH)) {
                 ((MainActivity) getActivity()).
-                        setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
+                    setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
             }
 
             mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
@@ -199,7 +199,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         outState.putString(KEY_STORY_TYPE, mStoryType);
         outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
         mLastTimeListPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
-                findFirstVisibleItemPosition();
+            findFirstVisibleItemPosition();
         outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
         Log.d("postfrag saveState", mStoryType);
         Log.d("postfrag saveState", mStoryTypeSpec);
@@ -224,106 +224,105 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadPostList(String storyTypeUrl) {
         mCompositeSubscription.add(mDataManager.getPostList(storyTypeUrl)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<List<Long>>() {
+                @Override
+                public void call(List<Long> longs) {
+                    mPostIdList = longs;
+                    loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
+                    mLoadingState = Constants.LOADING_IN_PROGRESS;
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("loadPostList", throwable.toString());
+                }
+            }));
+    }
+
+    void loadPostListFromSearch(String timeRangeCombine, int page) {
+        mCompositeSubscription.add(
+            mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(1, 11)
+                + "," + "created_at_i<" + timeRangeCombine.substring(11), page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Long>>() {
+                .subscribe(new Action1<HNItem.SearchResult>() {
                     @Override
-                    public void call(List<Long> longs) {
-                        mPostIdList = longs;
-                        loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
+                    public void call(HNItem.SearchResult searchResult) {
+                        List<Long> list = new ArrayList<>();
+                        mSearchResultTotalPages = searchResult.getNbPages();
+                        for (int i = 0; i < searchResult.getHits().length; i++) {
+                            list.add(searchResult.getHits()[i].getObjectID());
+                        }
+                        loadPostFromList(list);
                         mLoadingState = Constants.LOADING_IN_PROGRESS;
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.e("loadPostList", throwable.toString());
+                        Log.i("search", throwable.toString());
+
                     }
                 }));
-    }
-
-    void loadPostListFromSearch(String timeRangeCombine, int page) {
-        mCompositeSubscription.add(
-                mDataManager.getPopularPosts("created_at_i>" + timeRangeCombine.substring(1, 11)
-                        + "," + "created_at_i<" + timeRangeCombine.substring(11), page)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<HNItem.SearchResult>() {
-                            @Override
-                            public void call(HNItem.SearchResult searchResult) {
-                                List<Long> list = new ArrayList<>();
-                                mSearchResultTotalPages = searchResult.getNbPages();
-                                for (int i = 0; i < searchResult.getHits().length; i++) {
-                                    list.add(searchResult.getHits()[i].getObjectID());
-                                }
-                                loadPostFromList(list);
-                                mLoadingState = Constants.LOADING_IN_PROGRESS;
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                Log.i("search", throwable.toString());
-
-                            }
-                        }));
     }
 
     void loadPostFromList(List<Long> list) {
         mCompositeSubscription.add(mDataManager.getPosts(list)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Post>() {
-                    @Override
-                    public void onCompleted() {
-                        mLoadingState = Constants.LOADING_IDLE;
-                    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Subscriber<Post>() {
+                @Override
+                public void onCompleted() {
+                    mLoadingState = Constants.LOADING_IDLE;
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("loadPostFromList", e.toString());
-                    }
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("loadPostFromList", e.toString());
+                }
 
-                    @Override
-                    public void onNext(Post post) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mRecyclerView.setVisibility(View.VISIBLE);
-                        if (post != null) {
-                            post.setIndex(mPostAdapter.getItemCount() - 1);
-                            // setup url and pretty url
-                            String url = post.getUrl();
-                            if (url == null || url.isEmpty()) {
-                                url = Constants.YCOMBINATOR_ITEM_URL + post.getId();
-                                post.setUrl(url);
-                            }
-                            String[] splitUrl = url.split("/");
-                            if (splitUrl.length > 2) {
-                                url = splitUrl[2];
-                                post.setPrettyUrl(url);
-                            }
-                            mPostAdapter.add(post);
-                            if (mShowPostSummary
-                                    && !mStoryTypeSpec.equals(Constants.STORY_TYPE_ASK_HN_PATH)
-                                    && !mStoryTypeSpec.equals(Constants.STORY_TYPE_SHOW_HN_PATH)
-                                    && post.getKids() != null) {
-                                loadSummary(post);
-                            }
-                            if (SharedPrefsManager.getIsShowTooltip(prefs)
-                                    && mRecyclerView.getLayoutManager().getChildCount() > 4) {
-                                final ToolTipView myToolTipView = tooltipLayout
-                                        .showToolTipForView(toolTip,
-                                                mRecyclerView.getLayoutManager().getChildAt(3));
-                                myToolTipView.setOnToolTipViewClickedListener(
-                                        new ToolTipView.OnToolTipViewClickedListener() {
-                                            @Override
-                                            public void onToolTipViewClicked(ToolTipView toolTipView) {
-                                                myToolTipView.remove();
-                                            }
-                                        });
-                                SharedPrefsManager.setIsShowTooltip(prefs, false);
-                            }
-
+                @Override
+                public void onNext(Post post) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    if (post != null) {
+                        post.setIndex(mPostAdapter.getItemCount() - 1);
+                        // setup url and pretty url
+                        String url = post.getUrl();
+                        if (url == null || url.isEmpty()) {
+                            url = Constants.YCOMBINATOR_ITEM_URL + post.getId();
+                            post.setUrl(url);
+                        }
+                        String[] splitUrl = url.split("/");
+                        if (splitUrl.length > 2) {
+                            url = splitUrl[2];
+                            post.setPrettyUrl(url);
+                        }
+                        mPostAdapter.add(post);
+                        if (mShowPostSummary
+                            && !mStoryTypeSpec.equals(Constants.STORY_TYPE_ASK_HN_PATH)
+                            && !mStoryTypeSpec.equals(Constants.STORY_TYPE_SHOW_HN_PATH)
+                            && post.getKids() != null) {
+                            loadSummary(post);
+                        }
+                        if (SharedPrefsManager.getIsShowTooltip(prefs)
+                            && mRecyclerView.getLayoutManager().getChildCount() > 4) {
+                            final ToolTipView myToolTipView = tooltipLayout
+                                .showToolTipForView(toolTip,
+                                    mRecyclerView.getLayoutManager().getChildAt(3));
+                            myToolTipView.setOnToolTipViewClickedListener(
+                                new ToolTipView.OnToolTipViewClickedListener() {
+                                    @Override
+                                    public void onToolTipViewClicked(ToolTipView toolTipView) {
+                                        myToolTipView.remove();
+                                    }
+                                });
+                            SharedPrefsManager.setIsShowTooltip(prefs, false);
                         }
                     }
-                }));
+                }
+            }));
     }
 
     public void refresh(String type, String spec) {
@@ -341,12 +340,16 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 }
             });
             mPostAdapter.clear();
-            if (type.equals(Constants.TYPE_SEARCH)) {
-                loadPostListFromSearch(spec, 0);
-            } else if (type.equals(Constants.TYPE_STORY)) {
-                loadPostList(spec);
-            } else {
-                Log.e("refresh", "type");
+            switch (type) {
+                case Constants.TYPE_SEARCH:
+                    loadPostListFromSearch(spec, 0);
+                    break;
+                case Constants.TYPE_STORY:
+                    loadPostList(spec);
+                    break;
+                default:
+                    Log.e("refresh", "type");
+                    break;
             }
         } else {
             if (mSwipeRefreshLayout.isRefreshing()) {
@@ -362,15 +365,15 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     private void loadMore() {
         if (mStoryType.equals(Constants.TYPE_STORY)
-                && Constants.NUM_LOADING_ITEM * (mLoadedTime + 1) < mPostIdList.size()) {
+            && Constants.NUM_LOADING_ITEM * (mLoadedTime + 1) < mPostIdList.size()) {
             int start = Constants.NUM_LOADING_ITEM * mLoadedTime,
-                    end = Constants.NUM_LOADING_ITEM * (++mLoadedTime);
+                end = Constants.NUM_LOADING_ITEM * (++mLoadedTime);
             loadPostFromList(mPostIdList.subList(start, end));
             mLoadingState = Constants.LOADING_IN_PROGRESS;
             //Toast.makeText(getActivity(), "Loading more", Toast.LENGTH_SHORT).show();
             Log.i("loading", String.valueOf(start) + " - " + end);
         } else if (mStoryType.equals(Constants.TYPE_SEARCH)
-                && mLoadedTime < mSearchResultTotalPages) {
+            && mLoadedTime < mSearchResultTotalPages) {
             Log.i(String.valueOf(mSearchResultTotalPages), String.valueOf(mLoadedTime));
             loadPostListFromSearch(mStoryTypeSpec, mLoadedTime++);
             mLoadingState = Constants.LOADING_IN_PROGRESS;
@@ -394,26 +397,26 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
     void loadSummary(final Post post) {
         mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Comment>() {
-                    @Override
-                    public void call(Comment comment) {
-                        if (comment != null) {
-                            post.setSummary(Html.fromHtml(comment.getText()
-                                    .replace("<p>", "<br /><br />").replace("\n", "<br />")).toString());
-                            mPostAdapter.notifyItemChanged(post.getIndex());
-                        } else {
-                            post.setSummary(null);
-                        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<Comment>() {
+                @Override
+                public void call(Comment comment) {
+                    if (comment != null) {
+                        post.setSummary(Html.fromHtml(comment.getText()
+                            .replace("<p>", "<br /><br />").replace("\n", "<br />")).toString());
+                        mPostAdapter.notifyItemChanged(post.getIndex());
+                    } else {
+                        post.setSummary(null);
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("loadSummary: " + String.valueOf(post.getId()), throwable.toString());
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("loadSummary: " + String.valueOf(post.getId()), throwable.toString());
 
-                    }
-                }));
+                }
+            }));
     }
 
     public void setSwipeRefreshLayoutState(boolean isEnabled) {
@@ -430,11 +433,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(SharedPrefsManager.KEY_POST_FONT)
-                || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
-                || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
+            || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
+            || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
             mPostAdapter.updatePostPrefs();
             reformatListStyle();
         }
     }
-
 }

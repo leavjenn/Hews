@@ -2,6 +2,7 @@ package com.leavjenn.hews.ui;
 
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +11,8 @@ import com.leavjenn.hews.model.Post;
 
 import java.util.List;
 
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 public class BookmarkFragment extends BasePostListFragment {
 
@@ -44,26 +45,21 @@ public class BookmarkFragment extends BasePostListFragment {
     private void getPostBookmarks() {
         mPostAdapter.clear();
         mCompositeSubscription.add(mDataManager.getAllPostsFromDb(getActivity())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<List<Post>>() {
-                    @Override
-                    public void onCompleted() {
-
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<List<Post>>() {
+                @Override
+                public void call(List<Post> posts) {
+                    swipeRefreshLayout.setRefreshing(false);
+                    for (Post post : posts) {
+                        mPostAdapter.add(post);
                     }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(List<Post> posts) {
-                        swipeRefreshLayout.setRefreshing(false);
-                        for (Post post : posts) {
-                            mPostAdapter.add(post);
-                        }
-                    }
-                }));
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("getPostBookmarks", throwable.toString());
+                }
+            }));
     }
 
     @Override

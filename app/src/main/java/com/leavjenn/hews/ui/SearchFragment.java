@@ -33,11 +33,12 @@ import java.util.List;
 
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class SearchFragment extends Fragment implements PostAdapter.OnReachBottomListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+    SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String KEY_KEYWORD = "key_keyword";
     private static final String KEY_TIME_RANGE = "key_time_range";
     private static final String KEY_SORT_METHOD = "key_sort_method";
@@ -94,7 +95,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement (PostAdapter.OnItemClickListener)");
+                + " must implement (PostAdapter.OnItemClickListener)");
         }
     }
 
@@ -131,7 +132,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
         mRecyclerView.setAdapter(mPostAdapter);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-                R.color.orange_900, R.color.orange_900, R.color.orange_600);
+            R.color.orange_900, R.color.orange_900, R.color.orange_600);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -168,7 +169,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         outState.putParcelable(KEY_POST_ID_LIST, Parcels.wrap(mPostIdList));
         outState.putInt(KEY_SEARCH_RESULT_TOTAL_PAGE, mSearchResultTotalPages);
         mLastTimeListPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
-                findFirstVisibleItemPosition();
+            findFirstVisibleItemPosition();
         outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
         outState.putInt(KEY_LOADED_TIME, mLoadedTime);
         outState.putInt(KEY_LOADING_STATE, mLoadingState);
@@ -185,87 +186,79 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
 
     void loadPostListFromSearch(String keyword, String dateRange, int page, boolean isSortByDate) {
         mCompositeSubscription.add(
-                mDataManager.getSearchResult(keyword, "created_at_i>" + dateRange.substring(0, 10)
-                        + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<HNItem.SearchResult>() {
-                            @Override
-                            public void onCompleted() {
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.i("search", e.toString());
-                            }
-
-                            @Override
-                            public void onNext(HNItem.SearchResult searchResult) {
-                                List<Long> list = new ArrayList<>();
-                                mSearchResultTotalPages = searchResult.getNbPages();
-                                for (int i = 0; i < searchResult.getHits().length; i++) {
-                                    list.add(searchResult.getHits()[i].getObjectID());
-                                }
-                                loadPostFromList(list);
-                                mLoadingState = Constants.LOADING_IN_PROGRESS;
-                            }
-                        }));
-    }
-
-    void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(mDataManager.getPosts(list)
+            mDataManager.getSearchResult(keyword, "created_at_i>" + dateRange.substring(0, 10)
+                + "," + "created_at_i<" + dateRange.substring(10), page, isSortByDate)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Post>() {
+                .subscribe(new Action1<HNItem.SearchResult>() {
                     @Override
-                    public void onCompleted() {
-                        mLoadingState = Constants.LOADING_IDLE;
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("loadPostFromList", e.toString());
-                    }
-
-                    @Override
-                    public void onNext(Post post) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mRecyclerView.setVisibility(View.VISIBLE);
-                        if (post != null) {
-                            mPostAdapter.add(post);
-                            post.setIndex(mPostAdapter.getItemCount() - 1);
-                            if (mShowPostSummary && post.getKids() != null) {
-                                loadSummary(post);
-                            }
+                    public void call(HNItem.SearchResult searchResult) {
+                        List<Long> list = new ArrayList<>();
+                        mSearchResultTotalPages = searchResult.getNbPages();
+                        for (int i = 0; i < searchResult.getHits().length; i++) {
+                            list.add(searchResult.getHits()[i].getObjectID());
                         }
+                        loadPostFromList(list);
+                        mLoadingState = Constants.LOADING_IN_PROGRESS;
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.i("search", throwable.toString());
                     }
                 }));
     }
 
-    void loadSummary(final Post post) {
-        mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Comment>() {
-                    @Override
-                    public void onCompleted() {
-                    }
+    void loadPostFromList(List<Long> list) {
+        mCompositeSubscription.add(mDataManager.getPosts(list)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Subscriber<Post>() {
+                @Override
+                public void onCompleted() {
+                    mLoadingState = Constants.LOADING_IDLE;
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("err " + String.valueOf(post.getId()), e.toString());
-                    }
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("loadPostFromList", e.toString());
+                }
 
-                    @Override
-                    public void onNext(Comment comment) {
-                        if (comment != null) {
-                            post.setSummary(Html.fromHtml(comment.getText()).toString());
-                            mPostAdapter.notifyItemChanged(post.getIndex());
-                        } else {
-                            post.setSummary(null);
+                @Override
+                public void onNext(Post post) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    if (post != null) {
+                        mPostAdapter.add(post);
+                        post.setIndex(mPostAdapter.getItemCount() - 1);
+                        if (mShowPostSummary && post.getKids() != null) {
+                            loadSummary(post);
                         }
                     }
-                })
+                }
+            }));
+    }
+
+    void loadSummary(final Post post) {
+        mCompositeSubscription.add(mDataManager.getSummary(post.getKids())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<Comment>() {
+                @Override
+                public void call(Comment comment) {
+                    if (comment != null) {
+                        post.setSummary(Html.fromHtml(comment.getText()).toString());
+                        mPostAdapter.notifyItemChanged(post.getIndex());
+                    } else {
+                        post.setSummary(null);
+                    }
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("loadSummary: " + String.valueOf(post.getId()), throwable.toString());
+                }
+            })
         );
     }
 
@@ -363,8 +356,8 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(SharedPrefsManager.KEY_POST_FONT)
-                || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
-                || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
+            || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
+            || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
             mPostAdapter.updatePostPrefs();
             reformatListStyle();
         }

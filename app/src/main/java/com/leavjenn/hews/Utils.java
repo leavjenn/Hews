@@ -25,7 +25,7 @@ public class Utils {
     public static CharSequence formatTime(long timeStamp) {
         timeStamp = timeStamp * 1000;
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(timeStamp,
-                System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
+            System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
         return timeAgo;
     }
 
@@ -51,7 +51,7 @@ public class Utils {
 
     public static boolean isOnline(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
+            .getSystemService(Context.CONNECTIVITY_SERVICE);
         return connectivityManager.getActiveNetworkInfo() != null;
     }
 
@@ -91,12 +91,12 @@ public class Utils {
         intentBuilder.enableUrlBarHiding();
         intentBuilder.setShowTitle(true);
         intentBuilder.setCloseButtonIcon(
-                BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_arrow_back));
+            BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_arrow_back));
         // share link option
         String menuItemTitle = context.getString(R.string.share_link_to);
         Intent actionIntent = new Intent(context.getApplicationContext(), ShareBroadcastReceiver.class);
         PendingIntent menuItemPendingIntent =
-                PendingIntent.getBroadcast(context.getApplicationContext(), 0, actionIntent, 0);
+            PendingIntent.getBroadcast(context.getApplicationContext(), 0, actionIntent, 0);
         intentBuilder.addMenuItem(menuItemTitle, menuItemPendingIntent);
         // TODO Use this way, it will show share to option when long click
 //            String shareLabel = getString(R.string.share_link_to);

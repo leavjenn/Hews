@@ -15,15 +15,15 @@ public class CommentTable {
 
     public static String getCreateTableQuery() {
         return "CREATE TABLE " + TABLE + "("
-                + COLUMN_COMMENT_ID + " INTEGER NOT NULL PRIMARY KEY, "
-                + COLUMN_INDEX + " INTEGER NOT NULL, "
-                + COLUMN_PARENT + " INTEGER NOT NULL, "
-                + COLUMN_LEVEL + " INTEGER, "
-                + COLUMN_BY + " TEXT, "
-                + COLUMN_DELETED + " TEXT, "
-                + COLUMN_KIDS + " TEXT, "
-                + COLUMN_TIME + " TEXT, "
-                + COLUMN_TEXT + " TEXT"
-                + ");";
+            + COLUMN_COMMENT_ID + " INTEGER NOT NULL PRIMARY KEY, "
+            + COLUMN_INDEX + " INTEGER NOT NULL, "
+            + COLUMN_PARENT + " INTEGER NOT NULL, "
+            + COLUMN_LEVEL + " INTEGER, "
+            + COLUMN_BY + " TEXT, "
+            + COLUMN_DELETED + " TEXT, "
+            + COLUMN_KIDS + " TEXT, "
+            + COLUMN_TIME + " TEXT, "
+            + COLUMN_TEXT + " TEXT"
+            + ");";
     }
 }

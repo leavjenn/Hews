@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.leavjenn.hews.R;
 
 public class CommentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
-        View.OnLongClickListener {
+    View.OnLongClickListener {
     public TextView ivIndent;
     public TextView tvComment;
     public TextView tvAuthor;
@@ -57,8 +57,7 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
             pixels[i + indentWidth / 3 * 2] = colorOrange;
         }
         Bitmap bm = Bitmap.createBitmap(pixels, indentWidth, 1, Bitmap.Config.ARGB_8888);
-        Shader shader = new BitmapShader(bm,
-                Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+        Shader shader = new BitmapShader(bm, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
         bg.getPaint().setShader(shader);
         return bg;
     }

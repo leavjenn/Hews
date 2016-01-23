@@ -52,8 +52,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class CommentsActivity extends AppCompatActivity implements
-        SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
-        AppBarLayout.OnOffsetChangedListener {
+    SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
+    AppBarLayout.OnOffsetChangedListener {
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
     private CoordinatorLayout coordinatorLayout;
@@ -115,7 +115,7 @@ public class CommentsActivity extends AppCompatActivity implements
         Parcelable postParcel = intent.getParcelableExtra(Constants.KEY_POST_PARCEL);
         if (postParcel != null) {
             commentsFragment = CommentsFragment.newInstance(postParcel,
-                    intent.getBooleanExtra(Constants.KEY_IS_BOOKMARKED, false));
+                intent.getBooleanExtra(Constants.KEY_IS_BOOKMARKED, false));
             Post post = Parcels.unwrap(postParcel);
             //FIXME how the url could be null?!
             mUrl = (post.getUrl() != null ? post.getUrl() : "https://news.ycombinator.com/");
@@ -132,8 +132,8 @@ public class CommentsActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             if (commentsFragment != null) {
                 getFragmentManager().beginTransaction()
-                        .add(R.id.container, commentsFragment, Constants.FRAGMENT_TAG_COMMENT)
-                        .commit();
+                    .add(R.id.container, commentsFragment, Constants.FRAGMENT_TAG_COMMENT)
+                    .commit();
             }
         }
 
@@ -146,7 +146,7 @@ public class CommentsActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
-                && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
+            && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
             mChromeCustomTabsHelper.bindCustomTabsService(this);
             if (mUrl != null) {
@@ -207,7 +207,7 @@ public class CommentsActivity extends AppCompatActivity implements
                         CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
                         Utils.setupIntentBuilder(intentBuilder, this, prefs);
                         ChromeCustomTabsHelper.openCustomTab(this, intentBuilder.build(),
-                                Utils.validateAndParseUri(mUrl, mPostId), null);
+                            Utils.validateAndParseUri(mUrl, mPostId), null);
                     } else {
                         Intent urlIntent = new Intent(Intent.ACTION_VIEW);
                         urlIntent.setData(Utils.validateAndParseUri(mUrl, mPostId));
@@ -234,15 +234,14 @@ public class CommentsActivity extends AppCompatActivity implements
 
             case R.id.action_refresh:
                 CommentsFragment commentFragment =
-                        (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
+                    (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
                 commentFragment.refresh();
                 break;
 
             case R.id.action_share:
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                String commentUrl = "https://news.ycombinator.com/item?id="
-                        + mPostId;
+                String commentUrl = "https://news.ycombinator.com/item?id=" + mPostId;
                 sendIntent.putExtra(Intent.EXTRA_TEXT, commentUrl);
                 sendIntent.setType("text/plain");
                 startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
@@ -302,19 +301,19 @@ public class CommentsActivity extends AppCompatActivity implements
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this);
         builder.setTitle("Discard")
-                .setMessage("Discard your reply?")
-                .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        enableReplyMode(false, mPostId);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            .setMessage("Discard your reply?")
+            .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    enableReplyMode(false, mPostId);
+                }
+            })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
-                    }
-                });
+                }
+            });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
@@ -338,7 +337,7 @@ public class CommentsActivity extends AppCompatActivity implements
 
     private void changeBookmarkState() {
         CommentsFragment commentsFragment =
-                (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
+            (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
         MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
         if (SharedPrefsManager.isPostBookmarked(prefs, mPostId)) {
             commentsFragment.removeBookmark();
@@ -358,109 +357,109 @@ public class CommentsActivity extends AppCompatActivity implements
         }
         final Snackbar snackbarProcessing = Snackbar.make(coordinatorLayout, "Upvoting...", Snackbar.LENGTH_INDEFINITE);
         TextView tvSnackbarText = (TextView) snackbarProcessing.getView()
-                .findViewById(android.support.design.R.id.snackbar_text);
+            .findViewById(android.support.design.R.id.snackbar_text);
         tvSnackbarText.setTextColor(Color.WHITE);
         snackbarProcessing.show();
         mCompositeSubscription.add(mDataManager.vote(itemId, prefs)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer integer) {
-                        snackbarProcessing.dismiss();
-                        AlertDialog.Builder builder =
-                                new AlertDialog.Builder(CommentsActivity.this)
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                            }
-                                        });
-                        switch (integer) {
-                            case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
-                                builder.setTitle("Login cookie expired")
-                                        .setMessage("Would you like to login again?")
-                                        .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                login();
-                                            }
-                                        }).create().show();
-                                break;
-                            case Constants.OPERATE_ERROR_NO_COOKIE:
-                                builder.setTitle("Not login")
-                                        .setMessage("Would you like to login?")
-                                        .setPositiveButton("Login", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                login();
-                                            }
-                                        }).create().show();
-                                break;
-                            case Constants.OPERATE_ERROR_HAVE_VOTED:
-                                Utils.showLongToast(CommentsActivity.this, "Already upvoted");
-                                break;
-                            case Constants.OPERATE_SUCCESS:
-                                Utils.showLongToast(CommentsActivity.this, "Upvote succeed");
-                                break;
-                            case Constants.OPERATE_ERROR_UNKNOWN:
-                                builder.setTitle("Upvote failed")
-                                        .setMessage("Would you like to upvote again?")
-                                        .setPositiveButton("Upvote again", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                vote(itemId);
-                                            }
-                                        }).create().show();
-                                break;
-                        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<Integer>() {
+                @Override
+                public void call(Integer integer) {
+                    snackbarProcessing.dismiss();
+                    AlertDialog.Builder builder =
+                        new AlertDialog.Builder(CommentsActivity.this)
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                    switch (integer) {
+                        case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
+                            builder.setTitle("Login cookie expired")
+                                .setMessage("Would you like to login again?")
+                                .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        login();
+                                    }
+                                }).create().show();
+                            break;
+                        case Constants.OPERATE_ERROR_NO_COOKIE:
+                            builder.setTitle("Not login")
+                                .setMessage("Would you like to login?")
+                                .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        login();
+                                    }
+                                }).create().show();
+                            break;
+                        case Constants.OPERATE_ERROR_HAVE_VOTED:
+                            Utils.showLongToast(CommentsActivity.this, "Already upvoted");
+                            break;
+                        case Constants.OPERATE_SUCCESS:
+                            Utils.showLongToast(CommentsActivity.this, "Upvote succeed");
+                            break;
+                        case Constants.OPERATE_ERROR_UNKNOWN:
+                            builder.setTitle("Upvote failed")
+                                .setMessage("Would you like to upvote again?")
+                                .setPositiveButton("Upvote again", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        vote(itemId);
+                                    }
+                                }).create().show();
+                            break;
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        snackbarProcessing.dismiss();
-                        Log.e("post vote err", throwable.toString());
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    snackbarProcessing.dismiss();
+                    Log.e("post vote err", throwable.toString());
 
-                    }
-                }));
+                }
+            }));
     }
 
     void login() {
         final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
         LoginDialogFragment.OnLoginListener onLoginListener =
-                new LoginDialogFragment.OnLoginListener() {
-                    @Override
-                    public void onLogin(final String username, String password) {
-                        mCompositeSubscription.add(mDataManager.login(username, password)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Action1<String>() {
-                                    @Override
-                                    public void call(String s) {
-                                        if (s.isEmpty()) {// login failed
-                                            loginDialogFragment.resetLogin();
-                                        } else {
-                                            loginDialogFragment.getDialog().dismiss();
-                                            Utils.showLongToast(CommentsActivity.this, "Login succeed");
-                                            SharedPrefsManager.setUsername(prefs, username);
-                                            SharedPrefsManager.setLoginCookie(prefs, s);
-                                        }
-                                    }
-                                }, new Action1<Throwable>() {
-                                    @Override
-                                    public void call(Throwable throwable) {
-                                        Log.e("login err", throwable.toString());
+            new LoginDialogFragment.OnLoginListener() {
+                @Override
+                public void onLogin(final String username, String password) {
+                    mCompositeSubscription.add(mDataManager.login(username, password)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<String>() {
+                            @Override
+                            public void call(String s) {
+                                if (s.isEmpty()) {// login failed
+                                    loginDialogFragment.resetLogin();
+                                } else {
+                                    loginDialogFragment.getDialog().dismiss();
+                                    Utils.showLongToast(CommentsActivity.this, "Login succeed");
+                                    SharedPrefsManager.setUsername(prefs, username);
+                                    SharedPrefsManager.setLoginCookie(prefs, s);
+                                }
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Log.e("login err", throwable.toString());
 
-                                    }
-                                }));
-                    }
-                };
+                            }
+                        }));
+                }
+            };
         loginDialogFragment.setListener(onLoginListener);
         loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
         // guarantee getDialog() will not return null
         getFragmentManager().executePendingTransactions();
         // show keyboard when dialog shows
         loginDialogFragment.getDialog().getWindow()
-                .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     void reply(final long itemId, String replyText) {
@@ -474,68 +473,68 @@ public class CommentsActivity extends AppCompatActivity implements
         }
         final Snackbar snackbarProcessing = Snackbar.make(coordinatorLayout, "Replying...", Snackbar.LENGTH_INDEFINITE);
         TextView tvSnackbarText = (TextView) snackbarProcessing.getView()
-                .findViewById(android.support.design.R.id.snackbar_text);
+            .findViewById(android.support.design.R.id.snackbar_text);
         tvSnackbarText.setTextColor(Color.WHITE);
         snackbarProcessing.show();
         mCompositeSubscription.add(
-                mDataManager.reply(itemId, replyText, SharedPrefsManager.getLoginCookie(prefs))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<Integer>() {
-                            @Override
-                            public void call(Integer integer) {
-                                snackbarProcessing.dismiss();
-                                AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                            }
-                                        });
-                                switch (integer) {
-                                    case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
-                                        builder.setTitle("Login cookie expired")
-                                                .setMessage("Would you like to login again?")
-                                                .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        login();
-                                                    }
-                                                }).create().show();
-                                        break;
-                                    case Constants.OPERATE_ERROR_NO_COOKIE:
-                                        builder.setTitle("Not login")
-                                                .setMessage("Would you like to login?")
-                                                .setPositiveButton("Login", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        login();
-                                                    }
-                                                }).create().show();
-                                        break;
-                                    case Constants.OPERATE_SUCCESS:
-                                        Utils.showLongToast(CommentsActivity.this, "Reply succeed");
-                                        enableReplyMode(false, mPostId);
-                                        break;
-                                    case Constants.OPERATE_ERROR_UNKNOWN:
-                                        builder.setTitle("Reply failed")
-                                                .setMessage("Would you like to reply again?")
-                                                .setPositiveButton("Reply again", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        reply(itemId, etReply.getText().toString());
-                                                    }
-                                                }).create().show();
-                                        break;
+            mDataManager.reply(itemId, replyText, SharedPrefsManager.getLoginCookie(prefs))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        snackbarProcessing.dismiss();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
                                 }
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                snackbarProcessing.dismiss();
-                                Log.e("post reply err", throwable.toString());
+                            });
+                        switch (integer) {
+                            case Constants.OPERATE_ERROR_COOKIE_EXPIRED:
+                                builder.setTitle("Login cookie expired")
+                                    .setMessage("Would you like to login again?")
+                                    .setPositiveButton("Login again", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            login();
+                                        }
+                                    }).create().show();
+                                break;
+                            case Constants.OPERATE_ERROR_NO_COOKIE:
+                                builder.setTitle("Not login")
+                                    .setMessage("Would you like to login?")
+                                    .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            login();
+                                        }
+                                    }).create().show();
+                                break;
+                            case Constants.OPERATE_SUCCESS:
+                                Utils.showLongToast(CommentsActivity.this, "Reply succeed");
+                                enableReplyMode(false, mPostId);
+                                break;
+                            case Constants.OPERATE_ERROR_UNKNOWN:
+                                builder.setTitle("Reply failed")
+                                    .setMessage("Would you like to reply again?")
+                                    .setPositiveButton("Reply again", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            reply(itemId, etReply.getText().toString());
+                                        }
+                                    }).create().show();
+                                break;
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        snackbarProcessing.dismiss();
+                        Log.e("post reply err", throwable.toString());
 
-                            }
-                        }));
+                    }
+                }));
     }
 
     public ChromeCustomTabsHelper getChromeCustomTabsHelper() {
@@ -572,7 +571,7 @@ public class CommentsActivity extends AppCompatActivity implements
     public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
         if (getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT) instanceof CommentsFragment) {
             ((CommentsFragment) getFragmentManager().findFragmentById(R.id.container))
-                    .setSwipeRefreshLayoutState(i == 0);
+                .setSwipeRefreshLayoutState(i == 0);
         }
     }
 }

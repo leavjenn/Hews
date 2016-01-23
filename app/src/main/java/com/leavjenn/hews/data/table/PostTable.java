@@ -20,19 +20,19 @@ public class PostTable {
 
     public static String getCreateTableQuery() {
         return "CREATE TABLE " + TABLE + "("
-                + COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY, "
-                + COLUMN_BY + " TEXT, "
-                + COLUMN_DESCENDANTS + " TEXT, "
-                + COLUMN_KIDS + " TEXT, "
-                + COLUMN_SCORE + " TEXT, "
-                + COLUMN_TEXT + " TEXT, "
-                + COLUMN_TIME + " TEXT, "
-                + COLUMN_TITLE + " TEXT, "
-                + COLUMN_TYPE + " TEXT, "
-                + COLUMN_URL + " TEXT, "
-                + COLUMN_PRETTY_URL + " TEXT, "
-                + COLUMN_SUMMARY + " TEXT, "
-                + COLUMN_ISBOOKMARKED + " INTEGER"
-                + ");";
+            + COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY, "
+            + COLUMN_BY + " TEXT, "
+            + COLUMN_DESCENDANTS + " TEXT, "
+            + COLUMN_KIDS + " TEXT, "
+            + COLUMN_SCORE + " TEXT, "
+            + COLUMN_TEXT + " TEXT, "
+            + COLUMN_TIME + " TEXT, "
+            + COLUMN_TITLE + " TEXT, "
+            + COLUMN_TYPE + " TEXT, "
+            + COLUMN_URL + " TEXT, "
+            + COLUMN_PRETTY_URL + " TEXT, "
+            + COLUMN_SUMMARY + " TEXT, "
+            + COLUMN_ISBOOKMARKED + " INTEGER"
+            + ");";
     }
 }
