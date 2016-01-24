@@ -305,9 +305,7 @@ public class CommentsFragment extends Fragment
 
                     @Override
                     public void onNext(List<Comment> commentList) {
-                        for (Comment comment : commentList) {
-                            mCommentAdapter.addComment(comment);
-                        }
+                        mCommentAdapter.addAllComments(commentList);
                     }
                 });
             mCompositeSubscription.add(mCommentsSubscription);

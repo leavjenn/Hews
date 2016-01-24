@@ -42,21 +42,23 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int VIEW_TYPE_COMMENT = 1;
     private static final int VIEW_TYPE_FOOTER = 2;
 
-    Context mContext;
-    RecyclerView mRecyclerView;
-    ArrayList<HNItem> mItemList;
-    Map<Long, List<Comment>> mCollapsedChildrenCommentsIndex;
-    Map<Long, List<Comment>> mCollapsedOlderCommentsIndex;
-    SharedPreferences prefs;
-    Typeface mFont;
-    float mTextSize, mLineHeight;
-    int mLoadingState = 0;
-    int mCommentIndentColorOrange, mCommentIndentColorBg, mCommentIndentWidth;
+    private int mLoadingState;
+    private int mCommentIndentColorOrange, mCommentIndentColorBg, mCommentIndentWidth;
+    private Typeface mFont;
+    private float mTextSize, mLineHeight;
+    private Map<Long, List<Comment>> mCollapsedChildrenCommentsIndex;
+    private Map<Long, List<Comment>> mCollapsedOlderCommentsIndex;
+    private Context mContext;
+    private RecyclerView mRecyclerView;
+    private ArrayList<HNItem> mItemList;
+    private ArrayList<Comment> mCommentList;
+    private SharedPreferences prefs;
 
     public CommentAdapter(Context context, RecyclerView recyclerView) {
         mContext = context;
         mRecyclerView = recyclerView;
         mItemList = new ArrayList<>();
+        mCommentList = new ArrayList<>();
         mCollapsedChildrenCommentsIndex = new HashMap<>();
         mCollapsedOlderCommentsIndex = new HashMap<>();
         prefs = ((CommentsActivity) mContext).getSharedPreferences();
@@ -273,6 +275,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void addComment(Comment comment) {
         mItemList.add(mItemList.size() - 1, comment);
         notifyItemInserted(mItemList.indexOf(comment));
+        mCommentList.add(comment);
     }
 
     public void addFooter(HNItem.Footer footer) {
@@ -280,9 +283,10 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyItemInserted(mItemList.size() - 1);
     }
 
-    public void addAllComments(List<? extends HNItem> hnItemList) {
-        mItemList.addAll(mItemList.size() - 1, hnItemList);
+    public void addAllComments(List<Comment> commentList) {
+        mItemList.addAll(mItemList.size() - 1, commentList);
         notifyDataSetChanged();
+        mCommentList.addAll(commentList);
     }
 
     public void updateFooter(int loadingState) {
@@ -290,17 +294,12 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public ArrayList<Comment> getCommentList() {
-        ArrayList<Comment> commentList = new ArrayList<>();
-        for (HNItem hnItem : mItemList) {
-            if (hnItem instanceof Comment) {
-                commentList.add((Comment) hnItem);
-            }
-        }
-        return commentList;
+        return mCommentList;
     }
 
     public void clear() {
         mItemList.clear();
+        mCommentList.clear();
     }
 
     public void collapseChildrenComment(int position) {
