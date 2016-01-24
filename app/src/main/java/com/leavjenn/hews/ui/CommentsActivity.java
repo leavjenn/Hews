@@ -57,6 +57,7 @@ public class CommentsActivity extends AppCompatActivity implements
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
     private CoordinatorLayout coordinatorLayout;
+    private AppBarLayout appbar;
     private LinearLayout layoutReply;
     private EditText etReply;
     private FloatingActionButton btnReplySend;
@@ -94,6 +95,8 @@ public class CommentsActivity extends AppCompatActivity implements
         }
         setContentView(R.layout.activity_comments);
         Firebase.setAndroidContext(this);
+        appbar = (AppBarLayout) findViewById(R.id.appbar);
+        appbar.addOnOffsetChangedListener(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
@@ -161,6 +164,7 @@ public class CommentsActivity extends AppCompatActivity implements
         if (mWindow.isWindowShowing()) {
             mWindow.dismiss();
         }
+        appbar.removeOnOffsetChangedListener(this);
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
         }
