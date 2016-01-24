@@ -72,7 +72,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private DataManager mDataManager;
     private CompositeSubscription mCompositeSubscription;
 
-    // no meaningful effect
     public static PostFragment newInstance(String storyType, String storyTypeSpec) {
         PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
@@ -101,11 +100,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//        if (getArguments() != null) {
-//            mStoryType = getArguments().getString(KEY_STORY_TYPE);
-//            mStoryTypeSpec = getArguments().getString(KEY_STORY_TYPE_SPEC);
-//        }
+        if (getArguments() != null) {
+            mStoryType = getArguments().getString(KEY_STORY_TYPE);
+            mStoryTypeSpec = getArguments().getString(KEY_STORY_TYPE_SPEC);
+        }
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
         mDataManager = new DataManager();
@@ -169,11 +167,13 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
                 loadMore();
             }
-            //Log.d("postfragActivityCreated", mStoryType);
-            //Log.d("postfragActivityCreated", mStoryTypeSpec);
         } else {
-            mStoryType = Constants.TYPE_STORY;
-            mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
+            if (mStoryType == null || mStoryTypeSpec == null) {
+                // rare condition:
+                // not new instance, no saved instance state and not popped back stack
+                mStoryType = Constants.TYPE_STORY;
+                mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
+            }
             refresh(mStoryType, mStoryTypeSpec);
         }
     }
@@ -207,19 +207,19 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     }
 
     @Override
-    public void onDetach() {
-        mOnItemClickListener = null;
-        mOnRecyclerViewCreateListener = null;
-        super.onDetach();
-    }
-
-    @Override
     public void onDestroy() {
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
         prefs.unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onDetach() {
+        mOnItemClickListener = null;
+        mOnRecyclerViewCreateListener = null;
+        super.onDetach();
     }
 
     void loadPostList(String storyTypeUrl) {
@@ -363,6 +363,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mLoadingState = loadingState;
         mPostAdapter.updateFooter(mLoadingState);
     }
+
     private void loadMore() {
         if (mStoryType.equals(Constants.TYPE_STORY)
             && Constants.NUM_LOADING_ITEM * (mLoadedTime + 1) < mPostIdList.size()) {

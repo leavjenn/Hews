@@ -1,7 +1,6 @@
 package com.leavjenn.hews.ui;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.app.SearchManager;
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final int NAV_NEW = 1;
     private static final int NAV_ASK_HN = 2;
     private static final int NAV_SHOW_HN = 3;
-    private static final int NAV_SEARCH = 4;
+    private static final int NAV_POPULAR = 4;
     private static final int NAV_BOOKMARK = 5;
 
     private DrawerLayout mDrawerLayout;
@@ -203,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         menu.getItem(mDrawerSelectedItem + 2).setChecked(true);
         //TODO bug: item including login part
         Log.i("mDrawerSelectedItem", String.valueOf(mDrawerSelectedItem));
-        if (mDrawerSelectedItem == NAV_SEARCH) {
+        if (mDrawerSelectedItem == NAV_POPULAR) {
             Log.i("mDrawerSelectedItem", "DateRange");
             setUpSpinnerPopularDateRange();
             int selectedDateRange = savedInstanceState.getInt(STATE_POPULAR_DATE_RANGE, 0);
@@ -337,9 +336,13 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 mSpinnerSortOrder.setVisibility(View.GONE);
                 mSpinnerDateRange.setVisibility(View.GONE);
+                // pop back stack fragment here because it intercepts back press event
                 if (getFragmentManager().getBackStackEntryCount() > 0) {
                     Log.i("fragment", "popback");
-                    getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    getFragmentManager().popBackStackImmediate();
+                    if (mStoryTypeSpec.equals(Constants.TYPE_SEARCH)) {
+                        setUpSpinnerPopularDateRange();
+                    }
                 }
                 return true;
             }
@@ -401,7 +404,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             break;
                         case R.id.nav_popular:
                             mStoryTypeSpec = Constants.TYPE_SEARCH;
-                            mDrawerSelectedItem = NAV_SEARCH;
+                            mDrawerSelectedItem = NAV_POPULAR;
+                            break;
                         case R.id.nav_bookmark:
                             mStoryTypeSpec = Constants.TYPE_BOOKMARK;
                             mDrawerSelectedItem = NAV_BOOKMARK;
@@ -437,7 +441,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     FragmentTransaction transaction = getFragmentManager()
                                         .beginTransaction();
                                     transaction.replace(R.id.container, postFragment);
-                                    transaction.addToBackStack(null);
                                     transaction.commit();
                                 }
                             } else if (type == R.id.nav_bookmark) {
@@ -446,7 +449,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 FragmentTransaction transaction = getFragmentManager()
                                     .beginTransaction();
                                 transaction.replace(R.id.container, bookmarkFragment);
-                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 mSpinnerDateRange.setVisibility(View.GONE);
                             } else if (type == R.id.nav_login) {
@@ -459,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 updateLoginName();
                             } else if (type == R.id.nav_feedback) {
                                 feedback();
-                            } else {
+                            } else { // top story, show HN, etc.
                                 menuItem.setChecked(true);
                                 mSpinnerDateRange.setVisibility(View.GONE);
                                 if (getFragmentManager().findFragmentById(R.id.container)
@@ -473,7 +475,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     FragmentTransaction transaction = getFragmentManager()
                                         .beginTransaction();
                                     transaction.replace(R.id.container, postFragment);
-                                    transaction.addToBackStack(null);
                                     transaction.commit();
                                 }
                             }
@@ -568,7 +569,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             });
         feedbackDialog.show(getFragmentManager(), "feedbackFrag");
     }
-
 
     void clickLogin() {
         isLoginMenuExpanded = !isLoginMenuExpanded;
@@ -850,12 +850,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawers();
-        } else if (mSearchItem.isActionViewExpanded()) {
-            mSearchItem.collapseActionView();
-//            if (getFragmentManager().getBackStackEntryCount() > 0) {
-//                Log.i("back pressed", "popback");
-//                getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-//            }
         } else {
             super.onBackPressed();
         }
