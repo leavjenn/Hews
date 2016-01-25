@@ -112,20 +112,24 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
         String theme = SharedPrefsManager.getTheme(prefs);
-        if (theme.equals(SharedPrefsManager.THEME_SEPIA)) {
-            setTheme(R.style.AppTheme_Sepia);
-        } else if (theme.equals(SharedPrefsManager.THEME_DARK)) {
-            setTheme(R.style.AppTheme_Dark);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                getWindow().setStatusBarColor(getResources().getColor(R.color.grey_900));
-            }
-        } else if (theme.equals(SharedPrefsManager.THEME_AMOLED_BLACK)) {
-            setTheme(R.style.AppTheme_AMOLEDBlack);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));
-            }
+        switch (theme) {
+            case SharedPrefsManager.THEME_SEPIA:
+                setTheme(R.style.AppTheme_Sepia);
+                break;
+            case SharedPrefsManager.THEME_DARK:
+                setTheme(R.style.AppTheme_Dark);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    getWindow().setStatusBarColor(getResources().getColor(R.color.grey_900));
+                }
+                break;
+            case SharedPrefsManager.THEME_AMOLED_BLACK:
+                setTheme(R.style.AppTheme_AMOLEDBlack);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    getWindow().setStatusBarColor(getResources().getColor(android.R.color.black));
+                }
+                break;
         }
         setContentView(R.layout.activity_main);
         Firebase.setAndroidContext(this);
