@@ -910,6 +910,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         } else if (getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment) {
             ((SearchFragment) getFragmentManager().findFragmentById(R.id.container))
                 .setSwipeRefreshLayoutState(i == 0);
+        } else if (getFragmentManager().findFragmentById(R.id.container) instanceof BasePostListFragment) {
+            ((BasePostListFragment) getFragmentManager().findFragmentById(R.id.container))
+                .setSwipeRefreshLayoutState(i == 0);
         }
     }
 }

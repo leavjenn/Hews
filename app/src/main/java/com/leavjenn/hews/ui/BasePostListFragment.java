@@ -116,6 +116,10 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
         mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
     }
 
+    public void setSwipeRefreshLayoutState(boolean isEnabled) {
+        swipeRefreshLayout.setEnabled(isEnabled);
+    }
+
     @Override
     public void OnReachBottom() {
 
