@@ -145,6 +145,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mIsSortByDate = getArguments().getBoolean(KEY_SORT_METHOD);
             mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
             if (mPostAdapter.getItemCount() == 0) {
+                mPostAdapter.addFooter(new HNItem.Footer());
                 mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
             }
             mSearchResultTotalPages = savedInstanceState.getInt(KEY_SEARCH_RESULT_TOTAL_PAGE);

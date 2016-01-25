@@ -156,6 +156,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
             mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
             if (mPostAdapter.getItemCount() == 0) {
+                mPostAdapter.addFooter(new HNItem.Footer());
                 mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
             }
             mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
