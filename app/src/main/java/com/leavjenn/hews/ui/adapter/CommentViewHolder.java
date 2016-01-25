@@ -70,16 +70,16 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.tv_comment) {
-            mListener.onClickComment(getPosition());
+            mListener.onClickComment(getAdapterPosition());
         } else {
-            mListener.onClick(getPosition());
+            mListener.onClick(getAdapterPosition());
         }
     }
 
     @Override
     public boolean onLongClick(View v) {
         if (mListener != null) {
-            mListener.onLongClick(getPosition());
+            mListener.onLongClick(getAdapterPosition());
         }
         return true;
     }
