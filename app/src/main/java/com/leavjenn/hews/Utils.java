@@ -8,14 +8,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.support.annotation.ColorRes;
 import android.support.annotation.StringRes;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.design.widget.Snackbar;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.leavjenn.hews.misc.ShareBroadcastReceiver;
@@ -62,6 +65,12 @@ public class Utils {
 
     public static void showLongToast(Context context, @StringRes int ResId) {
         Toast.makeText(context, ResId, Toast.LENGTH_LONG).show();
+    }
+
+    public static void setSnackBarTextColor(Snackbar snackbar, Context context, @ColorRes int color) {
+        TextView tvSnackbarText = (TextView) snackbar.getView()
+            .findViewById(android.support.design.R.id.snackbar_text);
+        tvSnackbarText.setTextColor(context.getResources().getColor(color));
     }
 
     // uri scheme can only lower case char

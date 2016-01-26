@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
@@ -48,8 +50,10 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     private static final String KEY_LAST_TIME_POSITION = "key_last_time_position";
     private static final String KEY_SEARCH_RESULT_TOTAL_PAGE = "key_search_result_total_page";
 
+    private RelativeLayout layoutRoot;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    private Snackbar snackbarNoConnection;
 
     private String mKeyword;
     private String mDateRange;
@@ -117,6 +121,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
+        layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_search_root);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_search);
         return rootView;
@@ -286,6 +291,9 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             mLoadedTime = 1;
             mCompositeSubscription.clear();
             mSwipeRefreshLayout.setRefreshing(true);
+            if (snackbarNoConnection != null && snackbarNoConnection.isShown()) {
+                snackbarNoConnection.dismiss();
+            }
             mPostAdapter.clear();
             mPostAdapter.addFooter(new HNItem.Footer());
             loadPostListFromSearch(keyword, dateRange, 0, isSortByDate);
@@ -293,7 +301,17 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             if (mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
-            Utils.showLongToast(getActivity(), R.string.no_connection_prompt);
+             snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
+                Snackbar.LENGTH_INDEFINITE);
+            Utils.setSnackBarTextColor(snackbarNoConnection, getActivity(), android.R.color.white);
+            snackbarNoConnection.setAction(R.string.snackebar_action_retry, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    refresh();
+                }
+            });
+            snackbarNoConnection.setActionTextColor(getResources().getColor(R.color.orange_600));
+            snackbarNoConnection.show();
         }
     }
 

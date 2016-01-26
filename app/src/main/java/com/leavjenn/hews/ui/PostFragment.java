@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
@@ -51,8 +53,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     static final String KEY_STORY_TYPE = "story_type";
     static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
 
+    private RelativeLayout layoutRoot;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    private Snackbar snackbarNoConnection;
     private LinearLayoutManager mLinearLayoutManager;
     private ToolTipRelativeLayout tooltipLayout;
     private ToolTip toolTip;
@@ -114,6 +118,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
+        layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_post_root);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_post);
 
@@ -335,6 +340,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                     mSwipeRefreshLayout.setRefreshing(true);
                 }
             });
+            if (snackbarNoConnection != null && snackbarNoConnection.isShown()) {
+                snackbarNoConnection.dismiss();
+            }
             mPostAdapter.clear();
             mPostAdapter.addFooter(new HNItem.Footer());
             switch (type) {
@@ -352,7 +360,17 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             if (mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
-            Utils.showLongToast(getActivity(), R.string.no_connection_prompt);
+            snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
+                Snackbar.LENGTH_INDEFINITE);
+            Utils.setSnackBarTextColor(snackbarNoConnection, getActivity(), android.R.color.white);
+            snackbarNoConnection.setAction(R.string.snackebar_action_retry, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    refresh(mStoryType, mStoryTypeSpec);
+                }
+            });
+            snackbarNoConnection.setActionTextColor(getResources().getColor(R.color.orange_600));
+            snackbarNoConnection.show();
         }
     }
 

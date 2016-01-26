@@ -57,6 +57,7 @@ public class CommentsFragment extends Fragment
     private RelativeLayout layoutRoot;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    private Snackbar snackbarNoConnection;
 
     private boolean mIsBookmarked, isFetchingCompleted;
     private Post mPost;
@@ -224,13 +225,16 @@ public class CommentsFragment extends Fragment
     public void refresh() {
         // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
         // https://code.google.com/p/android/issues/detail?id=77712
-        swipeRefreshLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                swipeRefreshLayout.setRefreshing(true);
-            }
-        });
         if (Utils.isOnline(getActivity())) {
+            swipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefreshLayout.setRefreshing(true);
+                }
+            });
+            if (snackbarNoConnection != null && snackbarNoConnection.isShown()) {
+                snackbarNoConnection.dismiss();
+            }
             mCommentAdapter.clear();
             mCommentAdapter.notifyDataSetChanged();
             isFetchingCompleted = false;
@@ -239,7 +243,17 @@ public class CommentsFragment extends Fragment
             if (swipeRefreshLayout.isRefreshing()) {
                 swipeRefreshLayout.setRefreshing(false);
             }
-            Utils.showLongToast(getActivity(), R.string.no_connection_prompt);
+            snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
+                Snackbar.LENGTH_INDEFINITE);
+            Utils.setSnackBarTextColor(snackbarNoConnection, getActivity(), R.color.orange_600);
+            snackbarNoConnection.setAction(R.string.snackebar_action_retry, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    refresh();
+                }
+            });
+            snackbarNoConnection.setActionTextColor(getResources().getColor(R.color.orange_800));
+            snackbarNoConnection.show();
         }
     }
 
