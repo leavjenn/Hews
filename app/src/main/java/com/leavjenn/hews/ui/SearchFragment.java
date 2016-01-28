@@ -296,6 +296,7 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
             }
             mPostAdapter.clear();
             mPostAdapter.addFooter(new HNItem.Footer());
+            updateLoadingState(Constants.LOADING_IDLE);
             loadPostListFromSearch(keyword, dateRange, 0, isSortByDate);
         } else {
             if (mSwipeRefreshLayout.isRefreshing()) {

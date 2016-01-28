@@ -345,6 +345,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             }
             mPostAdapter.clear();
             mPostAdapter.addFooter(new HNItem.Footer());
+            updateLoadingState(Constants.LOADING_IDLE);
             switch (type) {
                 case Constants.TYPE_SEARCH:
                     loadPostListFromSearch(spec, 0);
