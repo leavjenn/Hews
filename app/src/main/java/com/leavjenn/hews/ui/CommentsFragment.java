@@ -108,6 +108,7 @@ public class CommentsFragment extends Fragment
         if (getArguments() != null) {
             if (getArguments().containsKey(KEY_POST_PARCEL)) {
                 mPost = Parcels.unwrap(getArguments().getParcelable(KEY_POST_PARCEL));
+                mPostId = mPost.getId();
                 mIsBookmarked = getArguments().getBoolean(KEY_IS_BOOKMARKED);
             } else if (getArguments().containsKey(KEY_POST_ID)) {
                 mPostId = getArguments().getLong(KEY_POST_ID);
@@ -163,7 +164,11 @@ public class CommentsFragment extends Fragment
                 if (mIsBookmarked) {
                     getCommentsFromDb(mPost);
                 } else {
-                    getComments(mPost);
+                    if (mPost != null) {
+                        getComments(mPost);
+                    } else { // start from other app, leaving app without post info loading finished
+                        getPost(mPostId);
+                    }
                 }
             }
         } else if (mPost != null) { // new instance, no saved instance state
@@ -187,7 +192,6 @@ public class CommentsFragment extends Fragment
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mPostId = mPost.getId();
         outState.putLong(KEY_POST_ID, mPostId);
         outState.putParcelable(KEY_POST_PARCEL, Parcels.wrap(mPost));
         outState.putBoolean(KEY_IS_BOOKMARKED, mIsBookmarked);
