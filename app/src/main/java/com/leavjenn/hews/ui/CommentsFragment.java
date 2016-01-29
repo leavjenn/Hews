@@ -46,7 +46,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class CommentsFragment extends Fragment
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String KEY_POST_PARCEL = "arg_post_parcel";
     private static final String KEY_IS_BOOKMARKED = "arg_is_bookmarked";
     private static final String KEY_POST_ID = "arg_post_id";
@@ -98,7 +98,7 @@ public class CommentsFragment extends Fragment
             mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement (MainActivity.OnRecyclerViewCreateListener)");
+                + " must implement (MainActivity.OnRecyclerViewCreateListener)");
         }
     }
 
@@ -108,7 +108,6 @@ public class CommentsFragment extends Fragment
         if (getArguments() != null) {
             if (getArguments().containsKey(KEY_POST_PARCEL)) {
                 mPost = Parcels.unwrap(getArguments().getParcelable(KEY_POST_PARCEL));
-                mPostId = mPost.getId();
                 mIsBookmarked = getArguments().getBoolean(KEY_IS_BOOKMARKED);
             } else if (getArguments().containsKey(KEY_POST_ID)) {
                 mPostId = getArguments().getLong(KEY_POST_ID);
@@ -130,7 +129,7 @@ public class CommentsFragment extends Fragment
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.comment_list);
         setupRecyclerView();
         swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-                R.color.orange_900, R.color.orange_900, R.color.orange_600);
+            R.color.orange_900, R.color.orange_900, R.color.orange_600);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -153,7 +152,7 @@ public class CommentsFragment extends Fragment
                     mCommentAdapter.addFooter(new HNItem.Footer());
                     mCommentAdapter.addHeader(mPost);
                     mCommentAdapter.addAllComments((ArrayList<Comment>) Parcels.unwrap(
-                            savedInstanceState.getParcelable(KEY_COMMENTS_PARCEL)));
+                        savedInstanceState.getParcelable(KEY_COMMENTS_PARCEL)));
                     mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
                 }
                 mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
@@ -164,11 +163,7 @@ public class CommentsFragment extends Fragment
                 if (mIsBookmarked) {
                     getCommentsFromDb(mPost);
                 } else {
-                    if (mPost != null) {
-                        getComments(mPost);
-                    } else { // start from other app, leaving app without post info loading finished
-                        getPost(mPostId);
-                    }
+                    getComments(mPost);
                 }
             }
         } else if (mPost != null) { // new instance, no saved instance state
@@ -192,6 +187,7 @@ public class CommentsFragment extends Fragment
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        mPostId = mPost.getId();
         outState.putLong(KEY_POST_ID, mPostId);
         outState.putParcelable(KEY_POST_PARCEL, Parcels.wrap(mPost));
         outState.putBoolean(KEY_IS_BOOKMARKED, mIsBookmarked);
@@ -199,7 +195,7 @@ public class CommentsFragment extends Fragment
         if (isFetchingCompleted) {
             outState.putParcelable(KEY_COMMENTS_PARCEL, Parcels.wrap(mCommentAdapter.getCommentList()));
             mLastTimeListPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
-                    findFirstVisibleItemPosition();
+                findFirstVisibleItemPosition();
             outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
         }
     }
@@ -266,27 +262,27 @@ public class CommentsFragment extends Fragment
         }
         mCompositeSubscription.clear();
         mPostSubscription = mDataManager.getPost(postId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Post>() {
-                    @Override
-                    public void call(Post post) {
-                        if (swipeRefreshLayout.isRefreshing()) {
-                            swipeRefreshLayout.setRefreshing(false);
-                        }
-                        mCommentAdapter.addFooter(new HNItem.Footer());
-                        mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
-                        mPost = post;
-                        mCommentAdapter.addHeader(mPost);
-                        getComments(mPost);
-                        ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<Post>() {
+                @Override
+                public void call(Post post) {
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        swipeRefreshLayout.setRefreshing(false);
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("getPost", throwable.toString());
-                    }
-                });
+                    mCommentAdapter.addFooter(new HNItem.Footer());
+                    mCommentAdapter.updateFooter(Constants.LOADING_IN_PROGRESS);
+                    mPost = post;
+                    mCommentAdapter.addHeader(mPost);
+                    getComments(mPost);
+                    ((CommentsActivity) getActivity()).setUrl(mPost.getUrl());
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("getPost", throwable.toString());
+                }
+            });
         mCompositeSubscription.add(mPostSubscription);
     }
 
@@ -296,36 +292,36 @@ public class CommentsFragment extends Fragment
                 mCommentsSubscription.unsubscribe();
             }
             mCommentsSubscription = mDataManager.getComments(post, 0)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Subscriber<List<Comment>>() {
-                        @Override
-                        public void onCompleted() {
-                            mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
-                            for (int i = 0; i < mCommentAdapter.getCommentList().size(); i++) {
-                                Comment comment = mCommentAdapter.getCommentList().get(i);
-                                comment.setParent(post.getId());
-                                comment.setIndex(i);
-                            }
-                            isFetchingCompleted = true;
-                            if (SharedPrefsManager.isPostBookmarked(prefs, post.getId())) {
-                                putCommentsToDb(mCommentAdapter.getCommentList());
-                            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<List<Comment>>() {
+                    @Override
+                    public void onCompleted() {
+                        mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                        for (int i = 0; i < mCommentAdapter.getCommentList().size(); i++) {
+                            Comment comment = mCommentAdapter.getCommentList().get(i);
+                            comment.setParent(post.getId());
+                            comment.setIndex(i);
                         }
+                        isFetchingCompleted = true;
+                        if (SharedPrefsManager.isPostBookmarked(prefs, post.getId())) {
+                            putCommentsToDb(mCommentAdapter.getCommentList());
+                        }
+                    }
 
-                        @Override
-                        public void onError(Throwable e) {
-                            mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
-                            Toast.makeText(getActivity(), "Comments loading error",
-                                    Toast.LENGTH_LONG).show();
-                            Log.e("error", "There was an error retrieving the comments " + e);
-                        }
+                    @Override
+                    public void onError(Throwable e) {
+                        mCommentAdapter.updateFooter(Constants.LOADING_ERROR);
+                        Toast.makeText(getActivity(), "Comments loading error",
+                            Toast.LENGTH_LONG).show();
+                        Log.e("error", "There was an error retrieving the comments " + e);
+                    }
 
-                        @Override
-                        public void onNext(List<Comment> commentList) {
-                            mCommentAdapter.addAllComments(commentList);
-                        }
-                    });
+                    @Override
+                    public void onNext(List<Comment> commentList) {
+                        mCommentAdapter.addAllComments(commentList);
+                    }
+                });
             mCompositeSubscription.add(mCommentsSubscription);
         } else {
             mCommentAdapter.updateFooter(Constants.LOADING_PROMPT_NO_CONTENT);
@@ -334,20 +330,20 @@ public class CommentsFragment extends Fragment
 
     private void getCommentsFromDb(Post post) {
         mCompositeSubscription.add(mDataManager.getStoryCommentsFromDb(getActivity(), post.getId())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Comment>>() {
-                    @Override
-                    public void call(List<Comment> comments) {
-                        mCommentAdapter.addAllComments(comments);
-                        mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("getCommentFromDb", throwable.toString());
-                    }
-                }));
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<List<Comment>>() {
+                @Override
+                public void call(List<Comment> comments) {
+                    mCommentAdapter.addAllComments(comments);
+                    mCommentAdapter.updateFooter(Constants.LOADING_FINISH);
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("getCommentFromDb", throwable.toString());
+                }
+            }));
     }
 
     public void addBookmark() {
@@ -360,83 +356,83 @@ public class CommentsFragment extends Fragment
 
     private void putPostToDb(Post post) {
         mCompositeSubscription.add(mDataManager.putPostToDb(getActivity(), post)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<PutResult>() {
-                    @Override
-                    public void call(PutResult putResult) {
-                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Post saved!",
-                                Snackbar.LENGTH_LONG);
-                        TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
-                                .findViewById(android.support.design.R.id.snackbar_text);
-                        tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
-                        snackbarSucceed.show();
-                        SharedPrefsManager.setPostBookmarked(prefs, mPost.getId());
-                        if (isFetchingCompleted) {
-                            putCommentsToDb(mCommentAdapter.getCommentList());
-                        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<PutResult>() {
+                @Override
+                public void call(PutResult putResult) {
+                    Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Post saved!",
+                        Snackbar.LENGTH_LONG);
+                    TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
+                        .findViewById(android.support.design.R.id.snackbar_text);
+                    tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
+                    snackbarSucceed.show();
+                    SharedPrefsManager.setPostBookmarked(prefs, mPost.getId());
+                    if (isFetchingCompleted) {
+                        putCommentsToDb(mCommentAdapter.getCommentList());
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("---putPostToDb", throwable.toString());
-                    }
-                }));
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("---putPostToDb", throwable.toString());
+                }
+            }));
     }
 
     private void putCommentsToDb(List<Comment> comments) {
         mCompositeSubscription.add(mDataManager.putCommentsToDb(getActivity(), comments)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<PutResults<Comment>>() {
-                    @Override
-                    public void call(PutResults<Comment> commentPutResults) {
-                        SharedPrefsManager.setCommentsBookmarked(prefs, mPost.getId());
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("---putCommentsToDb", throwable.toString());
-                    }
-                }));
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<PutResults<Comment>>() {
+                @Override
+                public void call(PutResults<Comment> commentPutResults) {
+                    SharedPrefsManager.setCommentsBookmarked(prefs, mPost.getId());
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("---putCommentsToDb", throwable.toString());
+                }
+            }));
     }
 
     private void deletePostAndCommentFromDb() {
         mCompositeSubscription.add(Observable.merge(mDataManager.deletePostFromDb(getActivity(), mPost),
-                mDataManager.deleteStoryCommentsFromDb(getActivity(), mPost.getId()))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<DeleteResult>() {
-                    @Override
-                    public void onCompleted() {
-                        Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Unbookmark succeed!",
-                                Snackbar.LENGTH_LONG);
-                        TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
-                                .findViewById(android.support.design.R.id.snackbar_text);
-                        tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
-                        snackbarSucceed.show();
-                        SharedPrefsManager.setPostUnbookmarked(prefs, mPost.getId());
-                        SharedPrefsManager.setCommentsUnbookmarked(prefs, mPost.getId());
-                    }
+            mDataManager.deleteStoryCommentsFromDb(getActivity(), mPost.getId()))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Subscriber<DeleteResult>() {
+                @Override
+                public void onCompleted() {
+                    Snackbar snackbarSucceed = Snackbar.make(layoutRoot, "Unbookmark succeed!",
+                        Snackbar.LENGTH_LONG);
+                    TextView tvSnackbarText = (TextView) snackbarSucceed.getView()
+                        .findViewById(android.support.design.R.id.snackbar_text);
+                    tvSnackbarText.setTextColor(getResources().getColor(R.color.orange_600));
+                    snackbarSucceed.show();
+                    SharedPrefsManager.setPostUnbookmarked(prefs, mPost.getId());
+                    SharedPrefsManager.setCommentsUnbookmarked(prefs, mPost.getId());
+                }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("-delPost&CommentFromDb", e.toString());
-                    }
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("-delPost&CommentFromDb", e.toString());
+                }
 
-                    @Override
-                    public void onNext(DeleteResult deleteResult) {
-                        Log.i(deleteResult.affectedTables().toString(),
-                                String.valueOf(deleteResult.numberOfRowsDeleted()));
-                    }
-                }));
+                @Override
+                public void onNext(DeleteResult deleteResult) {
+                    Log.i(deleteResult.affectedTables().toString(),
+                        String.valueOf(deleteResult.numberOfRowsDeleted()));
+                }
+            }));
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(SharedPrefsManager.KEY_COMMENT_FONT_SIZE)
-                || key.equals(SharedPrefsManager.KEY_COMMENT_LINE_HEIGHT)
-                || key.equals(SharedPrefsManager.KEY_COMMENT_FONT)) {
+            || key.equals(SharedPrefsManager.KEY_COMMENT_LINE_HEIGHT)
+            || key.equals(SharedPrefsManager.KEY_COMMENT_FONT)) {
             mCommentAdapter.updateCommentPrefs();
             reformatListStyle();
         }
