@@ -167,14 +167,14 @@ public class CommentsFragment extends Fragment
                     if (mPost != null) {
                         getComments(mPost);
                     } else { // start from other app, leaving app without post info loading finished
-                        getPost(mPostId);
+                        refresh();
                     }
                 }
             }
         } else if (mPost != null) { // new instance, no saved instance state
             if (mIsBookmarked && !SharedPrefsManager.areCommentsBookmarked(prefs, mPost.getId())) {
                 // post is bookmarked but comments are not
-                getPost(mPost.getId());
+                refresh();
             } else {
                 mCommentAdapter.addFooter(new HNItem.Footer());
                 mCommentAdapter.addHeader(mPost);
@@ -185,7 +185,7 @@ public class CommentsFragment extends Fragment
                 }
             }
         } else { // start from other app
-            getPost(mPostId);
+            refresh();
         }
     }
 
