@@ -245,7 +245,7 @@ public class CommentsFragment extends Fragment
             }
             snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
                 Snackbar.LENGTH_INDEFINITE);
-            Utils.setSnackBarTextColor(snackbarNoConnection, getActivity(), R.color.orange_600);
+            Utils.setSnackBarTextColor(snackbarNoConnection, getActivity(), android.R.color.white);
             snackbarNoConnection.setAction(R.string.snackebar_action_retry, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
