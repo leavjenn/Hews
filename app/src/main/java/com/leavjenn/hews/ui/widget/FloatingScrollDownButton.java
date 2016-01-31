@@ -7,12 +7,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import com.leavjenn.hews.R;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 
 public class FloatingScrollDownButton extends android.support.design.widget.FloatingActionButton {
 
     public static final int FAB_DRAG_MODE = 1;
-    public static final int FAB_PRESS_MODE = 2;
+    public static final int FAB_HOLD_MODE = 2;
+    public static final int FAB_CLICK_MODE = 3;
 
     private int mScrollDownMode = 0;
     private RecyclerView recyclerView;
@@ -53,7 +55,7 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
 //                iRelY = (int) event.getY();
                 mOriginX = event.getRawX();
                 mOriginY = event.getRawY();
-                if (mScrollDownMode == FAB_PRESS_MODE) {
+                if (mScrollDownMode == FAB_HOLD_MODE) {
                     handler.post(scrollDownThread);
                 }
                 break;
@@ -64,7 +66,7 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (mScrollDownMode == FAB_PRESS_MODE) {
+                if (mScrollDownMode == FAB_HOLD_MODE) {
                     handler.removeCallbacks(scrollDownThread);
                 }
 
@@ -94,11 +96,12 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
     }
 
     public void setScrollDownMode(String mode) {
-        if (mode.equals(SharedPrefsManager.FAB_PRESS_SCROLL_DOWN)) {
-            mScrollDownMode = FAB_PRESS_MODE;
-        } else if (mode.equals(SharedPrefsManager.FAB_DRAG_SCROLL_DOWN)) {
+        if (mode.equals(SharedPrefsManager.FAB_HOLD_MODE)) {
+            mScrollDownMode = FAB_HOLD_MODE;
+        } else if (mode.equals(SharedPrefsManager.FAB_DRAG_MODE)) {
             mScrollDownMode = FAB_DRAG_MODE;
         }
+        setIcon(mScrollDownMode);
     }
 
     private void setFABPosition(int[] location, MotionEvent event) {
@@ -139,4 +142,18 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
 //    public void setScreenHeight(int screenHeight) {
 //        mScreenHeight = screenHeight;
 //    }
+
+    private void setIcon(int mode) {
+        switch (mode) {
+            case FAB_DRAG_MODE:
+                setImageResource(R.drawable.fab_arrow_down_drag);
+                break;
+            case FAB_HOLD_MODE:
+                setImageResource(R.drawable.fab_arrow_down_hold);
+                break;
+            case FAB_CLICK_MODE:
+                setImageResource(R.drawable.fab_arrow_down_click);
+                break;
+        }
+    }
 }

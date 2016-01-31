@@ -26,8 +26,8 @@ public class SharedPrefsManager {
     public static final String THEME_AMOLED_BLACK = "3";
     public static final String KEY_FAB_MODE = "fabkey";
     public static final String FAB_DISABLE = "0";
-    public static final String FAB_DRAG_SCROLL_DOWN = "1";
-    public static final String FAB_PRESS_SCROLL_DOWN = "2";
+    public static final String FAB_DRAG_MODE = "1";
+    public static final String FAB_HOLD_MODE = "2";
     public static final String KEY_SHOW_POST_SUMMARY = "key_show_post_summary";
 
     static String[] fontsForComment = {"PT Sans", "Roboto", "Lato",
@@ -192,7 +192,7 @@ public class SharedPrefsManager {
     }
 
     public static String getFabMode(SharedPreferences sp) {
-        return sp.getString(KEY_FAB_MODE, FAB_PRESS_SCROLL_DOWN);
+        return sp.getString(KEY_FAB_MODE, FAB_HOLD_MODE);
     }
 
     public static Boolean getShowPostSummary(SharedPreferences sp, Context context) {
