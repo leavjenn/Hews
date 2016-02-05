@@ -14,12 +14,12 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
 
     public static final int FAB_DRAG_MODE = 1;
     public static final int FAB_HOLD_MODE = 2;
-    public static final int FAB_CLICK_MODE = 3;
+//    public static final int FAB_CLICK_MODE = 3;
 
-    private int mScrollDownMode = 0;
+    private int mScrollDownMode;
+    private float mOriginX, mOriginY;
     private RecyclerView recyclerView;
-    float mOriginX = 0, mOriginY = 0;
-    Handler handler = new Handler();
+    private Handler handler = new Handler();
 
 
     public FloatingScrollDownButton(Context context) {
@@ -151,9 +151,9 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
             case FAB_HOLD_MODE:
                 setImageResource(R.drawable.fab_arrow_down_hold);
                 break;
-            case FAB_CLICK_MODE:
-                setImageResource(R.drawable.fab_arrow_down_click);
-                break;
+//            case FAB_CLICK_MODE:
+//                setImageResource(R.drawable.fab_arrow_down_click);
+//                break;
         }
     }
 }
