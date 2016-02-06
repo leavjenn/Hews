@@ -1,13 +1,20 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'io.fabric'
 
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+        classpath 'io.fabric.tools:gradle:1.14.4'
     }
+}
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 android {
@@ -20,6 +27,7 @@ android {
         targetSdkVersion 23
         versionCode 19
         versionName "1.7.1"
+        manifestPlaceholders = [ crashlytics_api_key:"${crashlytics_key}" ]
     }
     buildTypes {
         release {
@@ -55,4 +63,7 @@ dependencies {
     compile 'com.pushtorefresh.storio:sqlite:1.6.1'
     compile 'com.pushtorefresh.storio:sqlite-annotations:1.6.1'
     apt 'com.pushtorefresh.storio:sqlite-annotations-processor:1.6.1'
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+        transitive = true;
+    }
 }

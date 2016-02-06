@@ -41,3 +41,9 @@ local.properties
 
 # Sandbox stuff
 _sandbox
+
+# Properties
+app/crashlytics.properties
+gradle.properties
+app/fabric.properties
+app/src/main/res/values/com_crashlytics_export_strings.xml
