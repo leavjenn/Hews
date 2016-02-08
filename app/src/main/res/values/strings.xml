@@ -64,6 +64,7 @@
     <!-- Comment Dialog -->
     <string-array name="dialog_comment">
         <item>Upvote</item>
+        <item>Downvote</item>
         <item>Reply</item>
         <item>Author profile</item>
         <item>Share link to&#8230;</item>

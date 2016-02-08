@@ -320,7 +320,7 @@ public class DataManager {
         });
     }
 
-    public Observable<Integer> vote(final long itemId, final SharedPreferences sp) {
+    public Observable<Integer> vote(final long itemId, final int voteState, final SharedPreferences sp) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
@@ -350,9 +350,18 @@ public class DataManager {
                     url:
                     https://news.ycombinator.com/vote?for=10276091&dir=up&goto=item%3Fid%3D10276091
                     */
-                    Elements links = commentsDocument.select("a[id=up_" + itemId + "]");
+                    Elements links;
+                    if (voteState == Constants.VOTE_DOWN) {
+                        links = commentsDocument.select("a[id=down_" + itemId + "]");
+                    } else {
+                        links = commentsDocument.select("a[id=up_" + itemId + "]");
+                    }
                     if (links.size() == 0) {
-                        subscriber.onNext(Constants.OPERATE_ERROR_HAVE_VOTED);
+                        if (voteState == Constants.VOTE_DOWN) {
+                            subscriber.onNext(Constants.OPERATE_ERROR_NOT_ENOUGH_KARMA);
+                        } else {
+                            subscriber.onNext(Constants.OPERATE_ERROR_HAVE_VOTED);
+                        }
                         subscriber.onCompleted();
                     } else {
                         Element voteElement = links.get(0).select("a[href^=vote]").first();

@@ -229,7 +229,7 @@ public class CommentsActivity extends AppCompatActivity implements
                 break;
 
             case R.id.action_upvote:
-                vote(mPostId);
+                vote(mPostId, Constants.VOTE_UP);
                 break;
 
             case R.id.action_reply:
@@ -358,7 +358,7 @@ public class CommentsActivity extends AppCompatActivity implements
         }
     }
 
-    public void vote(final long itemId) {
+    public void vote(final long itemId, final int voteState) {
         if (!Utils.isOnline(this)) {
             Utils.showLongToast(this, R.string.no_connection_prompt);
             return;
@@ -368,7 +368,7 @@ public class CommentsActivity extends AppCompatActivity implements
             .findViewById(android.support.design.R.id.snackbar_text);
         tvSnackbarText.setTextColor(Color.WHITE);
         snackbarProcessing.show();
-        mCompositeSubscription.add(mDataManager.vote(itemId, prefs)
+        mCompositeSubscription.add(mDataManager.vote(itemId, voteState, prefs)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<Integer>() {
@@ -404,18 +404,22 @@ public class CommentsActivity extends AppCompatActivity implements
                                 }).create().show();
                             break;
                         case Constants.OPERATE_ERROR_HAVE_VOTED:
-                            Utils.showLongToast(CommentsActivity.this, "Already upvoted");
+                            Utils.showLongToast(CommentsActivity.this, "Already voted");
+                            break;
+                        case Constants.OPERATE_ERROR_NOT_ENOUGH_KARMA:
+                            Utils.showLongToast(CommentsActivity.this, "Karma is not enough " +
+                                "or you've voted already");
                             break;
                         case Constants.OPERATE_SUCCESS:
-                            Utils.showLongToast(CommentsActivity.this, "Upvote succeed");
+                            Utils.showLongToast(CommentsActivity.this, "Vote succeed");
                             break;
                         case Constants.OPERATE_ERROR_UNKNOWN:
-                            builder.setTitle("Upvote failed")
-                                .setMessage("Would you like to upvote again?")
-                                .setPositiveButton("Upvote again", new DialogInterface.OnClickListener() {
+                            builder.setTitle("Vote failed")
+                                .setMessage("Would you like to vote again?")
+                                .setPositiveButton("Vote again", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        vote(itemId);
+                                        vote(itemId, voteState);
                                     }
                                 }).create().show();
                             break;

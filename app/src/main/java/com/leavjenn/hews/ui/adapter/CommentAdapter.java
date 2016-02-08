@@ -398,8 +398,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         dialog.setOnListDialogClickListener
             (new CommentDialogFragment.OnCommentDialogClickListener() {
                 @Override
-                public void onUpvote() {
-                    ((CommentsActivity) mContext).vote(comment.getCommentId());
+                public void onUpVote() {
+                    ((CommentsActivity) mContext).vote(comment.getCommentId(), Constants.VOTE_UP);
+                }
+
+                @Override
+                public void onDownVote() {
+                    ((CommentsActivity) mContext).vote(comment.getCommentId(), Constants.VOTE_DOWN);
                 }
 
                 @Override

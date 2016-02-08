@@ -31,7 +31,11 @@ public final class Constants {
     public static final int OPERATE_ERROR_NO_COOKIE = 1;
     public static final int OPERATE_ERROR_COOKIE_EXPIRED = 2;
     public static final int OPERATE_ERROR_HAVE_VOTED = 3;
-    public static final int OPERATE_ERROR_UNKNOWN = 4;
+    public static final int OPERATE_ERROR_NOT_ENOUGH_KARMA = 4;
+    public static final int OPERATE_ERROR_UNKNOWN = 64;
+
+    public static final int VOTE_UP = 1;
+    public static final int VOTE_DOWN = 2;
 
     public static final String FRAGMENT_TAG_COMMENT = "comment_fragment";
 }

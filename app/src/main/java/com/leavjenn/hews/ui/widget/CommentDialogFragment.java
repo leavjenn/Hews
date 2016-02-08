@@ -26,18 +26,21 @@ public class CommentDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
-                        mListener.onUpvote();
+                        mListener.onUpVote();
                         break;
                     case 1:
-                        mListener.onReply();
+                        mListener.onDownVote();
                         break;
                     case 2:
-                        mListener.onAuthorProfile();
+                        mListener.onReply();
                         break;
                     case 3:
-                        mListener.onShare();
+                        mListener.onAuthorProfile();
                         break;
                     case 4:
+                        mListener.onShare();
+                        break;
+                    case 5:
                         mListener.onShareCommentTextTo();
                         break;
                 }
@@ -51,7 +54,9 @@ public class CommentDialogFragment extends DialogFragment {
     }
 
     public interface OnCommentDialogClickListener {
-        void onUpvote();
+        void onUpVote();
+
+        void onDownVote();
 
         void onReply();
 
