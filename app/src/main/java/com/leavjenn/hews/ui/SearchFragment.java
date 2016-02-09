@@ -145,9 +145,9 @@ public class SearchFragment extends Fragment implements PostAdapter.OnReachBotto
         });
         mShowPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
         if (savedInstanceState != null) {
-            mKeyword = getArguments().getString(KEY_KEYWORD);
-            mDateRange = getArguments().getString(KEY_TIME_RANGE);
-            mIsSortByDate = getArguments().getBoolean(KEY_SORT_METHOD);
+            mKeyword = savedInstanceState.getString(KEY_KEYWORD);
+            mDateRange = savedInstanceState.getString(KEY_TIME_RANGE);
+            mIsSortByDate = savedInstanceState.getBoolean(KEY_SORT_METHOD);
             mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
             if (mPostAdapter.getItemCount() == 0) {
                 mPostAdapter.addFooter(new HNItem.Footer());
