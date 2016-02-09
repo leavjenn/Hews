@@ -4,5 +4,4 @@
     <dimen name="navigation_drawer_width">300dp</dimen>
     <dimen name="toolbar_height">56dp</dimen>
     <dimen name="fab_margin_bottom">0dp</dimen>
-    <dimen name="design_fab_content_size" tools:override="true">48dp</dimen>
 </resources>
