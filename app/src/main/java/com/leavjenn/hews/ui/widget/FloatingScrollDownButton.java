@@ -33,7 +33,7 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
     public FloatingScrollDownButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         // override fab icon size
-        FloatingScrollDownButton.this.setPadding(8, 8, 8, 8);
+        FloatingScrollDownButton.this.setPadding(16, 16, 16, 16);
     }
 
     private Runnable scrollDownThread = new Runnable() {
