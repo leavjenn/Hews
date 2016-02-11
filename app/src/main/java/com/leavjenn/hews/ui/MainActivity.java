@@ -72,6 +72,12 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private static final int DRAWER_CLOSE_DELAY_MS = 250;
     private static final String STATE_DRAWER_SELECTED_ITEM = "state_drawer_selected_item";
     private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
+    private static final String STATE_STORY_TYPE = "state_story_type";
+    private static final String STATE_STORY_TYPE_SPEC = "state_story_spec";
+    private static final String STATE_IS_IN_SEARCH = "state_is_in_search";
+    private static final String STATE_SEARCH_IS_SUBMITTED = "state_search_is_submitted";
+    private static final String STATE_SEARCH_KEYWORD = "state_search_keyword";
+    private static final String STATE_SEARCH_DATE_RANGE = "state_search_date_range";
     private static final int NAV_TOP = 0;
     private static final int NAV_NEW = 1;
     private static final int NAV_ASK_HN = 2;
@@ -97,8 +103,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private int mDrawerSelectedItem;
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
-    private MenuItem mSearchItem;
-    private boolean isSearchKeywordSubmitted;
+    private boolean mIsSearchKeywordSubmitted;
+    private boolean mIsInSearch;
+    private boolean mIsSearchInfoRestored;
+    private String mSearchKeyword, mSearchDateRange;
     private String mStoryType, mStoryTypeSpec;
     private SharedPreferences prefs;
     private DataManager mDataManager;
@@ -200,6 +208,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        mStoryType = savedInstanceState.getString(STATE_STORY_TYPE);
+        mStoryTypeSpec = savedInstanceState.getString(STATE_STORY_TYPE_SPEC);
         mDrawerSelectedItem = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ITEM, 0);
         Menu menu = mNavigationView.getMenu();
         //mDrawerSelectedItem + 2 to skip login and logout
@@ -212,14 +222,28 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             int selectedDateRange = savedInstanceState.getInt(STATE_POPULAR_DATE_RANGE, 0);
             mSpinnerDateRange.setSelection(selectedDateRange);
         }
+        mIsInSearch = savedInstanceState.getBoolean(STATE_IS_IN_SEARCH, false);
+        if (mIsInSearch) {
+            mIsSearchKeywordSubmitted = savedInstanceState.getBoolean(STATE_SEARCH_IS_SUBMITTED);
+            mSearchKeyword = savedInstanceState.getString(STATE_SEARCH_KEYWORD);
+            mSearchDateRange = savedInstanceState.getString(STATE_SEARCH_DATE_RANGE);
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putString(STATE_STORY_TYPE, mStoryType);
+        outState.putString(STATE_STORY_TYPE_SPEC, mStoryTypeSpec);
         outState.putInt(STATE_DRAWER_SELECTED_ITEM, mDrawerSelectedItem);
         if (mSpinnerDateRange.getVisibility() == View.VISIBLE) {
             outState.putInt(STATE_POPULAR_DATE_RANGE, mSpinnerDateRange.getSelectedItemPosition());
+        }
+        if (getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment) {
+            outState.putBoolean(STATE_IS_IN_SEARCH, true);
+            outState.putBoolean(STATE_SEARCH_IS_SUBMITTED, mIsSearchKeywordSubmitted);
+            outState.putString(STATE_SEARCH_KEYWORD, mSearchKeyword);
+            outState.putString(STATE_SEARCH_DATE_RANGE, mSearchDateRange);
         }
     }
 
@@ -255,14 +279,6 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         int id = item.getItemId();
         switch (id) {
             case R.id.action_search:
-                //mSpinnerDateRange.setVisibility(View.VISIBLE);
-                //mSpinnerSortOrder.setVisibility(View.VISIBLE);
-                //Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                //String url = "https://hn.algolia.com/";
-                //urlIntent.setData(Uri.parse(url));
-                //startActivity(urlIntent);
-//                mSearchView.setIconified(false);
-//                mDrawerToggle.setDrawerIndicatorEnabled(false);
                 break;
 
             case R.id.action_refresh:
@@ -308,26 +324,66 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     void setUpSearchBar(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Fragment currentFrag = getFragmentManager().findFragmentById(R.id.container);
+                if (currentFrag instanceof SearchFragment) {
+                    String dateRange = ((SearchFragment) currentFrag).getDateRange();
+                    if (dateRange == null) {
+                        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                        String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                        c.add(Calendar.YEAR, -1);
+                        String secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                        dateRange = secStart + secEnd;
+                    }
+                    mIsSearchKeywordSubmitted = true;
+                    ((SearchFragment) currentFrag).setKeyword(query);
+                    ((SearchFragment) currentFrag).refresh(query, dateRange,
+                        ((SearchFragment) currentFrag).getIsSortByDate());
+                    mSearchKeyword = query;
+                    mSearchDateRange = dateRange;
+                }
+                mSearchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // During restoring SearchFragment,
+                // when MenuItemCompat.expandActionView(searchItem) is invoking,
+                // onQueryTextChange(String newText) is triggered.
+                // To prevent mIsSearchKeywordSubmitted and mSearchKeyword being cleared,
+                // setup mIsSearchInfoRestored as an init time gateway.
+                // After search info is restored, set mIsSearchInfoRestored to true.
+                if (mIsSearchInfoRestored) {
+                    mIsSearchKeywordSubmitted = false;
+                    mSearchKeyword = newText;
+                }
+                return true;
+            }
+        };
+        mSearchView.setOnQueryTextListener(onQueryTextListener);
+        // searchable config
         SearchManager searchManager =
             (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//        SearchView mSearchView =
-//                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchItem = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
-        if (mSearchView != null) {
-            mSearchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-        }
-        MenuItemCompat.setOnActionExpandListener(mSearchItem, new MenuItemCompat.OnActionExpandListener() {
+        mSearchView.setSearchableInfo(
+            searchManager.getSearchableInfo(getComponentName()));
+        // setup menu item expending
+        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                SearchFragment searchFragment = new SearchFragment();
-                FragmentTransaction transaction = MainActivity.this.getFragmentManager()
-                    .beginTransaction();
-                transaction.replace(R.id.container, searchFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                getFragmentManager().executePendingTransactions();
+                if (!(getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment)) {
+                    SearchFragment searchFragment = new SearchFragment();
+                    FragmentTransaction transaction = MainActivity.this.getFragmentManager()
+                        .beginTransaction();
+                    transaction.replace(R.id.container, searchFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                    getFragmentManager().executePendingTransactions();
+                }
                 mSpinnerSortOrder.setVisibility(View.VISIBLE);
                 mSpinnerDateRange.setVisibility(View.VISIBLE);
                 setUpSpinnerSearchDateRange();
@@ -351,36 +407,17 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 return true;
             }
         });
-        SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Fragment currentFrag = getFragmentManager().findFragmentById(R.id.container);
-                if (currentFrag instanceof SearchFragment) {
-                    String dateRange = ((SearchFragment) currentFrag).getDateRange();
-                    if (dateRange == null) {
-                        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-                        String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                        c.add(Calendar.YEAR, -1);
-                        String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        dateRange = secStart + secEnd;
-                    }
-                    isSearchKeywordSubmitted = true;
-                    ((SearchFragment) currentFrag).setKeyword(query);
-                    ((SearchFragment) currentFrag).refresh(query, dateRange,
-                        ((SearchFragment) currentFrag).getIsSortByDate());
-                }
+        // restore search view state
+        if (mIsInSearch) {
+            MenuItemCompat.expandActionView(searchItem);
+            if (mSearchKeyword != null) {
+                mSearchView.setQuery(mSearchKeyword, false);
+            }
+            if (mIsSearchKeywordSubmitted) {
                 mSearchView.clearFocus();
-                return true;
             }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                isSearchKeywordSubmitted = false;
-                return true;
-            }
-        };
-        mSearchView.setOnQueryTextListener(onQueryTextListener);
+        }
+        mIsSearchInfoRestored = true;
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -714,7 +751,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             // the time of first post
                             secStart = "1160418110";
                             if (((SearchFragment) currentFrag).getKeyword() != null
-                                && isSearchKeywordSubmitted) {
+                                && mIsSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
@@ -724,7 +761,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             c.add(Calendar.YEAR, -1);
                             secStart = String.valueOf(c.getTimeInMillis() / 1000);
                             if (((SearchFragment) currentFrag).getKeyword() != null
-                                && isSearchKeywordSubmitted) {
+                                && mIsSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
@@ -734,7 +771,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             c.add(Calendar.MONTH, -1);
                             secStart = String.valueOf(c.getTimeInMillis() / 1000);
                             if (((SearchFragment) currentFrag).getKeyword() != null
-                                && isSearchKeywordSubmitted) {
+                                && mIsSearchKeywordSubmitted) {
                                 ((SearchFragment) currentFrag).refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
@@ -804,7 +841,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 } else if (currentFrag instanceof SearchFragment) {
                     ((SearchFragment) currentFrag).setDateRange(dateRange[0] + dateRange[1]);
                     if (((SearchFragment) currentFrag).getKeyword() != null
-                        && isSearchKeywordSubmitted) {
+                        && mIsSearchKeywordSubmitted) {
                         ((SearchFragment) currentFrag).refresh(dateRange[0] + dateRange[1]);
                         mSearchView.clearFocus();
                     }
@@ -836,7 +873,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     }
                     ((SearchFragment) currentFrag).setSortByDate(isSortByDate);
                     if (((SearchFragment) currentFrag).getKeyword() != null
-                        && isSearchKeywordSubmitted) {
+                        && mIsSearchKeywordSubmitted) {
                         ((SearchFragment) currentFrag).refresh(isSortByDate);
                         mSearchView.clearFocus();
                     }
