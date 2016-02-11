@@ -734,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             R.array.time_range_search, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
         mSpinnerDateRange.setAdapter(adapter);
-        mSpinnerDateRange.setSelection(1);
+        mSpinnerDateRange.setSelection(1, false);
         mSpinnerDateRange.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -856,6 +856,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 //        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.spinner_drop_down_item_custom);
         mSpinnerSortOrder.setAdapter(adapter);
+        mSpinnerSortOrder.setSelection(0, false);
         mSpinnerSortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
