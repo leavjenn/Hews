@@ -48,7 +48,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     static final String KEY_LOADED_POSTS = "key_loaded_posts";
     static final String KEY_LOADED_TIME = "key_loaded_time";
     static final String KEY_LOADING_STATE = "key_loading_state";
-    static final String KEY_LAST_TIME_POSITION = "key_last_time_position";
     static final String KEY_SEARCH_RESULT_TOTAL_PAGE = "key_search_result_total_page";
     static final String KEY_STORY_TYPE = "story_type";
     static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
@@ -69,7 +68,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     private String mStoryType, mStoryTypeSpec;
     private int mLoadedTime;
     private int mLoadingState = Constants.LOADING_IDLE;
-    private int mLastTimeListPosition;
     private int mSearchResultTotalPages;
     private PostAdapter mPostAdapter;
     private List<Long> mPostIdList;
@@ -112,6 +110,31 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         prefs.registerOnSharedPreferenceChangeListener(this);
         mDataManager = new DataManager();
         mCompositeSubscription = new CompositeSubscription();
+
+        /**
+         * when Fragment goes to back stack,
+         * if Activity gets onSaveInstanceState, so does the back stack Fragment;
+         * but when Activity gets restored, the back stack Fragment will not invoke
+         * onCreateView() nor onActivityCreated(), so if Activity gets onSaveInstanceState again
+         * and instance state of back stack Fragment not restored before,
+         * some NPE might happened.
+         * To avoid this, the instance state gets restore during onCreate(),
+         * which will get called when Activity restoring.
+         */
+
+        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
+        if (savedInstanceState != null) {
+            mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
+            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
+            mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
+            if (mPostAdapter.getItemCount() == 0) {
+                mPostAdapter.addFooter(new HNItem.Footer());
+                mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
+            }
+            mLoadedTime = savedInstanceState.getInt(KEY_LOADED_TIME);
+            mSearchResultTotalPages = savedInstanceState.getInt(KEY_SEARCH_RESULT_TOTAL_PAGE);
+            mLoadingState = savedInstanceState.getInt(KEY_LOADING_STATE);
+        }
     }
 
     @Override
@@ -139,7 +162,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
-        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
         mRecyclerView.setAdapter(mPostAdapter);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
             R.color.orange_900, R.color.orange_900, R.color.orange_600);
@@ -152,24 +174,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
         mShowPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
         if (savedInstanceState != null) {
-            mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
-            mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
             if (mStoryType.equals(Constants.TYPE_SEARCH)) {
                 ((MainActivity) getActivity()).
                     setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
             }
-
-            mPostIdList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_POST_ID_LIST));
-            if (mPostAdapter.getItemCount() == 0) {
-                mPostAdapter.addFooter(new HNItem.Footer());
-                mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
-            }
-            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
-            mRecyclerView.getLayoutManager().scrollToPosition(mLastTimeListPosition);
-
-            mLoadedTime = savedInstanceState.getInt(KEY_LOADED_TIME);
-            mSearchResultTotalPages = savedInstanceState.getInt(KEY_SEARCH_RESULT_TOTAL_PAGE);
-            mLoadingState = savedInstanceState.getInt(KEY_LOADING_STATE);
             if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
                 loadMore();
             }
@@ -198,18 +206,16 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(KEY_POST_ID_LIST, Parcels.wrap(mPostIdList));
-        outState.putParcelable(KEY_LOADED_POSTS, Parcels.wrap(mPostAdapter.getPostList()));
+        if (mPostAdapter != null) {
+            outState.putParcelable(KEY_LOADED_POSTS, Parcels.wrap(mPostAdapter.getPostList()));
+        }
         outState.putInt(KEY_LOADED_TIME, mLoadedTime);
         outState.putInt(KEY_LOADING_STATE, mLoadingState);
         outState.putInt(KEY_SEARCH_RESULT_TOTAL_PAGE, mSearchResultTotalPages);
         outState.putString(KEY_STORY_TYPE, mStoryType);
         outState.putString(KEY_STORY_TYPE_SPEC, mStoryTypeSpec);
-        mLastTimeListPosition = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).
-            findFirstVisibleItemPosition();
-        outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
-        Log.d("postfrag saveState", mStoryType);
-        Log.d("postfrag saveState", mStoryTypeSpec);
-        Log.d("postfrag saveState", String.valueOf(mLastTimeListPosition));
+        Log.i("postfrag saveState", mStoryType);
+        Log.i("postfrag saveState", mStoryTypeSpec);
     }
 
     @Override
