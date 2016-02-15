@@ -178,7 +178,9 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 ((MainActivity) getActivity()).
                     setUpSpinnerPopularDateRange(Integer.valueOf(mStoryTypeSpec.substring(0, 1)));
             }
-            if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
+            if (mPostIdList == null) {
+                refresh(mStoryType, mStoryTypeSpec);
+            } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
                 loadMore();
             }
         } else {
