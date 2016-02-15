@@ -169,13 +169,13 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         layoutLogin = (LinearLayout) drawerHeader.findViewById(R.id.layout_login);
         tvLoginName = (TextView) drawerHeader.findViewById(R.id.tv_account);
         updateLoginName();
-        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
-        layoutLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clickLogin();
-            }
-        });
+//        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
+//        layoutLogin.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                clickLogin();
+//            }
+//        });
         ivExpander = (ImageView) findViewById(R.id.iv_expander);
 
         mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
