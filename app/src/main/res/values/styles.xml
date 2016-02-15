@@ -1,22 +1,9 @@
 <resources>
-    <style name="ListItemBgColor">
-        <item name="android:background">@color/grey_200</item>
-    </style>
-
-    <style name="ListItemBgColor.Sepia">
-        <item name="android:background">@color/sepia</item>
-    </style>
-
-    <style name="ListItemBgColor.Dark">
-        <item name="android:background">@color/grey_900</item>
-    </style>
-
-    <style name="ListItemBgColor.AMOLEDBlack">
-        <item name="android:background">@android:color/black</item>
-    </style>
-
     <style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">
         <item name="android:textCursorDrawable">@drawable/searchview_cursor</item>
     </style>
 
+    <style name="SelectableItemTheme">
+        <item name="colorControlHighlight">@color/orange_600</item>
+    </style>
 </resources>

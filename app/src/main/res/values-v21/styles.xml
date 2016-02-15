@@ -1,18 +1,2 @@
 <resources>
-
-    <style name="ListItemBgColor">
-        <item name="android:background">@drawable/list_item_bg</item>
-    </style>
-
-    <style name="ListItemBgColor.Sepia">
-        <item name="android:background">@drawable/list_item_bg_sepia</item>
-    </style>
-
-    <style name="ListItemBgColor.Dark">
-        <item name="android:background">@drawable/list_item_bg_dark</item>
-    </style>
-
-    <style name="ListItemBgColor.AMOLEDBlack">
-        <item name="android:background">@drawable/list_item_bg_amoled_black</item>
-    </style>
 </resources>

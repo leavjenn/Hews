@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
-    style="?attr/list_item_bg_color"
+    style="@style/SelectableItemBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <!--android:layout_marginBottom="8dp"-->
@@ -12,7 +13,7 @@
         android:layout_width="8dp"
         android:layout_height="match_parent"
         android:layout_alignBottom="@+id/tv_comment"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"/>
     <!--android:background="@color/orange_600" -->
 
     <TextView
@@ -48,18 +49,18 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="16dp"
         android:textColor="?attr/colorAccent"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <TextView
         android:id="@id/tv_comment"
-        style="?attr/list_item_bg_color"
+        style="@style/SelectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_author"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
         android:layout_toRightOf="@id/iv_indent"
         android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
         android:textSize="16sp"
         tools:text="Here’s to the crazy ones. The misfits. The rebels. The troublemakers. The round pegs in the square holes. The ones who see things differently. They’re not fond of rules. And they have no respect for the status quo. You can quote them, disagree with them, glorify or vilify them. About the only thing you can’t do is ignore them. Because they change things. They push the human race forward. And while some may see them as the crazy ones, we see genius. Because the people who are crazy enough to think they can change the world, are the ones who do."
         />
