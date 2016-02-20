@@ -69,6 +69,11 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
 
     @Override
     public void onClick(View v) {
+        // if getAdapterPosition() equals RecyclerView.NO_POSITION, ignore it.
+        // Source: https://stackoverflow.com/questions/29684154/recyclerview-viewholder-getlayoutposition-vs-getadapterposition
+        if (getAdapterPosition() == RecyclerView.NO_POSITION) {
+            return;
+        }
         if (v.getId() == R.id.tv_comment) {
             mListener.onClickComment(getAdapterPosition());
         } else {
