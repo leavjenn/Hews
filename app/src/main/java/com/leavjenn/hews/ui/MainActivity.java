@@ -162,21 +162,18 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         }
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer,
             R.string.close_drawer);
-        // TODO inflate drawerHeader due to a bug:
-        // https://code.google.com/p/android/issues/detail?id=190226
-        drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, null);
-        mNavigationView.addHeaderView(drawerHeader);
+        drawerHeader = mNavigationView.getHeaderView(0);
         layoutLogin = (LinearLayout) drawerHeader.findViewById(R.id.layout_login);
         tvLoginName = (TextView) drawerHeader.findViewById(R.id.tv_account);
         updateLoginName();
-        layoutLogin = (LinearLayout) findViewById(R.id.layout_login);
+        layoutLogin = (LinearLayout) drawerHeader.findViewById(R.id.layout_login);
         layoutLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 clickLogin();
             }
         });
-        ivExpander = (ImageView) findViewById(R.id.iv_expander);
+        ivExpander = (ImageView) drawerHeader.findViewById(R.id.iv_expander);
 
         mFab = (FloatingScrollDownButton) findViewById(R.id.fab);
 

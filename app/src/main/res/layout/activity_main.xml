@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
@@ -31,7 +32,7 @@
                     android:fitsSystemWindows="true"
                     android:theme="@style/ToolBarTheme"
                     app:layout_scrollFlags="scroll|enterAlways"
-                    app:popupTheme="?attr/toolbar_poptheme" />
+                    app:popupTheme="?attr/toolbar_poptheme"/>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -51,7 +52,7 @@
                         android:gravity="bottom"
                         android:minWidth="25dp"
                         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                        android:visibility="gone" />
+                        android:visibility="gone"/>
 
                     <Spinner
                         android:id="@+id/spinner_sort_order"
@@ -60,7 +61,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_alignParentTop="true"
                         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                        android:visibility="gone" />
+                        android:visibility="gone"/>
                 </RelativeLayout>
             </android.support.design.widget.AppBarLayout>
 
@@ -75,10 +76,10 @@
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
         </android.support.design.widget.CoordinatorLayout>
 
-        <include layout="@layout/include_fab" />
+        <include layout="@layout/include_fab"/>
     </RelativeLayout>
 
     <!-- The navigation drawer -->
@@ -87,6 +88,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/drawer" />
-    <!--app:headerLayout="@layout/drawer_header"-->
+        app:headerLayout="@layout/drawer_header"
+        app:menu="@menu/drawer"/>
 </android.support.v4.widget.DrawerLayout>
