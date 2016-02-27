@@ -168,6 +168,13 @@ public class CommentsActivity extends AppCompatActivity implements
         if (mWindow.isWindowShowing()) {
             mWindow.dismiss();
         }
+        if (isReplyEnabled && !etReply.getText().toString().isEmpty()) {
+            SharedPrefsManager.setReplyText(prefs, etReply.getText().toString());
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
         appbar.removeOnOffsetChangedListener(this);
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
@@ -175,9 +182,7 @@ public class CommentsActivity extends AppCompatActivity implements
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
-        if (isReplyEnabled && !etReply.getText().toString().isEmpty()) {
-            SharedPrefsManager.setReplyText(prefs, etReply.getText().toString());
-        }
+        super.onDestroy();
     }
 
     @Override

@@ -245,8 +245,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
@@ -255,13 +254,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             // if ChromeCustomTabsHelper was not null and called unbind, error would occur
             mChromeCustomTabsHelper = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
         mAppbar.removeOnOffsetChangedListener(this);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
     }
 
     @Override
