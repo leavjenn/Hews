@@ -18,16 +18,18 @@
         <item>3</item>
     </string-array>
 
-    <!-- Floating actino button -->
+    <!-- Floating action button -->
     <string name="pref_key_scroll_down_fab">key_scroll_down_fab</string>
-    <string name="pref_title_scroll_down_fab">Scroll down floating button</string>
+    <string name="pref_title_scroll_down_fab">Scroll down assist</string>
     <string-array name="pref_scroll_down_fab_mode">
-        <item>Press &amp; hold to scroll down</item>
-        <item>Drag to scroll down</item>
+        <item>Press &amp; hold floating button</item>
+        <item>Drag floating button</item>
+        <item>Volume/page button</item>
         <item>Disable</item>
     </string-array>
 
     <string-array name="pref_scroll_down_fab_mode_value">
+        <item>3</item>
         <item>2</item>
         <item>1</item>
         <item>0</item>

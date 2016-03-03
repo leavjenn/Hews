@@ -24,10 +24,11 @@ public class SharedPrefsManager {
     public static final String THEME_SEPIA = "1";
     public static final String THEME_DARK = "2";
     public static final String THEME_AMOLED_BLACK = "3";
-    public static final String KEY_FAB_MODE = "fabkey";
-    public static final String FAB_DISABLE = "0";
-    public static final String FAB_DRAG_MODE = "1";
-    public static final String FAB_HOLD_MODE = "2";
+    public static final String SCROLL_MODE = "fabkey";
+    public static final String SCROLL_MODE_DISABLE = "0";
+    public static final String SCROLL_MODE_BUTTON = "1";
+    public static final String SCROLL_MODE_FAB_DRAG = "2";
+    public static final String SCROLL_MODE_FAB_HOLD = "3";
     public static final String KEY_SHOW_POST_SUMMARY = "key_show_post_summary";
 
     static String[] fontsForComment = {"PT Sans", "Roboto", "Lato",
@@ -192,7 +193,7 @@ public class SharedPrefsManager {
     }
 
     public static String getFabMode(SharedPreferences sp) {
-        return sp.getString(KEY_FAB_MODE, FAB_HOLD_MODE);
+        return sp.getString(SCROLL_MODE, SCROLL_MODE_FAB_HOLD);
     }
 
     public static Boolean getShowPostSummary(SharedPreferences sp, Context context) {

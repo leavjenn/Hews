@@ -98,9 +98,9 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
     }
 
     public void setScrollDownMode(String mode) {
-        if (mode.equals(SharedPrefsManager.FAB_HOLD_MODE)) {
+        if (mode.equals(SharedPrefsManager.SCROLL_MODE_FAB_HOLD)) {
             mScrollDownMode = FAB_HOLD_MODE;
-        } else if (mode.equals(SharedPrefsManager.FAB_DRAG_MODE)) {
+        } else if (mode.equals(SharedPrefsManager.SCROLL_MODE_FAB_DRAG)) {
             mScrollDownMode = FAB_DRAG_MODE;
         }
         setIcon(mScrollDownMode);

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,9 +64,11 @@ public class CommentsActivity extends AppCompatActivity implements
     private EditText etReply;
     private FloatingActionButton btnReplySend;
 
-    private String mUrl;
+    private int mAppBarOffset;
     private long mPostId;
     private boolean isReplyEnabled;
+    private boolean mIsKeyScrollEnabled;
+    private String mUrl;
     private Menu mMenu;
     private SharedPreferences prefs;
     private ChromeCustomTabsHelper mChromeCustomTabsHelper;
@@ -301,7 +305,7 @@ public class CommentsActivity extends AppCompatActivity implements
             layoutReply.setVisibility(View.GONE);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(etReply.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-            if (!SharedPrefsManager.getFabMode(prefs).equals(SharedPrefsManager.FAB_DISABLE)) {
+            if (!SharedPrefsManager.getFabMode(prefs).equals(SharedPrefsManager.SCROLL_MODE_DISABLE)) {
                 mFab.setVisibility(View.VISIBLE);
             }
         }
@@ -331,16 +335,29 @@ public class CommentsActivity extends AppCompatActivity implements
         alertDialog.show();
     }
 
-    private void setupFAB() {
+    private void setupScrollMode() {
         String mode = SharedPrefsManager.getFabMode(prefs);
-        if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
-            mFab.setVisibility(View.VISIBLE);
-            mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
-            //set fab position to default
-            mFab.setTranslationX(0f);
-            mFab.setTranslationY(0f);
-        } else {
-            mFab.setVisibility(View.GONE);
+        switch (mode) {
+            case SharedPrefsManager.SCROLL_MODE_FAB_DRAG:
+            case SharedPrefsManager.SCROLL_MODE_FAB_HOLD:
+                mFab.setVisibility(View.VISIBLE);
+                mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
+                //set fab position to default
+                mFab.setTranslationX(0f);
+                mFab.setTranslationY(0f);
+                mIsKeyScrollEnabled = false;
+                setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                break;
+            case SharedPrefsManager.SCROLL_MODE_BUTTON:
+                mIsKeyScrollEnabled = true;
+                setVolumeControlStream(AudioManager.STREAM_MUSIC);
+                mFab.setVisibility(View.GONE);
+                break;
+            case SharedPrefsManager.SCROLL_MODE_DISABLE:
+                mIsKeyScrollEnabled = false;
+                setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                mFab.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -572,20 +589,42 @@ public class CommentsActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mIsKeyScrollEnabled) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_PAGE_UP) {
+                if (getFragmentManager().findFragmentById(R.id.container) instanceof CommentsFragment) {
+                    ((CommentsFragment) getFragmentManager().findFragmentById(R.id.container))
+                        .scrollUp(appbar.getHeight() + mAppBarOffset);
+                }
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
+                if (getFragmentManager().findFragmentById(R.id.container) instanceof CommentsFragment) {
+                    ((CommentsFragment) getFragmentManager().findFragmentById(R.id.container))
+                        .scrollDown(appbar.getHeight() + mAppBarOffset);
+                }
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
-            setupFAB();
+        if (key.equals(SharedPrefsManager.SCROLL_MODE)) {
+            setupScrollMode();
         }
     }
 
     @Override
     public void onRecyclerViewCreate(RecyclerView recyclerView) {
         mFab.setRecyclerView(recyclerView);
-        setupFAB();
+        setupScrollMode();
     }
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+        mAppBarOffset = i;
         if (getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT) instanceof CommentsFragment) {
             ((CommentsFragment) getFragmentManager().findFragmentById(R.id.container))
                 .setSwipeRefreshLayoutState(i == 0);

@@ -44,6 +44,11 @@ public class Utils {
         return px;
     }
 
+    public static float convertSpToPixels(float sp, Context context) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
+        return sp * scaledDensity;
+    }
+
 
     public static int getScreenHeight(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

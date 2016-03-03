@@ -432,6 +432,18 @@ public class CommentsFragment extends Fragment
             }));
     }
 
+    public void scrollUp(int appBarCurrentHeight) {
+        mRecyclerView.smoothScrollBy(0, (int) -(mRecyclerView.getHeight() - appBarCurrentHeight
+            - Utils.convertSpToPixels(SharedPrefsManager.getCommentFontSize(prefs), getActivity())
+            - Utils.convertSpToPixels(SharedPrefsManager.getCommentLineHeight(prefs), getActivity())));
+    }
+
+    public void scrollDown(int appBarCurrentHeight) {
+        mRecyclerView.smoothScrollBy(0, (int) (mRecyclerView.getHeight() - appBarCurrentHeight
+            - Utils.convertSpToPixels(SharedPrefsManager.getCommentFontSize(prefs), getActivity())
+            - Utils.convertSpToPixels(SharedPrefsManager.getCommentLineHeight(prefs), getActivity())));
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(SharedPrefsManager.KEY_COMMENT_FONT_SIZE)

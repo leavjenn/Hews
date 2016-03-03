@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -100,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private FloatingScrollDownButton mFab;
 
     private boolean isLoginMenuExpanded;
+    private boolean mIsKeyScrollEnabled;
+    private int mAppBarOffset;
     private int mDrawerSelectedItem;
     private final Handler mDrawerActionHandler = new Handler();
     private ActionBarDrawerToggle mDrawerToggle;
@@ -302,16 +306,29 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
 
-    private void setupFAB() {
+    private void setupScrollMode() {
         String mode = SharedPrefsManager.getFabMode(prefs);
-        if (!mode.equals(SharedPrefsManager.FAB_DISABLE)) {
-            mFab.setVisibility(View.VISIBLE);
-            mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
-            //set fab position to default
-            mFab.setTranslationX(0f);
-            mFab.setTranslationY(0f);
-        } else {
-            mFab.setVisibility(View.GONE);
+        switch (mode) {
+            case SharedPrefsManager.SCROLL_MODE_FAB_DRAG:
+            case SharedPrefsManager.SCROLL_MODE_FAB_HOLD:
+                mFab.setVisibility(View.VISIBLE);
+                mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
+                //set fab position to default
+                mFab.setTranslationX(0f);
+                mFab.setTranslationY(0f);
+                mIsKeyScrollEnabled = false;
+                setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                break;
+            case SharedPrefsManager.SCROLL_MODE_BUTTON:
+                mIsKeyScrollEnabled = true;
+                setVolumeControlStream(AudioManager.STREAM_MUSIC);
+                mFab.setVisibility(View.GONE);
+                break;
+            case SharedPrefsManager.SCROLL_MODE_DISABLE:
+                mIsKeyScrollEnabled = false;
+                setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                mFab.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -921,9 +938,31 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mIsKeyScrollEnabled) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_PAGE_UP) {
+                if (getFragmentManager().findFragmentById(R.id.container) instanceof BasePostListFragment) {
+                    // mAppBarOffset is negative
+                    ((BasePostListFragment) getFragmentManager().findFragmentById(R.id.container))
+                        .scrollUp(mAppbar.getHeight() + mAppBarOffset);
+                }
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
+                if (getFragmentManager().findFragmentById(R.id.container) instanceof BasePostListFragment) {
+                    ((BasePostListFragment) getFragmentManager().findFragmentById(R.id.container))
+                        .scrollDown(mAppbar.getHeight() + mAppBarOffset);
+                }
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(SharedPrefsManager.KEY_FAB_MODE)) {
-            setupFAB();
+        if (key.equals(SharedPrefsManager.SCROLL_MODE)) {
+            setupScrollMode();
         }
         if (key.equals(SharedPrefsManager.KEY_THEME)) {
             recreate();
@@ -933,18 +972,20 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     public void onRecyclerViewCreate(RecyclerView recyclerView) {
         mFab.setRecyclerView(recyclerView);
-        setupFAB();
+        setupScrollMode();
     }
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
-        if (getFragmentManager().findFragmentById(R.id.container) instanceof PostFragment) {
-            ((PostFragment) getFragmentManager().findFragmentById(R.id.container))
-                .setSwipeRefreshLayoutState(i == 0);
-        } else if (getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment) {
-            ((SearchFragment) getFragmentManager().findFragmentById(R.id.container))
-                .setSwipeRefreshLayoutState(i == 0);
-        } else if (getFragmentManager().findFragmentById(R.id.container) instanceof BasePostListFragment) {
+        mAppBarOffset = i;
+//        if (getFragmentManager().findFragmentById(R.id.container) instanceof PostFragment) {
+//            ((PostFragment) getFragmentManager().findFragmentById(R.id.container))
+//                .setSwipeRefreshLayoutState(i == 0);
+//        } else if (getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment) {
+//            ((SearchFragment) getFragmentManager().findFragmentById(R.id.container))
+//                .setSwipeRefreshLayoutState(i == 0);
+//        } else
+        if (getFragmentManager().findFragmentById(R.id.container) instanceof BasePostListFragment) {
             ((BasePostListFragment) getFragmentManager().findFragmentById(R.id.container))
                 .setSwipeRefreshLayoutState(i == 0);
         }

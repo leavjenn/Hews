@@ -1,13 +1,8 @@
 package com.leavjenn.hews.ui;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
@@ -19,13 +14,10 @@ import android.widget.RelativeLayout;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.Utils;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
-import com.leavjenn.hews.network.DataManager;
-import com.leavjenn.hews.ui.adapter.PostAdapter;
 import com.nhaarman.supertooltips.ToolTip;
 import com.nhaarman.supertooltips.ToolTipRelativeLayout;
 import com.nhaarman.supertooltips.ToolTipView;
@@ -39,10 +31,10 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
-public class PostFragment extends Fragment implements PostAdapter.OnReachBottomListener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+//public class PostFragment extends BasePostListFragment implements PostAdapter.OnReachBottomListener,
+//    SharedPreferences.OnSharedPreferenceChangeListener {
+public class PostFragment extends BasePostListFragment {
 
     static final String KEY_POST_ID_LIST = "key_post_id_list";
     static final String KEY_LOADED_POSTS = "key_loaded_posts";
@@ -53,26 +45,26 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     static final String KEY_STORY_TYPE_SPEC = "story_type_spec";
 
     private RelativeLayout layoutRoot;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private RecyclerView mRecyclerView;
+    //    private SwipeRefreshLayout swipeRefreshLayout;
+//    private RecyclerView rvPostList;
     private Snackbar snackbarNoConnection;
-    private LinearLayoutManager mLinearLayoutManager;
+    //    private LinearLayoutManager mLinearLayoutManager;
     private ToolTipRelativeLayout tooltipLayout;
     private ToolTip toolTip;
 
-    private PostAdapter.OnItemClickListener mOnItemClickListener;
-    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
+//    private PostAdapter.OnItemClickListener mOnItemClickListener;
+//    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
 
-    private SharedPreferences prefs;
+    //    private SharedPreferences prefs;
     private boolean mShowPostSummary;
     private String mStoryType, mStoryTypeSpec;
     private int mLoadedTime;
     private int mLoadingState = Constants.LOADING_IDLE;
     private int mSearchResultTotalPages;
-    private PostAdapter mPostAdapter;
+    //    private PostAdapter mPostAdapter;
     private List<Long> mPostIdList;
-    private DataManager mDataManager;
-    private CompositeSubscription mCompositeSubscription;
+//    private DataManager mDataManager;
+//    private CompositeSubscription mCompositeSubscription;
 
     public static PostFragment newInstance(String storyType, String storyTypeSpec) {
         PostFragment fragment = new PostFragment();
@@ -86,18 +78,18 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     public PostFragment() {
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mOnItemClickListener = (PostAdapter.OnItemClickListener) activity;
-            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                + " must implement (PostAdapter.OnItemClickListener" +
-                " && MainActivity.OnRecyclerViewCreateListener)");
-        }
-    }
+//    @Override
+//    public void onAttach(Activity activity) {
+//        super.onAttach(activity);
+//        try {
+//            mOnItemClickListener = (PostAdapter.OnItemClickListener) activity;
+//            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
+//        } catch (ClassCastException e) {
+//            throw new ClassCastException(activity.toString()
+//                + " must implement (PostAdapter.OnItemClickListener" +
+//                " && MainActivity.OnRecyclerViewCreateListener)");
+//        }
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -106,10 +98,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mStoryType = getArguments().getString(KEY_STORY_TYPE);
             mStoryTypeSpec = getArguments().getString(KEY_STORY_TYPE_SPEC);
         }
-        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        prefs.registerOnSharedPreferenceChangeListener(this);
-        mDataManager = new DataManager();
-        mCompositeSubscription = new CompositeSubscription();
+//        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//        prefs.registerOnSharedPreferenceChangeListener(this);
+//        mDataManager = new DataManager();
+//        mCompositeSubscription = new CompositeSubscription();
 
         /**
          * when Fragment goes to back stack,
@@ -122,7 +114,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
          * which will get called when Activity restoring.
          */
 
-        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
+//        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);
         if (savedInstanceState != null) {
             mStoryType = savedInstanceState.getString(KEY_STORY_TYPE, Constants.TYPE_STORY);
             mStoryTypeSpec = savedInstanceState.getString(KEY_STORY_TYPE_SPEC, Constants.STORY_TYPE_TOP_PATH);
@@ -142,8 +134,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_post, container, false);
         layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_post_root);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list_post);
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
+        rvPostList = (RecyclerView) rootView.findViewById(R.id.list_post);
 
         if (SharedPrefsManager.getIsShowTooltip(prefs)) {
             tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
@@ -159,18 +151,18 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mLinearLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
-        mRecyclerView.setAdapter(mPostAdapter);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-            R.color.orange_900, R.color.orange_900, R.color.orange_600);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refresh(mStoryType, mStoryTypeSpec);
-            }
-        });
+//        mLinearLayoutManager = new LinearLayoutManager(getActivity());
+//        rvPostList.setLayoutManager(mLinearLayoutManager);
+//        mOnRecyclerViewCreateListener.onRecyclerViewCreate(rvPostList);
+//        rvPostList.setAdapter(mPostAdapter);
+//        swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
+//            R.color.orange_900, R.color.orange_900, R.color.orange_600);
+//        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                refresh(mStoryType, mStoryTypeSpec);
+//            }
+//        });
 
         mShowPostSummary = SharedPrefsManager.getShowPostSummary(prefs, getActivity());
         if (savedInstanceState != null) {
@@ -220,21 +212,21 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         Log.i("postfrag saveState", mStoryTypeSpec);
     }
 
-    @Override
-    public void onDestroy() {
-        if (mCompositeSubscription.hasSubscriptions()) {
-            mCompositeSubscription.unsubscribe();
-        }
-        prefs.unregisterOnSharedPreferenceChangeListener(this);
-        super.onDestroy();
-    }
+//    @Override
+//    public void onDestroy() {
+//        if (mCompositeSubscription.hasSubscriptions()) {
+//            mCompositeSubscription.unsubscribe();
+//        }
+//        prefs.unregisterOnSharedPreferenceChangeListener(this);
+//        super.onDestroy();
+//    }
 
-    @Override
-    public void onDetach() {
-        mOnItemClickListener = null;
-        mOnRecyclerViewCreateListener = null;
-        super.onDetach();
-    }
+//    @Override
+//    public void onDetach() {
+//        mOnItemClickListener = null;
+//        mOnRecyclerViewCreateListener = null;
+//        super.onDetach();
+//    }
 
     void loadPostList(String storyTypeUrl) {
         mCompositeSubscription.add(mDataManager.getPostList(storyTypeUrl)
@@ -273,7 +265,7 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        mSwipeRefreshLayout.setRefreshing(false);
+                        swipeRefreshLayout.setRefreshing(false);
                         Log.e("loadPostListFromSearch", throwable.toString());
 
                     }
@@ -292,16 +284,16 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
 
                 @Override
                 public void onError(Throwable e) {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                    swipeRefreshLayout.setRefreshing(false);
                     Log.e("loadPostFromList", e.toString());
                 }
 
                 @Override
                 public void onNext(Post post) {
-                    if (mSwipeRefreshLayout.isRefreshing()) {
-                        mSwipeRefreshLayout.setRefreshing(false);
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        swipeRefreshLayout.setRefreshing(false);
                     }
-                    mRecyclerView.setVisibility(View.VISIBLE);
+                    rvPostList.setVisibility(View.VISIBLE);
                     if (post != null) {
                         post.setIndex(mPostAdapter.getItemCount() - 1);
                         Utils.setupPostUrl(post);
@@ -316,10 +308,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                             loadSummary(post);
                         }
                         if (SharedPrefsManager.getIsShowTooltip(prefs)
-                            && mRecyclerView.getLayoutManager().getChildCount() > 4) {
+                            && rvPostList.getLayoutManager().getChildCount() > 4) {
                             final ToolTipView myToolTipView = tooltipLayout
                                 .showToolTipForView(toolTip,
-                                    mRecyclerView.getLayoutManager().getChildAt(3));
+                                    rvPostList.getLayoutManager().getChildAt(3));
                             myToolTipView.setOnToolTipViewClickedListener(
                                 new ToolTipView.OnToolTipViewClickedListener() {
                                     @Override
@@ -334,6 +326,11 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             }));
     }
 
+    @Override
+    public void refresh() {
+        refresh(mStoryType, mStoryTypeSpec);
+    }
+
     public void refresh(String type, String spec) {
         mStoryType = type;
         mStoryTypeSpec = spec;
@@ -342,10 +339,10 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             mCompositeSubscription.clear();
             // Bug: SwipeRefreshLayout.setRefreshing(true); won't show at beginning
             // https://code.google.com/p/android/issues/detail?id=77712
-            mSwipeRefreshLayout.post(new Runnable() {
+            swipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
+                    swipeRefreshLayout.setRefreshing(true);
                 }
             });
             if (snackbarNoConnection != null && snackbarNoConnection.isShown()) {
@@ -366,8 +363,8 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
                     break;
             }
         } else {
-            if (mSwipeRefreshLayout.isRefreshing()) {
-                mSwipeRefreshLayout.setRefreshing(false);
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
             }
             snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
                 Snackbar.LENGTH_INDEFINITE);
@@ -381,10 +378,6 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             snackbarNoConnection.setActionTextColor(getResources().getColor(R.color.orange_600));
             snackbarNoConnection.show();
         }
-    }
-
-    public void refresh() {
-        refresh(mStoryType, mStoryTypeSpec);
     }
 
     private void updateLoadingState(int loadingState) {
@@ -435,21 +428,21 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
             }));
     }
 
-    private void reformatListStyle() {
-        int position = mLinearLayoutManager.findFirstVisibleItemPosition();
-        int offset = 0;
-        View firstChild = mLinearLayoutManager.getChildAt(0);
-        if (firstChild != null) {
-            offset = firstChild.getTop();
-        }
-        PostAdapter newAdapter = (PostAdapter) mRecyclerView.getAdapter();
-        mRecyclerView.setAdapter(newAdapter);
-        mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
-    }
+//    private void reformatListStyle() {
+//        int position = mLinearLayoutManager.findFirstVisibleItemPosition();
+//        int offset = 0;
+//        View firstChild = mLinearLayoutManager.getChildAt(0);
+//        if (firstChild != null) {
+//            offset = firstChild.getTop();
+//        }
+//        PostAdapter newAdapter = (PostAdapter) rvPostList.getAdapter();
+//        rvPostList.setAdapter(newAdapter);
+//        mLinearLayoutManager.scrollToPositionWithOffset(position, offset);
+//    }
 
-    public void setSwipeRefreshLayoutState(boolean isEnabled) {
-        mSwipeRefreshLayout.setEnabled(isEnabled);
-    }
+//    public void setSwipeRefreshLayoutState(boolean isEnabled) {
+//        swipeRefreshLayout.setEnabled(isEnabled);
+//    }
 
     @Override
     public void OnReachBottom() {
@@ -458,13 +451,36 @@ public class PostFragment extends Fragment implements PostAdapter.OnReachBottomL
         }
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(SharedPrefsManager.KEY_POST_FONT)
-            || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
-            || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
-            mPostAdapter.updatePostPrefs();
-            reformatListStyle();
-        }
-    }
+//    @Override
+//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+//        if (key.equals(SharedPrefsManager.KEY_POST_FONT)
+//            || key.equals(SharedPrefsManager.KEY_POST_FONT_SIZE)
+//            || key.equals(SharedPrefsManager.KEY_POST_LINE_HEIGHT)) {
+//            mPostAdapter.updatePostPrefs();
+//            reformatListStyle();
+//        }
+//    }
+
+//    public void scrollUp(int appBarOffset) {
+//        int j = mLinearLayoutManager.findFirstVisibleItemPosition();
+//        if (j != 0 && mLinearLayoutManager.findViewByPosition(j) != null) {
+//            int visibleOffsetBottom = mLinearLayoutManager.findViewByPosition(j).getBottom();
+//            if (visibleOffsetBottom <= appBarOffset) { // first visible item is overlaid by app bar
+//                j++;
+//                Log.i("--", "overlay");
+//            }
+//            // offset j + 1 item the recycler view height to hide the entire item
+//            mLinearLayoutManager.scrollToPositionWithOffset(j + 1, rvPostList.getHeight() - appBarOffset);
+//        }
+//    }
+
+//    public void scrollDown() {
+//        int j = mLinearLayoutManager.findLastVisibleItemPosition();
+//        // sometimes, findLastVisibleItemPosition() won't get the real last one visible item,
+//        // add more checks.
+//        if (rvPostList.getHeight() - mLinearLayoutManager.findViewByPosition(j).getBottom() > 0) {
+//            j++;
+//        }
+//        mLinearLayoutManager.scrollToPositionWithOffset(j, 0);
+//    }
 }
