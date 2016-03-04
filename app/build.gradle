@@ -25,8 +25,8 @@ android {
         applicationId "com.leavjenn.hews"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 21
-        versionName "1.7.3"
+        versionCode 22
+        versionName "1.7.4"
         manifestPlaceholders = [ crashlytics_api_key:"${crashlytics_key}" ]
         generatedDensities = []
     }
