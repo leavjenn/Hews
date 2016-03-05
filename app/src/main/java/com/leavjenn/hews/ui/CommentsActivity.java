@@ -53,8 +53,7 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class CommentsActivity extends AppCompatActivity implements
-    SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
+public class CommentsActivity extends AppCompatActivity implements OnRecyclerViewCreateListener,
     AppBarLayout.OnOffsetChangedListener {
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
@@ -80,7 +79,6 @@ public class CommentsActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         // Set theme
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.registerOnSharedPreferenceChangeListener(this);
         String theme = SharedPrefsManager.getTheme(prefs);
         switch (theme) {
             case SharedPrefsManager.THEME_SEPIA:
@@ -305,7 +303,7 @@ public class CommentsActivity extends AppCompatActivity implements
             layoutReply.setVisibility(View.GONE);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(etReply.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-            if (!SharedPrefsManager.getFabMode(prefs).equals(SharedPrefsManager.SCROLL_MODE_DISABLE)) {
+            if (!SharedPrefsManager.getScrollMode(prefs).equals(SharedPrefsManager.SCROLL_MODE_DISABLE)) {
                 mFab.setVisibility(View.VISIBLE);
             }
         }
@@ -336,12 +334,12 @@ public class CommentsActivity extends AppCompatActivity implements
     }
 
     private void setupScrollMode() {
-        String mode = SharedPrefsManager.getFabMode(prefs);
+        String mode = SharedPrefsManager.getScrollMode(prefs);
         switch (mode) {
             case SharedPrefsManager.SCROLL_MODE_FAB_DRAG:
             case SharedPrefsManager.SCROLL_MODE_FAB_HOLD:
                 mFab.setVisibility(View.VISIBLE);
-                mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
+                mFab.setScrollDownMode(SharedPrefsManager.getScrollMode(prefs));
                 //set fab position to default
                 mFab.setTranslationX(0f);
                 mFab.setTranslationY(0f);
@@ -607,13 +605,6 @@ public class CommentsActivity extends AppCompatActivity implements
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(SharedPrefsManager.SCROLL_MODE)) {
-            setupScrollMode();
-        }
     }
 
     @Override

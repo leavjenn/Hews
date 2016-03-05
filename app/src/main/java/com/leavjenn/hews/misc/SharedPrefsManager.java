@@ -192,7 +192,7 @@ public class SharedPrefsManager {
         return sp.getString(KEY_THEME, THEME_LIGHT);
     }
 
-    public static String getFabMode(SharedPreferences sp) {
+    public static String getScrollMode(SharedPreferences sp) {
         return sp.getString(SCROLL_MODE, SCROLL_MODE_FAB_HOLD);
     }
 

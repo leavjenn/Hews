@@ -63,6 +63,7 @@ public class CommentsFragment extends Fragment
     private Post mPost;
     private long mPostId;
     private int mLastTimeListPosition;
+    private float mFontSize, mLineHeight;
     private LinearLayoutManager mLinearLayoutManager;
     private CommentAdapter mCommentAdapter;
     private SharedPreferences prefs;
@@ -220,6 +221,10 @@ public class CommentsFragment extends Fragment
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setAdapter(mCommentAdapter);
         mOnRecyclerViewCreateListener.onRecyclerViewCreate(mRecyclerView);
+        if (SharedPrefsManager.getScrollMode(prefs).equals(SharedPrefsManager.SCROLL_MODE_BUTTON)) {
+            mFontSize = Utils.convertSpToPixels(SharedPrefsManager.getCommentFontSize(prefs), getActivity());
+            mLineHeight = Utils.convertSpToPixels(SharedPrefsManager.getCommentLineHeight(prefs), getActivity());
+        }
     }
 
     public void refresh() {
@@ -433,15 +438,13 @@ public class CommentsFragment extends Fragment
     }
 
     public void scrollUp(int appBarCurrentHeight) {
-        mRecyclerView.smoothScrollBy(0, (int) -(mRecyclerView.getHeight() - appBarCurrentHeight
-            - Utils.convertSpToPixels(SharedPrefsManager.getCommentFontSize(prefs), getActivity())
-            - Utils.convertSpToPixels(SharedPrefsManager.getCommentLineHeight(prefs), getActivity())));
+        mRecyclerView.smoothScrollBy(0,
+            (int) -(mRecyclerView.getHeight() - appBarCurrentHeight - mFontSize - mLineHeight));
     }
 
     public void scrollDown(int appBarCurrentHeight) {
-        mRecyclerView.smoothScrollBy(0, (int) (mRecyclerView.getHeight() - appBarCurrentHeight
-            - Utils.convertSpToPixels(SharedPrefsManager.getCommentFontSize(prefs), getActivity())
-            - Utils.convertSpToPixels(SharedPrefsManager.getCommentLineHeight(prefs), getActivity())));
+        mRecyclerView.smoothScrollBy(0,
+            (int) (mRecyclerView.getHeight() - appBarCurrentHeight - mFontSize - mLineHeight));
     }
 
     @Override
@@ -451,6 +454,10 @@ public class CommentsFragment extends Fragment
             || key.equals(SharedPrefsManager.KEY_COMMENT_FONT)) {
             mCommentAdapter.updateCommentPrefs();
             reformatListStyle();
+            if (SharedPrefsManager.getScrollMode(prefs).equals(SharedPrefsManager.SCROLL_MODE_BUTTON)) {
+                mFontSize = Utils.convertSpToPixels(SharedPrefsManager.getCommentFontSize(prefs), getActivity());
+                mLineHeight = Utils.convertSpToPixels(SharedPrefsManager.getCommentLineHeight(prefs), getActivity());
+            }
         }
     }
 

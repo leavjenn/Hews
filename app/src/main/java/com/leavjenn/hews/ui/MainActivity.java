@@ -307,12 +307,12 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
 
     private void setupScrollMode() {
-        String mode = SharedPrefsManager.getFabMode(prefs);
+        String mode = SharedPrefsManager.getScrollMode(prefs);
         switch (mode) {
             case SharedPrefsManager.SCROLL_MODE_FAB_DRAG:
             case SharedPrefsManager.SCROLL_MODE_FAB_HOLD:
                 mFab.setVisibility(View.VISIBLE);
-                mFab.setScrollDownMode(SharedPrefsManager.getFabMode(prefs));
+                mFab.setScrollDownMode(SharedPrefsManager.getScrollMode(prefs));
                 //set fab position to default
                 mFab.setTranslationX(0f);
                 mFab.setTranslationY(0f);
