@@ -200,7 +200,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         mCompositeSubscription = new CompositeSubscription();
         mDataManager = new DataManager();
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
-            && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
+            && ChromeCustomTabsHelper.getPackageNameToUse(this) != null
+            && mChromeCustomTabsHelper == null) {
             mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
             mChromeCustomTabsHelper.bindCustomTabsService(this);
         }

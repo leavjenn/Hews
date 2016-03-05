@@ -156,8 +156,10 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
         super.onStart();
         if (SharedPrefsManager.getIsOpenLinkInApp(prefs, this)
             && ChromeCustomTabsHelper.getPackageNameToUse(this) != null) {
-            mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
-            mChromeCustomTabsHelper.bindCustomTabsService(this);
+            if (mChromeCustomTabsHelper == null) {
+                mChromeCustomTabsHelper = new ChromeCustomTabsHelper();
+                mChromeCustomTabsHelper.bindCustomTabsService(this);
+            }
             if (mUrl != null) {
                 mChromeCustomTabsHelper.mayLaunchUrl(Utils.validateAndParseUri(mUrl, mPostId), null, null);
             }
@@ -180,6 +182,8 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
         appbar.removeOnOffsetChangedListener(this);
         if (mChromeCustomTabsHelper != null) {
             mChromeCustomTabsHelper.unbindCustomTabsService(this);
+            // if ChromeCustomTabsHelper was not null and called unbind, error would occur
+            mChromeCustomTabsHelper = null;
         }
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
