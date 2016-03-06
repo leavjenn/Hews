@@ -2,6 +2,7 @@ package com.leavjenn.hews.ui.widget;
 
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -32,8 +33,6 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
 
     public FloatingScrollDownButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        // override fab icon size
-        FloatingScrollDownButton.this.setPadding(16, 16, 16, 16);
     }
 
     private Runnable scrollDownThread = new Runnable() {
@@ -103,7 +102,9 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
         } else if (mode.equals(SharedPrefsManager.SCROLL_MODE_FAB_DRAG)) {
             mScrollDownMode = FAB_DRAG_MODE;
         }
-        setIcon(mScrollDownMode);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setIcon(mScrollDownMode);
+        }
     }
 
     private void setFABPosition(int[] location, MotionEvent event) {
@@ -149,9 +150,13 @@ public class FloatingScrollDownButton extends android.support.design.widget.Floa
         switch (mode) {
             case FAB_DRAG_MODE:
                 setImageResource(R.drawable.fab_arrow_down_drag);
+                // override fab icon size
+                FloatingScrollDownButton.this.setPadding(16, 16, 16, 16);
                 break;
             case FAB_HOLD_MODE:
                 setImageResource(R.drawable.fab_arrow_down_hold);
+                // override fab icon size
+                FloatingScrollDownButton.this.setPadding(16, 16, 16, 16);
                 break;
 //            case FAB_CLICK_MODE:
 //                setImageResource(R.drawable.fab_arrow_down_click);
