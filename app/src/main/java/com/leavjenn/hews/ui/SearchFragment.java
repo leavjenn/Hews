@@ -32,7 +32,7 @@ import rx.schedulers.Schedulers;
 
 //public class SearchFragment extends Fragment implements PostAdapter.OnReachBottomListener,
 //    SharedPreferences.OnSharedPreferenceChangeListener {
-public class SearchFragment extends BasePostListFragment{
+public class SearchFragment extends BasePostListFragment {
     private static final String KEY_KEYWORD = "key_keyword";
     private static final String KEY_TIME_RANGE = "key_time_range";
     private static final String KEY_SORT_METHOD = "key_sort_method";
@@ -279,6 +279,10 @@ public class SearchFragment extends BasePostListFragment{
     public void refresh() {
         if (mKeyword != null && mDateRange != null) {
             refresh(mKeyword, mDateRange, mIsSortByDate);
+        } else {
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
         }
     }
 
@@ -310,7 +314,7 @@ public class SearchFragment extends BasePostListFragment{
             if (swipeRefreshLayout.isRefreshing()) {
                 swipeRefreshLayout.setRefreshing(false);
             }
-             snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
+            snackbarNoConnection = Snackbar.make(layoutRoot, R.string.no_connection_prompt,
                 Snackbar.LENGTH_INDEFINITE);
             Utils.setSnackBarTextColor(snackbarNoConnection, getActivity(), android.R.color.white);
             snackbarNoConnection.setAction(R.string.snackebar_action_retry, new View.OnClickListener() {
