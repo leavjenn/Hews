@@ -25,6 +25,7 @@ import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
 import com.leavjenn.hews.Utils;
 import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
+import com.leavjenn.hews.misc.HTMLCodeTagHandler;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
@@ -46,6 +47,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private int mCommentIndentColorOrange, mCommentIndentColorBg, mCommentIndentWidth;
     private Typeface mFont;
     private float mTextSize, mLineHeight;
+    private HTMLCodeTagHandler mHTMLCodeTagHandler;
     private Map<Long, List<Comment>> mCollapsedChildrenCommentsIndex;
     private Map<Long, List<Comment>> mCollapsedOlderCommentsIndex;
     private Context mContext;
@@ -59,6 +61,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mRecyclerView = recyclerView;
         mItemList = new ArrayList<>();
         mCommentList = new ArrayList<>();
+        mHTMLCodeTagHandler = new HTMLCodeTagHandler();
         mCollapsedChildrenCommentsIndex = new HashMap<>();
         mCollapsedOlderCommentsIndex = new HashMap<>();
         prefs = ((CommentsActivity) mContext).getSharedPreferences();
@@ -213,7 +216,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void setTextViewHTML(TextView textView, String string) {
         // trim two trailing blank lines
         CharSequence sequence =
-            Html.fromHtml(string.replace("<p>", "<br /><br />").replace("\n", "<br />"));
+            Html.fromHtml(string.replace("<p>", "<br /><br />").replace("\n", "<br />"), null, mHTMLCodeTagHandler);
         // use Chrome custom tab if it is available
         if (mContext instanceof CommentsActivity
             && ((CommentsActivity) mContext).getChromeCustomTabsHelper() != null) {
