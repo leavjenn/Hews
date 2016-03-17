@@ -114,6 +114,9 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
 
     public void scrollUp(int appBarShowingHeight) {
         int j = mLinearLayoutManager.findFirstVisibleItemPosition();
+        if (j == RecyclerView.NO_POSITION) {
+            return;
+        }
         if (j != 0 && mLinearLayoutManager.findViewByPosition(j) != null) {
 //            for (int visibleOffsetBottom = mLinearLayoutManager.findViewByPosition(j).getBottom();
 //                 visibleOffsetBottom <= appBarShowingHeight; j++) {
@@ -133,6 +136,9 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
 
     public void scrollDown(int appBarShowingHeight) {
         int j = mLinearLayoutManager.findLastVisibleItemPosition();
+        if (j == RecyclerView.NO_POSITION) {
+            return;
+        }
         // sometimes, findLastVisibleItemPosition() won't get the real last one visible item,
         // add more checks.
         Log.i(mPostAdapter.getPostList().get(j).getTitle(), "appBarShowingHeight: " + appBarShowingHeight);
