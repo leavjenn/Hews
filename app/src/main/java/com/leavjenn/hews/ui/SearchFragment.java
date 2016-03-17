@@ -3,7 +3,6 @@ package com.leavjenn.hews.ui;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
@@ -53,7 +52,7 @@ public class SearchFragment extends BasePostListFragment {
     private boolean mIsSortByDate;
     private int mLoadedTime;
     private int mLoadingState = Constants.LOADING_IDLE;
-    private int mLastTimeListPosition;
+//    private int mLastTimeListPosition;
     private int mSearchResultTotalPages;
     private List<Long> mPostIdList;
     private Boolean mShowPostSummary;
@@ -147,8 +146,8 @@ public class SearchFragment extends BasePostListFragment {
                 mPostAdapter.addAllPosts((ArrayList<Post>) Parcels.unwrap(savedInstanceState.getParcelable(KEY_LOADED_POSTS)));
             }
             mSearchResultTotalPages = savedInstanceState.getInt(KEY_SEARCH_RESULT_TOTAL_PAGE);
-            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
-            rvPostList.getLayoutManager().scrollToPosition(mLastTimeListPosition);
+//            mLastTimeListPosition = savedInstanceState.getInt(KEY_LAST_TIME_POSITION, 0);
+//            rvPostList.getLayoutManager().scrollToPosition(mLastTimeListPosition);
             mLoadedTime = savedInstanceState.getInt(KEY_LOADED_TIME);
             mLoadingState = savedInstanceState.getInt(KEY_LOADING_STATE);
             if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
@@ -166,9 +165,9 @@ public class SearchFragment extends BasePostListFragment {
         outState.putParcelable(KEY_LOADED_POSTS, Parcels.wrap(mPostAdapter.getPostList()));
         outState.putParcelable(KEY_POST_ID_LIST, Parcels.wrap(mPostIdList));
         outState.putInt(KEY_SEARCH_RESULT_TOTAL_PAGE, mSearchResultTotalPages);
-        mLastTimeListPosition = ((LinearLayoutManager) rvPostList.getLayoutManager()).
-            findFirstVisibleItemPosition();
-        outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
+//        mLastTimeListPosition = ((LinearLayoutManager) rvPostList.getLayoutManager()).
+//            findFirstVisibleItemPosition();
+//        outState.putInt(KEY_LAST_TIME_POSITION, mLastTimeListPosition);
         outState.putInt(KEY_LOADED_TIME, mLoadedTime);
         outState.putInt(KEY_LOADING_STATE, mLoadingState);
     }
