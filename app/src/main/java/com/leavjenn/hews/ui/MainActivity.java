@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private boolean mIsSearchInfoRestored;
     private String mSearchKeyword, mSearchDateRange;
     private String mStoryType, mStoryTypeSpec;
+    private MenuItem mSearchItem;
     private SharedPreferences prefs;
     private DataManager mDataManager;
     private CompositeSubscription mCompositeSubscription;
@@ -334,8 +335,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     void setUpSearchBar(Menu menu) {
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
         SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -363,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             @Override
             public boolean onQueryTextChange(String newText) {
                 // During restoring SearchFragment,
-                // when MenuItemCompat.expandActionView(searchItem) is invoking,
+                // when MenuItemCompat.expandActionView(mSearchItem) is invoking,
                 // onQueryTextChange(String newText) is triggered.
                 // To prevent mIsSearchKeywordSubmitted and mSearchKeyword being cleared,
                 // setup mIsSearchInfoRestored as an init time gateway.
@@ -382,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         mSearchView.setSearchableInfo(
             searchManager.getSearchableInfo(getComponentName()));
         // setup menu item expending
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        MenuItemCompat.setOnActionExpandListener(mSearchItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 if (!(getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment)) {
@@ -419,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         });
         // restore search view state
         if (mIsInSearch) {
-            MenuItemCompat.expandActionView(searchItem);
+            MenuItemCompat.expandActionView(mSearchItem);
             if (mSearchKeyword != null) {
                 mSearchView.setQuery(mSearchKeyword, false);
             }
@@ -487,6 +488,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                         .findFragmentById(R.id.container);
                                     currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
                                 } else {
+                                    if (getFragmentManager().findFragmentById(R.id.container)
+                                        instanceof SearchFragment) {
+                                        MenuItemCompat.collapseActionView(mSearchItem);
+                                        mSpinnerSortOrder.setVisibility(View.GONE);
+                                    }
                                     PostFragment postFragment = PostFragment
                                         .newInstance(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
                                     FragmentTransaction transaction = getFragmentManager()
@@ -496,12 +502,17 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 }
                             } else if (type == R.id.nav_bookmark) {
                                 menuItem.setChecked(true);
+                                mSpinnerDateRange.setVisibility(View.GONE);
+                                if (getFragmentManager().findFragmentById(R.id.container)
+                                    instanceof SearchFragment) {
+                                    MenuItemCompat.collapseActionView(mSearchItem);
+                                    mSpinnerSortOrder.setVisibility(View.GONE);
+                                }
                                 BookmarkFragment bookmarkFragment = new BookmarkFragment();
                                 FragmentTransaction transaction = getFragmentManager()
                                     .beginTransaction();
                                 transaction.replace(R.id.container, bookmarkFragment);
                                 transaction.commit();
-                                mSpinnerDateRange.setVisibility(View.GONE);
                             } else if (type == R.id.nav_login) {
                                 login();
                             } else if (type == R.id.nav_logout) {
@@ -521,6 +532,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                         .findFragmentById(R.id.container);
                                     currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
                                 } else {
+                                    if (getFragmentManager().findFragmentById(R.id.container)
+                                        instanceof SearchFragment) {
+                                        MenuItemCompat.collapseActionView(mSearchItem);
+                                        mSpinnerSortOrder.setVisibility(View.GONE);
+                                    }
                                     PostFragment postFragment =
                                         PostFragment.newInstance(Constants.TYPE_STORY, mStoryTypeSpec);
                                     FragmentTransaction transaction = getFragmentManager()
