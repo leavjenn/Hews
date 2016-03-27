@@ -83,7 +83,7 @@ public class CommentViewHolder extends RecyclerView.ViewHolder implements View.O
 
     @Override
     public boolean onLongClick(View v) {
-        if (mListener != null) {
+        if (mListener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
             mListener.onLongClick(getAdapterPosition());
         }
         return true;

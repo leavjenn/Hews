@@ -122,7 +122,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             footerViewHolder.progressBar.setVisibility(View.GONE);
             footerViewHolder.tvPrompt.setVisibility(View.VISIBLE);
             if (mResPrompt != 0) {
-            footerViewHolder.tvPrompt.setText(mContext.getResources().getString(mResPrompt));
+                footerViewHolder.tvPrompt.setText(mContext.getResources().getString(mResPrompt));
             }
         } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
             footerViewHolder.progressBar.setVisibility(View.VISIBLE);
@@ -209,6 +209,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (getAdapterPosition() == RecyclerView.NO_POSITION) {
+                        return;
+                    }
                     if (mPostList.get(getAdapterPosition()) instanceof Post) {
                         Post post = (Post) mPostList.get(getAdapterPosition());
                         SharedPrefsManager.setPostRead(prefs, post.getId());
@@ -220,6 +223,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             v.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
+                    if (getAdapterPosition() == RecyclerView.NO_POSITION) {
+                        return true;
+                    }
                     if (mPostList.get(getAdapterPosition()) instanceof Post) {
                         mOnItemClickListener.onOpenLink((Post) mPostList.get(getAdapterPosition()));
                     }
