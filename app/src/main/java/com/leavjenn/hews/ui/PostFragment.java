@@ -182,9 +182,7 @@ public class PostFragment extends BasePostListFragment {
                 mStoryType = Constants.TYPE_STORY;
                 mStoryTypeSpec = Constants.STORY_TYPE_TOP_PATH;
             }
-            if (mPostAdapter.getItemCount() == 0) {
-                refresh(mStoryType, mStoryTypeSpec);
-            }
+            refresh(mStoryType, mStoryTypeSpec);
         }
     }
 
