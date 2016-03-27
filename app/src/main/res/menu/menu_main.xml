@@ -16,9 +16,9 @@
         android:icon="@drawable/ic_refresh"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_display"
+        android:id="@+id/action_typography"
         android:orderInCategory="99"
-        android:title="@string/menu_display"
+        android:title="@string/menu_typography"
         android:icon="@drawable/ic_text_format"
         app:showAsAction="ifRoom" />
 </menu>

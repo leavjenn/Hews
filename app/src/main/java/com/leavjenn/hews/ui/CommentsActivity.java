@@ -266,7 +266,7 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
                 startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
                 break;
 
-            case R.id.action_display:
+            case R.id.action_typography:
                 if (!mWindow.isWindowShowing()) {
                     mWindow.show();
                 } else {

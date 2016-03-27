@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 }
                 break;
 
-            case R.id.action_display:
+            case R.id.action_typography:
                 if (!mWindow.isWindowShowing()) {
                     mWindow.show();
                 } else {
