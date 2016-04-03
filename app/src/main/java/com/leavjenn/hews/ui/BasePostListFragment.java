@@ -123,7 +123,6 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
 //                Log.i("--", "overlay: " + j);
 //            }
             int visibleOffsetBottom = mLinearLayoutManager.findViewByPosition(j).getBottom();
-            Log.i(mPostAdapter.getPostList().get(j).getTitle(), "rv height: " + rvPostList.getHeight());
             if (visibleOffsetBottom + 168 <= appBarShowingHeight) { // first visible item is overlaid by app bar
                 Log.i("appBarShowingHeight: " + appBarShowingHeight,
                     "bottom: " + (mLinearLayoutManager.findViewByPosition(j).getBottom()));
@@ -141,7 +140,6 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
         }
         // sometimes, findLastVisibleItemPosition() won't get the real last one visible item,
         // add more checks.
-        Log.i(mPostAdapter.getPostList().get(j).getTitle(), "appBarShowingHeight: " + appBarShowingHeight);
         Log.i("top: " + (mLinearLayoutManager.findViewByPosition(j).getTop()),
             "bottom: " + (mLinearLayoutManager.findViewByPosition(j).getBottom()));
         if (rvPostList.getHeight()
