@@ -85,7 +85,7 @@ public class SharedPrefsManager {
     }
 
     public static float getCommentFontSize(SharedPreferences sp) {
-        return sp.getFloat(KEY_COMMENT_FONT_SIZE, 14);
+        return sp.getFloat(KEY_COMMENT_FONT_SIZE, 15);
     }
 
     public static void setCommentFontSize(SharedPreferences sp, float add) {
