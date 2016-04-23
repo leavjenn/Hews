@@ -16,7 +16,6 @@ public class SharedPrefsManager {
     public static final String KEY_USERNAME = "user_name";
     public static final String KEY_LOGIN_COOKIE = "login_cookie";
     public static final String KEY_REPLY_TEXT = "replying_text";
-    public static final String KEY_SHOW_TOOLTIP = "key_show_tooltip";
     public static final String KEY_POST_IS_READ = "key_post_is_read";
     public static final String KEY_POST_IS_BOOKMARKED = "key_post_is_bookmarked";
     public static final String KEY_COMMENTS_ARE_BOOKMARKED = "key_comments_are_bookmarked";
@@ -133,16 +132,6 @@ public class SharedPrefsManager {
 
     public static String getReplyText(SharedPreferences sp) {
         return sp.getString(KEY_REPLY_TEXT, "");
-    }
-
-    public static void setIsShowTooltip(SharedPreferences sp, boolean isShowTooltip) {
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putBoolean(SharedPrefsManager.KEY_SHOW_TOOLTIP, isShowTooltip);
-        editor.apply();
-    }
-
-    public static boolean getIsShowTooltip(SharedPreferences sp) {
-        return sp.getBoolean(KEY_SHOW_TOOLTIP, true);
     }
 
     public static void setPostRead(SharedPreferences sp, long postId) {

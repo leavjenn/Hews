@@ -18,9 +18,6 @@ import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
-import com.nhaarman.supertooltips.ToolTip;
-import com.nhaarman.supertooltips.ToolTipRelativeLayout;
-import com.nhaarman.supertooltips.ToolTipView;
 
 import org.parceler.Parcels;
 
@@ -49,8 +46,6 @@ public class PostFragment extends BasePostListFragment {
 //    private RecyclerView rvPostList;
     private Snackbar snackbarNoConnection;
     //    private LinearLayoutManager mLinearLayoutManager;
-    private ToolTipRelativeLayout tooltipLayout;
-    private ToolTip toolTip;
 
 //    private PostAdapter.OnItemClickListener mOnItemClickListener;
 //    private OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
@@ -136,15 +131,6 @@ public class PostFragment extends BasePostListFragment {
         layoutRoot = (RelativeLayout) rootView.findViewById(R.id.layout_post_root);
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         rvPostList = (RecyclerView) rootView.findViewById(R.id.list_post);
-
-        if (SharedPrefsManager.getIsShowTooltip(prefs)) {
-            tooltipLayout = (ToolTipRelativeLayout) rootView.findViewById(R.id.tooltip_layout_post);
-            toolTip = new ToolTip()
-                .withText(getString(R.string.tooltip_post_action))
-                .withTextColor(getResources().getColor(android.R.color.white))
-                .withColor(getResources().getColor(R.color.orange_600))
-                .withAnimationType(ToolTip.AnimationType.FROM_MASTER_VIEW);
-        }
         return rootView;
     }
 
@@ -306,20 +292,6 @@ public class PostFragment extends BasePostListFragment {
                             && !mStoryTypeSpec.equals(Constants.STORY_TYPE_SHOW_HN_PATH)
                             && post.getKids() != null) {
                             loadSummary(post);
-                        }
-                        if (SharedPrefsManager.getIsShowTooltip(prefs)
-                            && rvPostList.getLayoutManager().getChildCount() > 4) {
-                            final ToolTipView myToolTipView = tooltipLayout
-                                .showToolTipForView(toolTip,
-                                    rvPostList.getLayoutManager().getChildAt(3));
-                            myToolTipView.setOnToolTipViewClickedListener(
-                                new ToolTipView.OnToolTipViewClickedListener() {
-                                    @Override
-                                    public void onToolTipViewClicked(ToolTipView toolTipView) {
-                                        myToolTipView.remove();
-                                    }
-                                });
-                            SharedPrefsManager.setIsShowTooltip(prefs, false);
                         }
                     }
                 }
