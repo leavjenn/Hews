@@ -10,6 +10,8 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.leavjenn.hews.Constants;
@@ -98,9 +100,9 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         postVH.tvTitle.setTextColor(titleColor.data);
 
-        String s = currentPost.getDescendants() > 1 ? " comments" : " comment";
         postVH.tvScore.setText("+ " + String.valueOf(currentPost.getScore()));
-        postVH.tvDescendants.setText(String.valueOf(currentPost.getDescendants()) + s);
+        postVH.tvScore.setTextColor(titleColor.data);
+        postVH.tvDescendants.setText(String.valueOf(currentPost.getDescendants()));
         postVH.tvTime.setText(String.valueOf(Utils.formatTime(currentPost.getTime())));
         postVH.tvPrettyUrl.setText(currentPost.getPrettyUrl());
         if (currentPost.getSummary() != null) {
@@ -191,6 +193,8 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public class PostViewHolder extends RecyclerView.ViewHolder {
+        RelativeLayout layoutLink;
+        LinearLayout layoutComment;
         TextView tvTitle;
         TextView tvScore;
         TextView tvDescendants;
@@ -200,13 +204,15 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public PostViewHolder(View v) {
             super(v);
+            layoutLink = (RelativeLayout) v.findViewById(R.id.layout_link);
+            layoutComment = (LinearLayout) v.findViewById(R.id.layout_comment);
             tvTitle = (TextView) v.findViewById(R.id.tv_post_title);
             tvScore = (TextView) v.findViewById(R.id.tv_post_point);
             tvTime = (TextView) v.findViewById(R.id.tv_post_time);
             tvDescendants = (TextView) v.findViewById(R.id.tv_post_comments);
             tvPrettyUrl = (TextView) v.findViewById(R.id.tv_post_pretty_url);
             tvSummary = (TextView) v.findViewById(R.id.tv_post_summary);
-            v.setOnClickListener(new View.OnClickListener() {
+            layoutComment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (getAdapterPosition() == RecyclerView.NO_POSITION) {
@@ -220,16 +226,18 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 }
             });
-            v.setOnLongClickListener(new View.OnLongClickListener() {
+            layoutLink.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onLongClick(View v) {
+                public void onClick(View v) {
                     if (getAdapterPosition() == RecyclerView.NO_POSITION) {
-                        return true;
+                        return;
                     }
                     if (mPostList.get(getAdapterPosition()) instanceof Post) {
-                        mOnItemClickListener.onOpenLink((Post) mPostList.get(getAdapterPosition()));
+                        Post post = (Post) mPostList.get(getAdapterPosition());
+                        SharedPrefsManager.setPostRead(prefs, post.getId());
+                        notifyItemChanged(getAdapterPosition());
+                        mOnItemClickListener.onOpenLink(post);
                     }
-                    return true;
                 }
             });
         }
@@ -245,5 +253,4 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void onOpenLink(Post post);
     }
-
 }

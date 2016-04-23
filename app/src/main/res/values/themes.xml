@@ -16,6 +16,7 @@
         <item name="text_title_color_inverse">@color/grey_500</item>
         <item name="text_info_color">@color/grey_400</item>
         <item name="bg_color">@color/grey_200</item>
+        <item name="list_item_comment_icon_color">@color/grey_400</item>
         <item name="toolbar_bg_color">@color/orange_600</item>
         <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="popup_window_bg_color">@color/grey_400</item>
@@ -29,6 +30,7 @@
         <item name="text_title_color_inverse">@color/sepia_light</item>
         <item name="text_info_color">@color/sepia_light</item>
         <item name="bg_color">@color/sepia</item>
+        <item name="list_item_comment_icon_color">@color/sepia_light</item>
         <item name="android:textColor">@color/sepia_dark</item>
         <item name="toolbar_bg_color">@color/orange_600</item>
     </style>
@@ -42,6 +44,7 @@
         <item name="text_title_color_inverse">@color/grey_500</item>
         <item name="text_info_color">@color/grey_600</item>
         <item name="bg_color">@color/grey_900</item>
+        <item name="list_item_comment_icon_color">@color/grey_600</item>
         <item name="toolbar_bg_color">@color/grey_800</item>
         <item name="toolbar_poptheme">@style/ThemeOverlay.AppCompat</item>
         <item name="popup_window_bg_color">@color/grey_800</item>

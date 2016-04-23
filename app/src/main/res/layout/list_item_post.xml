@@ -1,80 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/SelectableItemBackground"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingBottom="8dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
     android:paddingTop="8dp">
 
-    <TextView
-        android:id="@+id/tv_post_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:text=""
-        android:textColor="?attr/text_info_color" />
 
-    <TextView
-        android:id="@+id/tv_post_title"
+    <RelativeLayout
+        android:id="@+id/layout_link"
+        style="@style/SelectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_post_time"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="4dp"
-        android:layout_marginTop="2dp"
-        android:gravity="center_vertical"
-        android:text="title test"
-        android:textSize="18sp" />
+        android:layout_toLeftOf="@+id/layout_comment"
+        android:paddingLeft="16dp">
+
+        <TextView
+            android:id="@+id/tv_post_point"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="8dp"
+            tools:text="+1234"
+            tools:textColor="?android:attr/textColor"/>
+
+        <TextView
+            android:id="@+id/tv_post_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/tv_post_point"
+            android:textColor="?attr/text_info_color"
+            tools:text="12 hours ago"/>
+
+        <TextView
+            android:id="@+id/tv_post_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/tv_post_time"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:textSize="18sp"
+            tools:text="title test title test title test title test title test title test"
+            tools:textColor="?android:attr/textColor"/>
+
+        <TextView
+            android:id="@+id/tv_post_pretty_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/tv_post_title"
+            android:layout_toRightOf="@id/tv_post_point"
+            android:ellipsize="middle"
+            android:gravity="left"
+            android:paddingBottom="8dp"
+            android:singleLine="true"
+            android:textColor="?attr/text_info_color"
+            tools:text="averyveryveryveryveryveryveryveryveryverylongurl.com"/>
+        <!--android:ellipsize:"start" style has some issue-->
+        <!--android:maxLines="1"-->
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@id/layout_comment"
+        style="@style/SelectableItemBackground"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/layout_link"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/layout_link"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/go_to_comment"
+            android:tint="?attr/list_item_comment_icon_color"
+            app:srcCompat="@drawable/ic_comment_vector"/>
+
+        <TextView
+            android:id="@+id/tv_post_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="?attr/text_info_color"
+            tools:text="123"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_post_summary"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/tv_post_title"
-        android:text="fdfhu sdufkhdfkds dksufsdkf ukdfhsdkufh dskfhsdfkdshfksdu fhdskfus dh"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tv_post_point"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/tv_post_summary"
-        android:layout_marginRight="8dp"
-        android:paddingBottom="8dp"
-        android:text="+1234"
-        android:textColor="?attr/text_info_color" />
-
-    <TextView
-        android:id="@+id/tv_post_comments"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/tv_post_point"
-        android:layout_toRightOf="@id/tv_post_point"
-        android:text="234 comments"
-        android:textColor="?attr/text_info_color" />
-
-    <TextView
-        android:id="@+id/tv_post_pretty_url"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignBaseline="@id/tv_post_point"
-        android:layout_marginLeft="8dp"
-        android:layout_toRightOf="@id/tv_post_comments"
-        android:ellipsize="middle"
-        android:gravity="right"
-        android:singleLine="true"
-        android:text="averyveryveryveryveryveryveryveryveryverylongurl.com"
-        android:textColor="?attr/text_info_color" />
-    <!--android:ellipsize:"start" style has some issue-->
-    <!--android:maxLines="1"-->
-    
+        android:layout_below="@id/layout_link"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:visibility="gone"
+        tools:text="fdfhu sdufkhdfkds dksufsdkf ukdfh sdkufh dskfhsdf kdsh fksdu fhdskfus dh"
+        tools:visibility="visible"/>
 </RelativeLayout>

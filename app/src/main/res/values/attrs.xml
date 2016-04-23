@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CustomStyle">
-        <attr name="text_title_color_inverse" format="reference" />
-        <attr name="text_info_color" format="reference" />
-        <attr name="bg_color" format="reference" />
-        <attr name="list_item_bg_color" format="reference" />
-        <attr name="toolbar_bg_color" format="reference" />
-        <attr name="toolbar_poptheme" format="reference" />
-        <attr name="popup_window_bg_color" format="reference" />
-        <attr name="popup_window_icon_textsize_small" format="reference" />
-        <attr name="popup_window_icon_textsize_large" format="reference" />
-        <attr name="popup_window_icon_lineheight_narrow" format="reference" />
-        <attr name="popup_window_icon_lineheight_wide" format="reference" />
+        <attr name="text_title_color_inverse" format="reference"/>
+        <attr name="text_info_color" format="reference"/>
+        <attr name="bg_color" format="reference"/>
+        <attr name="list_item_bg_color" format="reference"/>
+        <attr name="list_item_comment_icon_color" format="reference"></attr>
+        <attr name="toolbar_bg_color" format="reference"/>
+        <attr name="toolbar_poptheme" format="reference"/>
+        <attr name="popup_window_bg_color" format="reference"/>
+        <attr name="popup_window_icon_textsize_small" format="reference"/>
+        <attr name="popup_window_icon_textsize_large" format="reference"/>
+        <attr name="popup_window_icon_lineheight_narrow" format="reference"/>
+        <attr name="popup_window_icon_lineheight_wide" format="reference"/>
     </declare-styleable>
 </resources>
