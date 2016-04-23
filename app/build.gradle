@@ -28,12 +28,7 @@ android {
         versionCode 25
         versionName "1.7.7"
         manifestPlaceholders = [ crashlytics_api_key:"${crashlytics_key}" ]
-        generatedDensities = []
-    }
-
-    // This is handled for you by the 2.0+ Gradle Plugin
-    aaptOptions {
-        additionalParameters "--no-version-vectors"
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
