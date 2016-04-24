@@ -43,7 +43,7 @@ public class SearchFragment extends BasePostListFragment {
     private static final String KEY_SEARCH_RESULT_TOTAL_PAGE = "key_search_result_total_page";
 
     private RelativeLayout layoutRoot;
-//    private SwipeRefreshLayout swipeRefreshLayout;
+    //    private SwipeRefreshLayout swipeRefreshLayout;
 //    private RecyclerView rvPostList;
     private Snackbar snackbarNoConnection;
 
@@ -52,7 +52,7 @@ public class SearchFragment extends BasePostListFragment {
     private boolean mIsSortByDate;
     private int mLoadedTime;
     private int mLoadingState = Constants.LOADING_IDLE;
-//    private int mLastTimeListPosition;
+    //    private int mLastTimeListPosition;
     private int mSearchResultTotalPages;
     private List<Long> mPostIdList;
     private Boolean mShowPostSummary;
@@ -202,7 +202,7 @@ public class SearchFragment extends BasePostListFragment {
                         for (int i = 0; i < searchResult.getHits().length; i++) {
                             list.add(searchResult.getHits()[i].getObjectID());
                         }
-                        loadPostFromList(list);
+                        loadPostFromList(list, true);
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -213,8 +213,8 @@ public class SearchFragment extends BasePostListFragment {
                 }));
     }
 
-    void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(mDataManager.getPosts(list)
+    void loadPostFromList(List<Long> list, boolean isByOrder) {
+        mCompositeSubscription.add(mDataManager.getPosts(list, isByOrder)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Subscriber<Post>() {

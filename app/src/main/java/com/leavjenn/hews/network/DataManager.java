@@ -57,27 +57,50 @@ public class DataManager {
         return mHackerNewsService.getStory(String.valueOf(postId));
     }
 
-    public Observable<Post> getPosts(List<Long> postIds) {
-        return Observable.from(postIds)
-            .flatMap(new Func1<Long, Observable<Post>>() {
-                @Override
-                public Observable<Post> call(Long aLong) {
-                    return mHackerNewsService.getStory(String.valueOf(aLong));
-                }
-            })
-            .onErrorReturn(new Func1<Throwable, Post>() {
-                @Override
-                public Post call(Throwable throwable) {
-                    Log.e("getPosts", throwable.toString());
-                    return null;
-                }
-            })
-            .filter(new Func1<Post, Boolean>() {
-                @Override
-                public Boolean call(Post post) {
-                    return post != null && post.getTitle() != null;
-                }
-            });
+    public Observable<Post> getPosts(List<Long> postIds, boolean isByOrder) {
+        if (isByOrder) {
+            return Observable.from(postIds)
+                .concatMap(new Func1<Long, Observable<Post>>() {
+                    @Override
+                    public Observable<Post> call(Long aLong) {
+                        return mHackerNewsService.getStory(String.valueOf(aLong));
+                    }
+                })
+                .onErrorReturn(new Func1<Throwable, Post>() {
+                    @Override
+                    public Post call(Throwable throwable) {
+                        Log.e("getPosts", throwable.toString());
+                        return null;
+                    }
+                })
+                .filter(new Func1<Post, Boolean>() {
+                    @Override
+                    public Boolean call(Post post) {
+                        return post != null && post.getTitle() != null;
+                    }
+                });
+        } else {
+            return Observable.from(postIds)
+                .flatMap(new Func1<Long, Observable<Post>>() {
+                    @Override
+                    public Observable<Post> call(Long aLong) {
+                        return mHackerNewsService.getStory(String.valueOf(aLong));
+                    }
+                })
+                .onErrorReturn(new Func1<Throwable, Post>() {
+                    @Override
+                    public Post call(Throwable throwable) {
+                        Log.e("getPosts", throwable.toString());
+                        return null;
+                    }
+                })
+                .filter(new Func1<Post, Boolean>() {
+                    @Override
+                    public Boolean call(Post post) {
+                        return post != null && post.getTitle() != null;
+                    }
+                });
+        }
     }
 
     public Observable<Comment> getSummary(List<Long> commentIds) {

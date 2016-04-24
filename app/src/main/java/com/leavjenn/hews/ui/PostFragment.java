@@ -222,7 +222,7 @@ public class PostFragment extends BasePostListFragment {
                 @Override
                 public void call(List<Long> longs) {
                     mPostIdList = longs;
-                    loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM));
+                    loadPostFromList(mPostIdList.subList(0, Constants.NUM_LOADING_ITEM), false);
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -246,7 +246,7 @@ public class PostFragment extends BasePostListFragment {
                         for (int i = 0; i < searchResult.getHits().length; i++) {
                             list.add(searchResult.getHits()[i].getObjectID());
                         }
-                        loadPostFromList(list);
+                        loadPostFromList(list, true);
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -258,8 +258,8 @@ public class PostFragment extends BasePostListFragment {
                 }));
     }
 
-    void loadPostFromList(List<Long> list) {
-        mCompositeSubscription.add(mDataManager.getPosts(list)
+    void loadPostFromList(List<Long> list, boolean isByOrder) {
+        mCompositeSubscription.add(mDataManager.getPosts(list, isByOrder)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Subscriber<Post>() {
@@ -363,7 +363,7 @@ public class PostFragment extends BasePostListFragment {
             int start = Constants.NUM_LOADING_ITEM * mLoadedTime,
                 end = Constants.NUM_LOADING_ITEM * (++mLoadedTime);
             updateLoadingState(Constants.LOADING_IN_PROGRESS);
-            loadPostFromList(mPostIdList.subList(start, end));
+            loadPostFromList(mPostIdList.subList(start, end), false);
             Log.i("loading", String.valueOf(start) + " - " + end);
         } else if (mStoryType.equals(Constants.TYPE_SEARCH)
             && mLoadedTime < mSearchResultTotalPages) {
