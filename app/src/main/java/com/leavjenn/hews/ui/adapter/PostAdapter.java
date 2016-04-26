@@ -93,7 +93,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         postVH.tvTitle.setText(currentPost.getTitle());
         // set title color based on has read or not
         TypedValue titleColor = new TypedValue();
-        if (SharedPrefsManager.isPostRead(prefs, currentPost.getId())) {
+        if (currentPost.isRead()) {
             mContext.getTheme().resolveAttribute(R.attr.text_title_color_inverse, titleColor, true);
         } else {
             mContext.getTheme().resolveAttribute(android.R.attr.textColor, titleColor, true);

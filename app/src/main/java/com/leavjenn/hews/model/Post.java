@@ -1,9 +1,9 @@
 package com.leavjenn.hews.model;
 
-import org.parceler.Parcel;
-
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteColumn;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
+
+import org.parceler.Parcel;
 
 import java.util.ArrayList;
 
@@ -50,6 +50,8 @@ public class Post extends HNItem {
 
     @StorIOSQLiteColumn(name = "isBookmarked")
     boolean isBookmarked;
+
+    boolean isRead;
 
     public Post() {
     }
@@ -173,5 +175,13 @@ public class Post extends HNItem {
 
     public void setIsBookmarked(boolean isBookmarked) {
         this.isBookmarked = isBookmarked;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
     }
 }

@@ -283,6 +283,7 @@ public class PostFragment extends BasePostListFragment {
                     if (post != null) {
                         post.setIndex(mPostAdapter.getItemCount() - 1);
                         Utils.setupPostUrl(post);
+                        post.setRead(SharedPrefsManager.isPostRead(prefs, post.getId()));
                         mPostAdapter.addPost(post);
                         if (mLoadingState != Constants.LOADING_IN_PROGRESS) {
                             updateLoadingState(Constants.LOADING_IN_PROGRESS);
