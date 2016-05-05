@@ -99,14 +99,14 @@ public class PostFragment extends BasePostListFragment {
 //        mCompositeSubscription = new CompositeSubscription();
 
         /**
-         * when Fragment goes to back stack,
-         * if Activity gets onSaveInstanceState, so does the back stack Fragment;
-         * but when Activity gets restored, the back stack Fragment will not invoke
-         * onCreateView() nor onActivityCreated(), so if Activity gets onSaveInstanceState again
+         * after Fragment adds to back stack,
+         * if Activity invokes onSaveInstanceState(), so does the back stack Fragment;
+         * But when Activity restored, the back stack Fragment will not invoke
+         * onCreateView() nor onActivityCreated(), so if Activity invokes onSaveInstanceState() again
          * and instance state of back stack Fragment not restored before,
-         * some NPE might happened.
-         * To avoid this, the instance state gets restore during onCreate(),
-         * which will get called when Activity restoring.
+         * the NPE might happened.
+         * To avoid this, the instance state should be restored during onCreate(),
+         * which will get called when Activity is restoring.
          */
 
 //        mPostAdapter = new PostAdapter(this.getActivity(), this, mOnItemClickListener);

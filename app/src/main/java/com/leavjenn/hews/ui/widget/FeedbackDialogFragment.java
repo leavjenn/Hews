@@ -24,16 +24,16 @@ public class FeedbackDialogFragment extends DialogFragment {
                     if (mListener != null) {
                         switch (which) {
                             case 0:
-                                mListener.onTwitter();
+                                mListener.onSelectTwitter();
                                 break;
                             case 1:
-                                mListener.onGooglePlus();
+                                mListener.onSelectGooglePlus();
                                 break;
                             case 2:
-                                mListener.onEmail();
+                                mListener.onSelectEmail();
                                 break;
                             case 3:
-                                mListener.onGooglePlayReview();
+                                mListener.onSelectGooglePlayReview();
                                 break;
                         }
                     }
@@ -46,13 +46,12 @@ public class FeedbackDialogFragment extends DialogFragment {
     }
 
     public interface OnFeedbackListClickListener {
-        void onTwitter();
+        void onSelectTwitter();
 
-        void onGooglePlus();
+        void onSelectGooglePlus();
 
-        void onEmail();
+        void onSelectEmail();
 
-        void onGooglePlayReview();
-
+        void onSelectGooglePlayReview();
     }
 }

@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         layoutLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clickLogin();
+                switchLoginDropdownMenu();
             }
         });
         ivExpander = (ImageView) drawerHeader.findViewById(R.id.iv_expander);
@@ -601,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         feedbackDialog.setOnFeedbackListClickListener(
             new FeedbackDialogFragment.OnFeedbackListClickListener() {
                 @Override
-                public void onTwitter() {
+                public void onSelectTwitter() {
                     Intent urlIntent = new Intent(Intent.ACTION_VIEW);
                     String url = "https://twitter.com/leavjenn";
                     urlIntent.setData(Uri.parse(url));
@@ -609,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 }
 
                 @Override
-                public void onGooglePlus() {
+                public void onSelectGooglePlus() {
                     Intent urlIntent = new Intent(Intent.ACTION_VIEW);
                     String url = "https://plus.google.com/u/0/101572751825365377306";
                     urlIntent.setData(Uri.parse(url));
@@ -617,7 +617,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 }
 
                 @Override
-                public void onEmail() {
+                public void onSelectEmail() {
                     Intent intent = new Intent(Intent.ACTION_SENDTO,
                         Uri.fromParts("mailto", "", null));
                     intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"leavjenn@gmail.com"});
@@ -626,7 +626,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 }
 
                 @Override
-                public void onGooglePlayReview() {
+                public void onSelectGooglePlayReview() {
                     Intent urlIntent = new Intent(Intent.ACTION_VIEW);
                     String url =
                         "https://play.google.com/store/apps/details?id=com.leavjenn.hews";
@@ -637,7 +637,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         feedbackDialog.show(getFragmentManager(), "feedbackFrag");
     }
 
-    void clickLogin() {
+    void switchLoginDropdownMenu() {
         isLoginMenuExpanded = !isLoginMenuExpanded;
         Menu menu = mNavigationView.getMenu();
         if (isLoginMenuExpanded) {
@@ -660,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
     void updateLoginName() {
         tvLoginName.setText(SharedPrefsManager.getUsername(prefs, this));
-        Log.i("usename", tvLoginName.getText().toString());
+        Log.i("username", tvLoginName.getText().toString());
     }
 
     public void setUpSpinnerPopularDateRange() {
