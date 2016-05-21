@@ -8,7 +8,7 @@ A hacker news reader focuses on readng experience with some handy features.
 * Three themes: light, sepia, dark and AmoLED black
 * Browse Top, New, Show HN and Ask HN stories
 * Browse popular posts by any date range
-• Login hacker news account, upvote and reply to post/comment
+* Login hacker news account, upvote and reply to post/comment
 * Search by any date range, with popularity/date sorting
 * Open hacker news links from other app
 * Open post/other links in external browser
