@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.misc.Utils;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
@@ -167,6 +167,13 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mMaxRead = 0;
     }
 
+    public void clearAndAddFooter() {
+        mPostList.clear();
+        mPostList.add(new HNItem.Footer());
+        notifyDataSetChanged();
+        mMaxRead = 0;
+    }
+
     public void updateFooter(int loadingState) {
         mLoadingState = loadingState;
     }
@@ -220,6 +227,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                     if (mPostList.get(getAdapterPosition()) instanceof Post) {
                         Post post = (Post) mPostList.get(getAdapterPosition());
+                        post.setRead(true);
                         SharedPrefsManager.setPostRead(prefs, post.getId());
                         notifyItemChanged(getAdapterPosition());
                         mOnItemClickListener.onOpenComment(post);
@@ -234,6 +242,7 @@ public class PostAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                     if (mPostList.get(getAdapterPosition()) instanceof Post) {
                         Post post = (Post) mPostList.get(getAdapterPosition());
+                        post.setRead(true);
                         SharedPrefsManager.setPostRead(prefs, post.getId());
                         notifyItemChanged(getAdapterPosition());
                         mOnItemClickListener.onOpenLink(post);

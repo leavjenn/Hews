@@ -5,7 +5,7 @@ import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
 
 import org.parceler.Parcel;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Parcel
 @StorIOSQLiteType(table = "post")
@@ -22,7 +22,8 @@ public class Post extends HNItem {
     @StorIOSQLiteColumn(name = "descendants")
     long descendants;
 
-    ArrayList<Long> kids;
+    // StorIO not support List annotation
+    List<Long> kids;
 
     @StorIOSQLiteColumn(name = "score")
     long score;
@@ -97,11 +98,11 @@ public class Post extends HNItem {
         this.id = id;
     }
 
-    public ArrayList<Long> getKids() {
+    public List<Long> getKids() {
         return kids;
     }
 
-    public void setKids(ArrayList<Long> kids) {
+    public void setKids(List<Long> kids) {
         this.kids = kids;
     }
 

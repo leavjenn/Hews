@@ -2,13 +2,11 @@ package com.leavjenn.hews.ui.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -23,15 +21,14 @@ import android.widget.TextView;
 
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.misc.Utils;
 import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.misc.HTMLCodeTagHandler;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
-import com.leavjenn.hews.ui.CommentsActivity;
-import com.leavjenn.hews.ui.widget.CommentDialogFragment;
+import com.leavjenn.hews.ui.comment.CommentsActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,7 +118,6 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             @Override
             public void onLongClick(int position) {
-                showDialog(position);
             }
         };
     }
@@ -199,17 +195,20 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private void bindFooterViewHolder(RecyclerView.ViewHolder viewHolder) {
         FooterViewHolder footerViewHolder = (FooterViewHolder) viewHolder;
-        if (mLoadingState == Constants.LOADING_FINISH
-            || mLoadingState == Constants.LOADING_ERROR) {
+        if (mLoadingState == Constants.LOADING_FINISH) {
             footerViewHolder.progressBar.setVisibility(View.GONE);
             footerViewHolder.tvPrompt.setVisibility(View.GONE);
         } else if (mLoadingState == Constants.LOADING_PROMPT_NO_CONTENT) {
             footerViewHolder.progressBar.setVisibility(View.GONE);
             footerViewHolder.tvPrompt.setText(
-                mContext.getResources().getString(R.string.no_comment_prompt));
+                mContext.getResources().getString(R.string.prompt_no_comments));
         } else if (mLoadingState == Constants.LOADING_IN_PROGRESS) {
             footerViewHolder.progressBar.setVisibility(View.VISIBLE);
             footerViewHolder.tvPrompt.setVisibility(View.GONE);
+        } else if (mLoadingState == Constants.LOADING_ERROR) {
+            footerViewHolder.progressBar.setVisibility(View.GONE);
+            footerViewHolder.tvPrompt.setText(
+                mContext.getResources().getString(R.string.prompt_comments_loading_error));
         }
     }
 
@@ -392,65 +391,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return mCollapsedOlderCommentsIndex.containsKey(Comment.getCommentId());
     }
 
-
-    private void showDialog(final int position) {
         final Comment comment = (Comment) mItemList.get(position);
-        CommentDialogFragment dialog = new CommentDialogFragment();
-        dialog.show(((FragmentActivity) mContext)
-            .getSupportFragmentManager(), "ListDialog");
-        dialog.setOnListDialogClickListener
-            (new CommentDialogFragment.OnCommentDialogClickListener() {
-                @Override
-                public void onUpVote() {
-                    ((CommentsActivity) mContext).vote(comment.getCommentId(), Constants.VOTE_UP);
-                }
-
-                @Override
-                public void onDownVote() {
-                    ((CommentsActivity) mContext).vote(comment.getCommentId(), Constants.VOTE_DOWN);
-                }
-
-                @Override
-                public void onReply() {
-                    // scrollToPosition() not working
-                    ((LinearLayoutManager) mRecyclerView.getLayoutManager())
-                        .scrollToPositionWithOffset(position, 0);
-                    ((CommentsActivity) mContext).enableReplyMode(true, comment.getCommentId());
-                }
-
-                @Override
-                public void onAuthorProfile() {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    String url = "https://news.ycombinator.com/user?id="
-                        + comment.getBy();
-                    urlIntent.setData(Uri.parse(url));
-                    mContext.startActivity(urlIntent);
-                }
-
-                @Override
-                public void onShare() {
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    String url = "https://news.ycombinator.com/item?id="
-                        + comment.getCommentId();
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, url);
-                    sendIntent.setType("text/plain");
-                    mContext.startActivity(Intent.createChooser(sendIntent,
-                        mContext.getString(R.string.share_link_to)));
-                }
-
-                @Override
-                public void onShareCommentTextTo() {
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    String text = comment.getBy() + ":\n"
-                        + Html.fromHtml(comment.getText());
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, text);
-                    sendIntent.setType("text/plain");
-                    mContext.startActivity(Intent.createChooser(sendIntent,
-                        mContext.getString(R.string.send_to)));
-                }
-            });
+        // scrollToPosition() not working
+        ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(position, 0);
     }
 
     public void updateCommentPrefs() {

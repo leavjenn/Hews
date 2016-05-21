@@ -1,4 +1,4 @@
-package com.leavjenn.hews.data.table;
+package com.leavjenn.hews.data.local.table;
 
 public class CommentTable {
     public static final String TABLE = "comment";

@@ -14,11 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.Utils;
+import com.leavjenn.hews.misc.Utils;
 
 public class LoginDialogFragment extends DialogFragment {
     OnLoginListener mListener;
-    String mNote;
     TextInputLayout tiLayoutName;
     TextInputLayout tiLayoutPassword;
     ProgressBar progress;
@@ -28,10 +27,9 @@ public class LoginDialogFragment extends DialogFragment {
         // Required empty public constructor
     }
 
-    public static LoginDialogFragment newInstance(OnLoginListener mOnLoginListener, String note) {
+    public static LoginDialogFragment newInstance(OnLoginListener mOnLoginListener) {
         LoginDialogFragment fragment = new LoginDialogFragment();
         fragment.mListener = mOnLoginListener;
-        fragment.mNote = note;
         return fragment;
     }
 
@@ -46,7 +44,7 @@ public class LoginDialogFragment extends DialogFragment {
         progress = (ProgressBar) v.findViewById(R.id.progressbar_login);
         tvPrompt = (TextView) v.findViewById(R.id.tv_prompt);
         builder.setView(v)
-            .setPositiveButton("Login", new DialogInterface.OnClickListener() {
+            .setPositiveButton(R.string.login_dialog_login, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 //                                String username = tiLayoutName.getEditText().getText().toString();
@@ -69,13 +67,13 @@ public class LoginDialogFragment extends DialogFragment {
                     }
                 }
             )
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 }
             )
-            .setTitle("Login");
+            .setTitle(R.string.login_dialog_login);
 
         return builder.create();
     }
@@ -126,7 +124,7 @@ public class LoginDialogFragment extends DialogFragment {
         tvPrompt.setText(R.string.login_prompt_error_wrong_info);
     }
 
-    public void setListener(OnLoginListener onLoginListener) {
+    public void setOnLoginListener(OnLoginListener onLoginListener) {
         mListener = onLoginListener;
     }
 

@@ -1,4 +1,4 @@
-package com.leavjenn.hews.ui;
+package com.leavjenn.hews.ui.comment;
 
 import android.app.AlertDialog;
 import android.app.FragmentManager;
@@ -22,6 +22,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -36,12 +37,14 @@ import android.widget.TextView;
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.Utils;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.Utils;
+import com.leavjenn.hews.listener.OnRecyclerViewCreatedListener;
 import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.misc.SharedPrefsManager;
+import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.Post;
-import com.leavjenn.hews.network.DataManager;
+import com.leavjenn.hews.data.remote.DataManager;
+import com.leavjenn.hews.ui.widget.CommentOptionDialogFragment;
 import com.leavjenn.hews.ui.widget.FloatingScrollDownButton;
 import com.leavjenn.hews.ui.widget.LoginDialogFragment;
 import com.leavjenn.hews.ui.widget.PopupFloatingWindow;
@@ -53,8 +56,16 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class CommentsActivity extends AppCompatActivity implements OnRecyclerViewCreateListener,
+public class CommentsActivity extends AppCompatActivity implements OnRecyclerViewCreatedListener,
     AppBarLayout.OnOffsetChangedListener {
+    private static final String FRAGMENT_TAG_SELECT_COMMENT_DIALOG = "select_comment_dialog_fragment";
+    private static final String FRAGMENT_TAG_LOGIN_DIALOG = "login_dialog_fragment";
+    private static final String STATE_SELECTED_COMMENT = "selected_comment";
+    private static final String STATE_IS_IN_REPLAY_MODE = "is_in_reply_mode";
+    private static final String STATE_REPLY_ITEM_ID = "reply_item_id";
+    private static final String STATE_POST_ID = "post_id";
+    private static final String STATE_URL = "url";
+
     private PopupFloatingWindow mWindow;
     private FloatingScrollDownButton mFab;
     private CoordinatorLayout coordinatorLayout;
@@ -62,12 +73,16 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
     private LinearLayout layoutReply;
     private EditText etReply;
     private FloatingActionButton btnReplySend;
+    private CommentOptionDialogFragment dialogSelectComment;
+    private LoginDialogFragment dialogLogin;
 
     private int mAppBarOffset;
     private long mPostId;
-    private boolean isReplyEnabled;
+    private long mReplyItemId;
+    private boolean mIsInReplyMode;
     private boolean mIsKeyScrollEnabled;
     private String mUrl;
+    private Comment mSelectedComment;
     private Menu mMenu;
     private SharedPreferences prefs;
     private ChromeCustomTabsHelper mChromeCustomTabsHelper;
@@ -167,12 +182,54 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            // restore SelectCommentDialog if it exists
+            mSelectedComment = Parcels.unwrap(savedInstanceState.getParcelable(STATE_SELECTED_COMMENT));
+            dialogSelectComment = (CommentOptionDialogFragment) getFragmentManager()
+                .findFragmentByTag(FRAGMENT_TAG_SELECT_COMMENT_DIALOG);
+            if (dialogSelectComment != null) {
+                dialogSelectComment.setOnSelectCommentListener(mOnSelectCommentListener);
+                if (mSelectedComment != null) {
+                    dialogSelectComment.setSelectedComment(mSelectedComment);
+                }
+            }
+            // restore LoginDialog if it exists
+            dialogLogin = (LoginDialogFragment) getFragmentManager()
+                .findFragmentByTag(FRAGMENT_TAG_LOGIN_DIALOG);
+            if (dialogLogin != null) {
+                dialogLogin.setOnLoginListener(mOnLoginListener);
+            }
+            mPostId = savedInstanceState.getLong(STATE_POST_ID);
+            mUrl = savedInstanceState.getString(STATE_URL);
+            mIsInReplyMode = savedInstanceState.getBoolean(STATE_IS_IN_REPLAY_MODE);
+            mReplyItemId = savedInstanceState.getLong(STATE_REPLY_ITEM_ID);
+            if (mIsInReplyMode) {
+                switchReplyMode(mIsInReplyMode, mReplyItemId);
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mSelectedComment != null) {
+            outState.putParcelable(STATE_SELECTED_COMMENT, Parcels.wrap(mSelectedComment));
+        }
+        outState.putLong(STATE_POST_ID, mPostId);
+        outState.putString(STATE_URL, mUrl);
+        outState.putBoolean(STATE_IS_IN_REPLAY_MODE, mIsInReplyMode);
+        outState.putLong(STATE_REPLY_ITEM_ID, mReplyItemId);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if (mWindow.isWindowShowing()) {
             mWindow.dismiss();
         }
-        if (isReplyEnabled && !etReply.getText().toString().isEmpty()) {
+        if (mIsInReplyMode && !etReply.getText().toString().isEmpty()) {
             SharedPrefsManager.setReplyText(prefs, etReply.getText().toString());
         }
     }
@@ -207,8 +264,8 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (isReplyEnabled) {
-                    showDiscardReplyAlert();
+                if (mIsInReplyMode) {
+                    showDiscardReplyDialog();
                     return true;
                 }
                 FragmentManager fm = getFragmentManager();
@@ -248,13 +305,13 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
                     Utils.showLongToast(this, R.string.no_connection_prompt);
                     return false;
                 }
-                enableReplyMode(true, mPostId);
+                switchReplyMode(true, mPostId);
                 break;
 
             case R.id.action_refresh:
                 CommentsFragment commentFragment =
                     (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
-                commentFragment.refresh();
+                commentFragment.getPresenter().refresh();
                 break;
 
             case R.id.action_share:
@@ -277,15 +334,16 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
         return super.onOptionsItemSelected(item);
     }
 
-    public void enableReplyMode(boolean isEnabled, final long itemId) {
+    public void switchReplyMode(boolean isEnabled, long itemId) {
         if (isEnabled) {
-            isReplyEnabled = true;
+            mIsInReplyMode = true;
+            mReplyItemId = itemId;
 //                view.setSelected(true);
             layoutReply.setVisibility(View.VISIBLE);
             etReply.requestFocus();
-            //the soft keyborad will not show without this drity hack
-            //https://stackoverflow.com/questions/5105354/how-to-show-soft-keyboard-when-edittext-is-focused#
-            //https://stackoverflow.com/questions/13694995/android-softkeyboard-showsoftinput-vs-togglesoftinput
+            // soft keyboard will not show without this dirty hack
+            // https://stackoverflow.com/questions/5105354/how-to-show-soft-keyboard-when-edittext-is-focused#
+            // https://stackoverflow.com/questions/13694995/android-softkeyboard-showsoftinput-vs-togglesoftinput
             etReply.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -299,11 +357,12 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
             btnReplySend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    reply(itemId, etReply.getText().toString());
+                    reply(mReplyItemId, etReply.getText().toString());
                 }
             });
         } else {
-            isReplyEnabled = false;
+            mIsInReplyMode = false;
+            mReplyItemId = -1;
             layoutReply.setVisibility(View.GONE);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(etReply.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -313,21 +372,22 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
         }
     }
 
-    private void showDiscardReplyAlert() {
+    private void showDiscardReplyDialog() {
         if (etReply.getText().toString().isEmpty()) {
-            enableReplyMode(false, mPostId);
+            switchReplyMode(false, mPostId);
             return;
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this);
-        builder.setTitle("Discard")
-            .setMessage("Discard your reply?")
-            .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.discard_dialog_discard)
+            .setMessage(R.string.discard_dialog_prompt_discard)
+            .setPositiveButton(R.string.discard_dialog_discard, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    enableReplyMode(false, mPostId);
+                    SharedPrefsManager.setReplyText(prefs, "");
+                    switchReplyMode(false, mPostId);
                 }
             })
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
@@ -372,17 +432,70 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
             (CommentsFragment) getFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_COMMENT);
         MenuItem itemBookmark = mMenu.findItem(R.id.action_bookmark);
         if (SharedPrefsManager.isPostBookmarked(prefs, mPostId)) {
-            commentsFragment.removeBookmark();
+            commentsFragment.getPresenter().removeBookmark();
             itemBookmark.setTitle(getString(R.string.menu_bookmark));
             itemBookmark.setIcon(R.drawable.ic_bookmark);
         } else {
-            commentsFragment.addBookmark();
+            commentsFragment.getPresenter().addBookmark();
             itemBookmark.setTitle(getString(R.string.menu_unbookmark));
             itemBookmark.setIcon(R.drawable.ic_unbookmark);
         }
     }
 
-    public void vote(final long itemId, final int voteState) {
+    public void showCommentOptionDialog(Comment comment) {
+        CommentOptionDialogFragment dialogComment =
+            CommentOptionDialogFragment.newInstance(mOnSelectCommentListener, comment);
+        dialogComment.show(getFragmentManager(), FRAGMENT_TAG_SELECT_COMMENT_DIALOG);
+        mSelectedComment = comment;
+    }
+
+    CommentOptionDialogFragment.OnSelectCommentListener mOnSelectCommentListener =
+        new CommentOptionDialogFragment.OnSelectCommentListener() {
+            @Override
+            public void onUpVote(Comment comment) {
+                vote(comment.getCommentId(), Constants.VOTE_UP);
+            }
+
+            @Override
+            public void onDownVote(Comment comment) {
+                vote(comment.getCommentId(), Constants.VOTE_DOWN);
+            }
+
+            @Override
+            public void onReply(Comment comment) {
+                switchReplyMode(true, comment.getCommentId());
+            }
+
+            @Override
+            public void onAuthorProfile(Comment comment) {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                String url = "https://news.ycombinator.com/user?id=" + comment.getBy();
+                urlIntent.setData(Uri.parse(url));
+                startActivity(urlIntent);
+            }
+
+            @Override
+            public void onShare(Comment comment) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                String url = "https://news.ycombinator.com/item?id=" + comment.getCommentId();
+                sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getString(R.string.share_link_to)));
+            }
+
+            @Override
+            public void onShareCommentTextTo(Comment comment) {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                String text = comment.getBy() + ":\n" + Html.fromHtml(comment.getText());
+                sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getString(R.string.send_to)));
+            }
+        };
+
+    private void vote(final long itemId, final int voteState) {
         if (!Utils.isOnline(this)) {
             Utils.showLongToast(this, R.string.no_connection_prompt);
             return;
@@ -401,7 +514,7 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
                     snackbarProcessing.dismiss();
                     AlertDialog.Builder builder =
                         new AlertDialog.Builder(CommentsActivity.this)
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                 }
@@ -459,52 +572,51 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
             }));
     }
 
-    void login() {
-        final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
-        LoginDialogFragment.OnLoginListener onLoginListener =
-            new LoginDialogFragment.OnLoginListener() {
-                @Override
-                public void onLogin(final String username, String password) {
-                    mCompositeSubscription.add(mDataManager.login(username, password)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<String>() {
-                            @Override
-                            public void call(String s) {
-                                if (s.isEmpty()) {// login failed
-                                    loginDialogFragment.resetLogin();
-                                } else {
-                                    loginDialogFragment.getDialog().dismiss();
-                                    Utils.showLongToast(CommentsActivity.this, "Login succeed");
-                                    SharedPrefsManager.setUsername(prefs, username);
-                                    SharedPrefsManager.setLoginCookie(prefs, s);
-                                }
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                Log.e("login err", throwable.toString());
-
-                            }
-                        }));
-                }
-            };
-        loginDialogFragment.setListener(onLoginListener);
-        loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
+    private void login() {
+        dialogLogin =  LoginDialogFragment.newInstance(mOnLoginListener);
+        dialogLogin.show(getFragmentManager(), FRAGMENT_TAG_LOGIN_DIALOG);
         // guarantee getDialog() will not return null
         getFragmentManager().executePendingTransactions();
         // show keyboard when dialog shows
-        loginDialogFragment.getDialog().getWindow()
+        dialogLogin.getDialog().getWindow()
             .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
-    void reply(final long itemId, String replyText) {
+    private LoginDialogFragment.OnLoginListener mOnLoginListener = new LoginDialogFragment.OnLoginListener() {
+            @Override
+            public void onLogin(final String username, String password) {
+                mCompositeSubscription.add(mDataManager.login(username, password)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            if (s.isEmpty()) {// login failed
+                                dialogLogin.resetLogin();
+                            } else {
+                                dialogLogin.getDialog().dismiss();
+                                Utils.showLongToast(CommentsActivity.this, "Login succeed");
+                                SharedPrefsManager.setUsername(prefs, username);
+                                SharedPrefsManager.setLoginCookie(prefs, s);
+                            }
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Log.e("login", throwable.toString());
+                            dialogLogin.resetLogin();
+                        }
+                    }));
+            }
+        };
+
+    private void reply(final long itemId, String replyText) {
         if (!Utils.isOnline(this)) {
             Utils.showLongToast(this, R.string.no_connection_prompt);
             return;
         }
         if (etReply.getText().toString().isEmpty()) {
-            Utils.showLongToast(this, "Sound of slience...");
+            Utils.showLongToast(this, "Sound of silence...");
             return;
         }
         final Snackbar snackbarProcessing = Snackbar.make(coordinatorLayout, "Replying...", Snackbar.LENGTH_INDEFINITE);
@@ -521,7 +633,7 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
                     public void call(Integer integer) {
                         snackbarProcessing.dismiss();
                         AlertDialog.Builder builder = new AlertDialog.Builder(CommentsActivity.this)
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                 }
@@ -548,8 +660,9 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
                                     }).create().show();
                                 break;
                             case Constants.OPERATE_SUCCESS:
-                                Utils.showLongToast(CommentsActivity.this, "Reply succeed");
-                                enableReplyMode(false, mPostId);
+                                Utils.showLongToast(CommentsActivity.this, "Reply succeeded");
+                                SharedPrefsManager.setReplyText(prefs, "");
+                                switchReplyMode(false, mPostId);
                                 break;
                             case Constants.OPERATE_ERROR_UNKNOWN:
                                 builder.setTitle("Reply failed")
@@ -567,7 +680,7 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
                     @Override
                     public void call(Throwable throwable) {
                         snackbarProcessing.dismiss();
-                        Log.e("post reply err", throwable.toString());
+                        Log.e("reply", throwable.toString());
 
                     }
                 }));
@@ -583,8 +696,8 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
 
     @Override
     public void onBackPressed() {
-        if (isReplyEnabled) {
-            showDiscardReplyAlert();
+        if (mIsInReplyMode) {
+            showDiscardReplyDialog();
             return;
         }
         super.onBackPressed();
@@ -612,7 +725,7 @@ public class CommentsActivity extends AppCompatActivity implements OnRecyclerVie
     }
 
     @Override
-    public void onRecyclerViewCreate(RecyclerView recyclerView) {
+    public void onRecyclerViewCreated(RecyclerView recyclerView) {
         mFab.setRecyclerView(recyclerView);
         setupScrollMode();
     }

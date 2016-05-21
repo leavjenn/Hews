@@ -1,4 +1,4 @@
-package com.leavjenn.hews.network;
+package com.leavjenn.hews.data.remote;
 
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;

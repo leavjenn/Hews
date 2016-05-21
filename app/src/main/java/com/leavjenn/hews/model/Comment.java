@@ -1,7 +1,7 @@
 package com.leavjenn.hews.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.leavjenn.hews.data.table.CommentTable;
+import com.leavjenn.hews.data.local.table.CommentTable;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteColumn;
 import com.pushtorefresh.storio.sqlite.annotations.StorIOSQLiteType;
 

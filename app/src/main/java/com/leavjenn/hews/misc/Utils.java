@@ -1,4 +1,4 @@
-package com.leavjenn.hews;
+package com.leavjenn.hews.misc;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -12,6 +12,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.StringRes;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.Snackbar;
+import android.text.Html;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -21,11 +22,20 @@ import android.webkit.URLUtil;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.leavjenn.hews.Constants;
+import com.leavjenn.hews.R;
 import com.leavjenn.hews.misc.ShareBroadcastReceiver;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
 
-public class Utils {
+public class Utils implements com.leavjenn.hews.misc.UtilsContract {
+
+    private Context mContext;
+
+    public Utils(Context context) {
+        mContext = context;
+    }
+
     public static CharSequence formatTime(long timeStamp) {
         timeStamp = timeStamp * 1000;
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(timeStamp,
@@ -140,5 +150,17 @@ public class Utils {
 //            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0,
 //                    shareIntent, 0);
 //            intentBuilder.addMenuItem(shareLabel, pendingIntent);
+    }
+
+    @Override
+    public boolean isOnline() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext
+            .getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getActiveNetworkInfo() != null;
+    }
+
+    @Override
+    public String convertHtmlToString(String html) {
+        return Html.fromHtml(html).toString();
     }
 }

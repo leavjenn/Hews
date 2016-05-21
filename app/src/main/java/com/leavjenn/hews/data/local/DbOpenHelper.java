@@ -1,11 +1,11 @@
-package com.leavjenn.hews.data;
+package com.leavjenn.hews.data.local;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.leavjenn.hews.data.table.CommentTable;
-import com.leavjenn.hews.data.table.PostTable;
+import com.leavjenn.hews.data.local.table.CommentTable;
+import com.leavjenn.hews.data.local.table.PostTable;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 

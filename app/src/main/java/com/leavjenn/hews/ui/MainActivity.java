@@ -43,13 +43,17 @@ import android.widget.TextView;
 import com.firebase.client.Firebase;
 import com.leavjenn.hews.Constants;
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.Utils;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.Utils;
+import com.leavjenn.hews.listener.OnRecyclerViewCreatedListener;
 import com.leavjenn.hews.misc.ChromeCustomTabsHelper;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Post;
-import com.leavjenn.hews.network.DataManager;
+import com.leavjenn.hews.data.remote.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
+import com.leavjenn.hews.ui.bookmark.BookmarkFragment;
+import com.leavjenn.hews.ui.comment.CommentsActivity;
+import com.leavjenn.hews.ui.post.PostFragment;
+import com.leavjenn.hews.ui.search.SearchFragment;
 import com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner;
 import com.leavjenn.hews.ui.widget.DateRangeDialogFragment;
 import com.leavjenn.hews.ui.widget.FeedbackDialogFragment;
@@ -69,9 +73,12 @@ import rx.subscriptions.CompositeSubscription;
 
 
 public class MainActivity extends AppCompatActivity implements PostAdapter.OnItemClickListener,
-    SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreateListener,
+    SharedPreferences.OnSharedPreferenceChangeListener, OnRecyclerViewCreatedListener,
     AppBarLayout.OnOffsetChangedListener {
+    public static final String TAG = "MainActivity";
     private static final int DRAWER_CLOSE_DELAY_MS = 250;
+    private static final String FRAGMENT_TAG_LOGIN_DIALOG = "login_dialog_fragment";
+    private static final String FRAGMENT_TAG_FEEDBACK_DIALOG = "feedback_dialog_fragment";
     private static final String STATE_DRAWER_SELECTED_ITEM = "state_drawer_selected_item";
     private static final String STATE_POPULAR_DATE_RANGE = "state_popular_date_range";
     private static final String STATE_STORY_TYPE = "state_story_type";
@@ -100,6 +107,8 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     private PopupFloatingWindow mWindow;
     private SearchView mSearchView;
     private FloatingScrollDownButton mFab;
+    private LoginDialogFragment dialogLogin;
+    private FeedbackDialogFragment dialogFeedback;
 
     private boolean isLoginMenuExpanded;
     private boolean mIsKeyScrollEnabled;
@@ -121,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate");
         // Set theme
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
@@ -191,6 +201,21 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             PostFragment postFragment = PostFragment.newInstance(mStoryType, mStoryTypeSpec);
             getFragmentManager().beginTransaction().add(R.id.container, postFragment).commit();
         }
+        if (savedInstanceState != null) {
+            // restore LoginDialog if it exists
+            dialogLogin = (LoginDialogFragment) getFragmentManager()
+                .findFragmentByTag(FRAGMENT_TAG_LOGIN_DIALOG);
+            if (dialogLogin != null) {
+                dialogLogin.setOnLoginListener(onLoginListener);
+            }
+
+            // restore FeedbackDialog if it exists
+            dialogFeedback = (FeedbackDialogFragment) getFragmentManager()
+                .findFragmentByTag(FRAGMENT_TAG_FEEDBACK_DIALOG);
+            if (dialogFeedback != null) {
+                dialogFeedback.setOnSelectFeedbackListener(mOnSelectFeedbackListener);
+            }
+        }
     }
 
     @Override
@@ -211,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        Log.i(TAG, "onRestoreInstanceState");
         mStoryType = savedInstanceState.getString(STATE_STORY_TYPE);
         mStoryTypeSpec = savedInstanceState.getString(STATE_STORY_TYPE_SPEC);
         mDrawerSelectedItem = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ITEM, 0);
@@ -236,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.i(TAG, "onSaveInstanceState");
         outState.putString(STATE_STORY_TYPE, mStoryType);
         outState.putString(STATE_STORY_TYPE_SPEC, mStoryTypeSpec);
         outState.putInt(STATE_DRAWER_SELECTED_ITEM, mDrawerSelectedItem);
@@ -252,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG, "onDestroy");
         if (mCompositeSubscription.hasSubscriptions()) {
             mCompositeSubscription.unsubscribe();
         }
@@ -283,9 +311,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                 Fragment currentFrag = getFragmentManager()
                     .findFragmentById(R.id.container);
                 if (currentFrag instanceof PostFragment) {
-                    ((PostFragment) currentFrag).refresh();
+                    ((PostFragment) currentFrag).getPresenter().refresh();
                 } else if (currentFrag instanceof SearchFragment) {
-                    ((SearchFragment) currentFrag).refresh();
+                    ((SearchFragment) currentFrag).getPresenter().refresh();
                 }
                 break;
 
@@ -342,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             public boolean onQueryTextSubmit(String query) {
                 Fragment currentFrag = getFragmentManager().findFragmentById(R.id.container);
                 if (currentFrag instanceof SearchFragment) {
-                    String dateRange = ((SearchFragment) currentFrag).getDateRange();
+                    String dateRange = ((SearchFragment) currentFrag).getPresenter().getDateRange();
                     if (dateRange == null) {
                         Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
                         String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
@@ -351,9 +379,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         dateRange = secStart + secEnd;
                     }
                     mIsSearchKeywordSubmitted = true;
-                    ((SearchFragment) currentFrag).setKeyword(query);
-                    ((SearchFragment) currentFrag).refresh(query, dateRange,
-                        ((SearchFragment) currentFrag).getIsSortByDate());
+                    ((SearchFragment) currentFrag).getPresenter().setKeyword(query);
+                    ((SearchFragment) currentFrag).getPresenter().refresh(query, dateRange,
+                        ((SearchFragment) currentFrag).getPresenter().isSortByDate());
                     mSearchKeyword = query;
                     mSearchDateRange = dateRange;
                 }
@@ -468,52 +496,11 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     // allow some time after closing the drawer before performing real navigation
                     // so the user can see what is happening
                     mDrawerLayout.closeDrawer(GravityCompat.START);
-
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                            if (type == R.id.nav_settings) {
-                                Intent i = new Intent(getBaseContext(), SettingsActivity.class);
-                                startActivity(i);
-                            } else if (type == R.id.nav_popular) {
-                                menuItem.setChecked(true);
-                                setUpSpinnerPopularDateRange();
-                                Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-                                String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
-                                c.add(Calendar.DAY_OF_YEAR, -1);
-                                String secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                                if (getFragmentManager().findFragmentById(R.id.container)
-                                    instanceof PostFragment) {
-                                    PostFragment currentFrag = (PostFragment) getFragmentManager()
-                                        .findFragmentById(R.id.container);
-                                    currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
-                                } else {
-                                    if (getFragmentManager().findFragmentById(R.id.container)
-                                        instanceof SearchFragment) {
-                                        MenuItemCompat.collapseActionView(mSearchItem);
-                                        mSpinnerSortOrder.setVisibility(View.GONE);
-                                    }
-                                    PostFragment postFragment = PostFragment
-                                        .newInstance(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
-                                    FragmentTransaction transaction = getFragmentManager()
-                                        .beginTransaction();
-                                    transaction.replace(R.id.container, postFragment);
-                                    transaction.commit();
-                                }
-                            } else if (type == R.id.nav_bookmark) {
-                                menuItem.setChecked(true);
-                                mSpinnerDateRange.setVisibility(View.GONE);
-                                if (getFragmentManager().findFragmentById(R.id.container)
-                                    instanceof SearchFragment) {
-                                    MenuItemCompat.collapseActionView(mSearchItem);
-                                    mSpinnerSortOrder.setVisibility(View.GONE);
-                                }
-                                BookmarkFragment bookmarkFragment = new BookmarkFragment();
-                                FragmentTransaction transaction = getFragmentManager()
-                                    .beginTransaction();
-                                transaction.replace(R.id.container, bookmarkFragment);
-                                transaction.commit();
-                            } else if (type == R.id.nav_login) {
+                            Fragment currentFrag = getFragmentManager().findFragmentById(R.id.container);
+                            if (type == R.id.nav_login) {
                                 login();
                             } else if (type == R.id.nav_logout) {
                                 Utils.showLongToast(MainActivity.this, "Logout succeed");
@@ -523,26 +510,42 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                 updateLoginName();
                             } else if (type == R.id.nav_feedback) {
                                 feedback();
+                            } else if (type == R.id.nav_settings) {
+                                Intent i = new Intent(getBaseContext(), SettingsActivity.class);
+                                startActivity(i);
+                            } else if (type == R.id.nav_popular) {
+                                menuItem.setChecked(true);
+                                setUpSpinnerPopularDateRange();
+                                Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
+                                String secEnd = String.valueOf(c.getTimeInMillis() / 1000);
+                                c.add(Calendar.DAY_OF_YEAR, -1);
+                                String secStart = String.valueOf(c.getTimeInMillis() / 1000);
+                                if (currentFrag instanceof PostFragment) {
+                                    ((PostFragment)currentFrag).getPresenter().refresh(Constants.TYPE_SEARCH,
+                                        "0" + secStart + secEnd);
+                                } else {
+                                    collapseSearchViewWhenSwitch();
+                                    PostFragment postFragment = PostFragment
+                                        .newInstance(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
+                                    beginReplaceTransaction(postFragment);
+                                }
+                            } else if (type == R.id.nav_bookmark) {
+                                menuItem.setChecked(true);
+                                mSpinnerDateRange.setVisibility(View.GONE);
+                                collapseSearchViewWhenSwitch();
+                                BookmarkFragment bookmarkFragment = new BookmarkFragment();
+                                beginReplaceTransaction(bookmarkFragment);
                             } else { // top story, show HN, etc.
                                 menuItem.setChecked(true);
                                 mSpinnerDateRange.setVisibility(View.GONE);
-                                if (getFragmentManager().findFragmentById(R.id.container)
-                                    instanceof PostFragment) {
-                                    PostFragment currentFrag = (PostFragment) getFragmentManager()
-                                        .findFragmentById(R.id.container);
-                                    currentFrag.refresh(Constants.TYPE_STORY, mStoryTypeSpec);
+                                if (currentFrag instanceof PostFragment) {
+                                    ((PostFragment)currentFrag).getPresenter()
+                                        .refresh(Constants.TYPE_STORY, mStoryTypeSpec);
                                 } else {
-                                    if (getFragmentManager().findFragmentById(R.id.container)
-                                        instanceof SearchFragment) {
-                                        MenuItemCompat.collapseActionView(mSearchItem);
-                                        mSpinnerSortOrder.setVisibility(View.GONE);
-                                    }
+                                    collapseSearchViewWhenSwitch();
                                     PostFragment postFragment =
                                         PostFragment.newInstance(Constants.TYPE_STORY, mStoryTypeSpec);
-                                    FragmentTransaction transaction = getFragmentManager()
-                                        .beginTransaction();
-                                    transaction.replace(R.id.container, postFragment);
-                                    transaction.commit();
+                                    beginReplaceTransaction(postFragment);
                                 }
                             }
                             mNavigationView.getMenu().setGroupVisible(R.id.group_login, false);
@@ -557,85 +560,101 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
         );
     }
 
+    private void collapseSearchViewWhenSwitch() {
+        if (getFragmentManager().findFragmentById(R.id.container) instanceof SearchFragment) {
+            MenuItemCompat.collapseActionView(mSearchItem);
+            mSpinnerSortOrder.setVisibility(View.GONE);
+        }
+    }
+
+    private void beginReplaceTransaction(Fragment fragment) {
+        FragmentTransaction transaction = getFragmentManager()
+            .beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.commit();
+    }
+
     void login() {
-        final LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
-        LoginDialogFragment.OnLoginListener onLoginListener =
-            new LoginDialogFragment.OnLoginListener() {
-                @Override
-                public void onLogin(final String username, String password) {
-                    mCompositeSubscription.add(mDataManager.login(username, password)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<String>() {
-                            @Override
-                            public void call(String s) {
-                                if (s.isEmpty()) {// login failed
-                                    loginDialogFragment.resetLogin();
-                                } else {
-                                    loginDialogFragment.getDialog().dismiss();
-                                    Utils.showLongToast(MainActivity.this, "Login succeed");
-                                    SharedPrefsManager.setUsername(prefs, username);
-                                    SharedPrefsManager.setLoginCookie(prefs, s);
-                                    updateLoginName();
-                                }
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                Log.e("login err", throwable.toString());
-                            }
-                        }));
-                }
-            };
-        loginDialogFragment.setListener(onLoginListener);
-        loginDialogFragment.show(getFragmentManager(), "loginDialogFragment");
+        dialogLogin = LoginDialogFragment.newInstance(onLoginListener);
+        dialogLogin.show(getFragmentManager(), FRAGMENT_TAG_LOGIN_DIALOG);
         // guarantee getDialog() will not return null
         getFragmentManager().executePendingTransactions();
         // show keyboard when dialog shows
-        loginDialogFragment.getDialog().getWindow()
+        dialogLogin.getDialog().getWindow()
             .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
+    private LoginDialogFragment.OnLoginListener onLoginListener =
+        new LoginDialogFragment.OnLoginListener() {
+            @Override
+            public void onLogin(final String username, String password) {
+                mCompositeSubscription.add(mDataManager.login(username, password)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<String>() {
+                        @Override
+                        public void call(String s) {
+                            if (s.isEmpty()) {// login failed
+                                dialogLogin.resetLogin();
+                            } else {
+                                dialogLogin.getDialog().dismiss();
+                                Utils.showLongToast(MainActivity.this, "Login succeed");
+                                SharedPrefsManager.setUsername(prefs, username);
+                                SharedPrefsManager.setLoginCookie(prefs, s);
+                                updateLoginName();
+                            }
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Log.e("login", throwable.toString());
+                            dialogLogin.resetLogin();
+                        }
+                    }));
+            }
+        };
+
     private void feedback() {
-        FeedbackDialogFragment feedbackDialog = new FeedbackDialogFragment();
-        feedbackDialog.setOnFeedbackListClickListener(
-            new FeedbackDialogFragment.OnFeedbackListClickListener() {
-                @Override
-                public void onSelectTwitter() {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    String url = "https://twitter.com/leavjenn";
-                    urlIntent.setData(Uri.parse(url));
-                    startActivity(urlIntent);
-                }
-
-                @Override
-                public void onSelectGooglePlus() {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    String url = "https://plus.google.com/u/0/101572751825365377306";
-                    urlIntent.setData(Uri.parse(url));
-                    startActivity(urlIntent);
-                }
-
-                @Override
-                public void onSelectEmail() {
-                    Intent intent = new Intent(Intent.ACTION_SENDTO,
-                        Uri.fromParts("mailto", "", null));
-                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"leavjenn@gmail.com"});
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Hews");
-                    startActivity(Intent.createChooser(intent, "Send Email"));
-                }
-
-                @Override
-                public void onSelectGooglePlayReview() {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    String url =
-                        "https://play.google.com/store/apps/details?id=com.leavjenn.hews";
-                    urlIntent.setData(Uri.parse(url));
-                    startActivity(urlIntent);
-                }
-            });
-        feedbackDialog.show(getFragmentManager(), "feedbackFrag");
+        dialogFeedback = FeedbackDialogFragment.newInstance(mOnSelectFeedbackListener);
+        dialogFeedback.show(getFragmentManager(), FRAGMENT_TAG_FEEDBACK_DIALOG);
     }
+
+    private FeedbackDialogFragment.OnSelectFeedbackListener mOnSelectFeedbackListener =
+        new FeedbackDialogFragment.OnSelectFeedbackListener() {
+            @Override
+            public void onSelectTwitter() {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                String url = "https://twitter.com/leavjenn";
+                urlIntent.setData(Uri.parse(url));
+                startActivity(urlIntent);
+            }
+
+            @Override
+            public void onSelectGooglePlus() {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                String url = "https://plus.google.com/u/0/101572751825365377306";
+                urlIntent.setData(Uri.parse(url));
+                startActivity(urlIntent);
+            }
+
+            @Override
+            public void onSelectEmail() {
+                Intent intent = new Intent(Intent.ACTION_SENDTO,
+                    Uri.fromParts("mailto", "", null));
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"leavjenn@gmail.com"});
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback on Hews");
+                startActivity(Intent.createChooser(intent, "Send Email"));
+            }
+
+            @Override
+            public void onSelectGooglePlayReview() {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                String url =
+                    "https://play.google.com/store/apps/details?id=com.leavjenn.hews";
+                urlIntent.setData(Uri.parse(url));
+                startActivity(urlIntent);
+            }
+        };
 
     void switchLoginDropdownMenu() {
         isLoginMenuExpanded = !isLoginMenuExpanded;
@@ -682,19 +701,19 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                         secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -1);
                         secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        currentFrag.refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
+                        currentFrag.getPresenter().refresh(Constants.TYPE_SEARCH, "0" + secStart + secEnd);
                         break;
                     case 1: // Past 3 days
                         secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -3);
                         secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        currentFrag.refresh(Constants.TYPE_SEARCH, "1" + secStart + secEnd);
+                        currentFrag.getPresenter().refresh(Constants.TYPE_SEARCH, "1" + secStart + secEnd);
                         break;
                     case 2: // Past 7 days
                         secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                         c.add(Calendar.DAY_OF_YEAR, -7);
                         secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                        currentFrag.refresh(Constants.TYPE_SEARCH, "2" + secStart + secEnd);
+                        currentFrag.getPresenter().refresh(Constants.TYPE_SEARCH, "2" + secStart + secEnd);
                         break;
                     case 3: // Custom range
                         DateRangeDialogFragment newFragment = new DateRangeDialogFragment();
@@ -722,7 +741,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                             + "/" + String.valueOf(endDay)
                                             + "/" + String.valueOf(endYear).substring(2));
                                     }
-                                    currentFrag.refresh(Constants.TYPE_SEARCH,
+                                    currentFrag.getPresenter().refresh(Constants.TYPE_SEARCH,
                                         "3" + String.valueOf(startDate) + String.valueOf(endDate + 86400));
                                 } else {
                                     Log.i(String.valueOf(endDate), String.valueOf(startDate + 86400));
@@ -734,7 +753,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                         + "/" + String.valueOf(startDay)
                                         + "/" + String.valueOf(startYear).substring(2));
 
-                                    currentFrag.refresh(Constants.TYPE_SEARCH,
+                                    currentFrag.getPresenter().refresh(Constants.TYPE_SEARCH,
                                         "3" + String.valueOf(endDate) + String.valueOf(startDate + 86400));
                                 }
                             }
@@ -776,9 +795,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             // the time of first post
                             secStart = "1160418110";
-                            if (((SearchFragment) currentFrag).getKeyword() != null
+                            if (((SearchFragment) currentFrag).getPresenter().getKeyword() != null
                                 && mIsSearchKeywordSubmitted) {
-                                ((SearchFragment) currentFrag).refresh(secStart + secEnd);
+                                ((SearchFragment) currentFrag).getPresenter().refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
                             break;
@@ -786,9 +805,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             c.add(Calendar.YEAR, -1);
                             secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                            if (((SearchFragment) currentFrag).getKeyword() != null
+                            if (((SearchFragment) currentFrag).getPresenter().getKeyword() != null
                                 && mIsSearchKeywordSubmitted) {
-                                ((SearchFragment) currentFrag).refresh(secStart + secEnd);
+                                ((SearchFragment) currentFrag).getPresenter().refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
                             break;
@@ -796,9 +815,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             secEnd = String.valueOf(c.getTimeInMillis() / 1000);
                             c.add(Calendar.MONTH, -1);
                             secStart = String.valueOf(c.getTimeInMillis() / 1000);
-                            if (((SearchFragment) currentFrag).getKeyword() != null
+                            if (((SearchFragment) currentFrag).getPresenter().getKeyword() != null
                                 && mIsSearchKeywordSubmitted) {
-                                ((SearchFragment) currentFrag).refresh(secStart + secEnd);
+                                ((SearchFragment) currentFrag).getPresenter().refresh(secStart + secEnd);
                                 mSearchView.clearFocus();
                             }
                             break;
@@ -806,7 +825,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             setupDateRangePicker(view, currentFrag);
                             break;
                     }
-                    ((SearchFragment) currentFrag).setDateRange(secStart + secEnd);
+                    ((SearchFragment) currentFrag).getPresenter().setDateRange(secStart + secEnd);
                     Log.i(secStart, secEnd);
                 }
             }
@@ -862,13 +881,13 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                     dateRange[1] = String.valueOf(startDate + 86400);
                 }
                 if (currentFrag instanceof PostFragment) {
-                    ((PostFragment) currentFrag).refresh(Constants.TYPE_SEARCH,
+                    ((PostFragment) currentFrag).getPresenter().refresh(Constants.TYPE_SEARCH,
                         dateRange[0] + dateRange[1]);
                 } else if (currentFrag instanceof SearchFragment) {
-                    ((SearchFragment) currentFrag).setDateRange(dateRange[0] + dateRange[1]);
-                    if (((SearchFragment) currentFrag).getKeyword() != null
+                    ((SearchFragment) currentFrag).getPresenter().setDateRange(dateRange[0] + dateRange[1]);
+                    if (((SearchFragment) currentFrag).getPresenter().getKeyword() != null
                         && mIsSearchKeywordSubmitted) {
-                        ((SearchFragment) currentFrag).refresh(dateRange[0] + dateRange[1]);
+                        ((SearchFragment) currentFrag).getPresenter().refresh(dateRange[0] + dateRange[1]);
                         mSearchView.clearFocus();
                     }
                 }
@@ -898,10 +917,10 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                             isSortByDate = true;
                             break;
                     }
-                    ((SearchFragment) currentFrag).setSortByDate(isSortByDate);
-                    if (((SearchFragment) currentFrag).getKeyword() != null
+                    ((SearchFragment) currentFrag).getPresenter().setSortByDate(isSortByDate);
+                    if (((SearchFragment) currentFrag).getPresenter().getKeyword() != null
                         && mIsSearchKeywordSubmitted) {
-                        ((SearchFragment) currentFrag).refresh(isSortByDate);
+                        ((SearchFragment) currentFrag).getPresenter().refresh(isSortByDate);
                         mSearchView.clearFocus();
                     }
                 }
@@ -987,7 +1006,7 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
     }
 
     @Override
-    public void onRecyclerViewCreate(RecyclerView recyclerView) {
+    public void onRecyclerViewCreated(RecyclerView recyclerView) {
         mFab.setRecyclerView(recyclerView);
         setupScrollMode();
     }

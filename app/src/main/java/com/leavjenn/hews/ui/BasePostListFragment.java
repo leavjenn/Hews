@@ -15,57 +15,48 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.leavjenn.hews.R;
-import com.leavjenn.hews.listener.OnRecyclerViewCreateListener;
+import com.leavjenn.hews.misc.Utils;
+import com.leavjenn.hews.listener.OnRecyclerViewCreatedListener;
 import com.leavjenn.hews.misc.SharedPrefsManager;
-import com.leavjenn.hews.network.DataManager;
+import com.leavjenn.hews.data.remote.DataManager;
 import com.leavjenn.hews.ui.adapter.PostAdapter;
-
-import rx.subscriptions.CompositeSubscription;
 
 public class BasePostListFragment extends Fragment implements PostAdapter.OnReachBottomListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
-    SwipeRefreshLayout swipeRefreshLayout;
-    RecyclerView rvPostList;
+    public static final String TAG = "BaseListFragment";
 
-    LinearLayoutManager mLinearLayoutManager;
-    PostAdapter mPostAdapter;
-    PostAdapter.OnItemClickListener mOnItemClickListener;
-    OnRecyclerViewCreateListener mOnRecyclerViewCreateListener;
-    SharedPreferences prefs;
-    DataManager mDataManager;
-    CompositeSubscription mCompositeSubscription;
+
 
     public BasePostListFragment() {
     }
-
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
             mOnItemClickListener = (PostAdapter.OnItemClickListener) activity;
-            mOnRecyclerViewCreateListener = (OnRecyclerViewCreateListener) activity;
+            mOnRecyclerViewCreatedListener = (OnRecyclerViewCreatedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                 + " must implement (PostAdapter.OnItemClickListener" +
-                " && MainActivity.OnRecyclerViewCreateListener)");
+                " && MainActivity.OnRecyclerViewCreatedListener)");
         }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate");
+        mDataManager = new DataManager();
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         prefs.registerOnSharedPreferenceChangeListener(this);
-        mDataManager = new DataManager();
-        mCompositeSubscription = new CompositeSubscription();
-        mPostAdapter = new PostAdapter(getActivity(), this, mOnItemClickListener);
+        mPrefsManager = new SharedPrefsManager(getActivity(), prefs);
+        mUtils = new Utils(getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View v = inflater.inflate(R.layout.fragment_base_post_list, container, false);
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_layout);
         rvPostList = (RecyclerView) v.findViewById(R.id.list_post);
@@ -73,35 +64,21 @@ public class BasePostListFragment extends Fragment implements PostAdapter.OnReac
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mLinearLayoutManager = new LinearLayoutManager(getActivity());
-        rvPostList.setLayoutManager(mLinearLayoutManager);
-        rvPostList.setAdapter(mPostAdapter);
-        mOnRecyclerViewCreateListener.onRecyclerViewCreate(rvPostList);
-        swipeRefreshLayout.setColorSchemeResources(R.color.orange_600,
-            R.color.orange_900, R.color.orange_900, R.color.orange_600);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refresh();
-            }
-        });
-    }
-
-    @Override
     public void onDestroy() {
-        if (mCompositeSubscription.hasSubscriptions()) {
-            mCompositeSubscription.unsubscribe();
-        }
+        Log.i(TAG, "onDestroy");
         prefs.unregisterOnSharedPreferenceChangeListener(this);
+        prefs = null;
+        mPrefsManager = null;
+        mUtils = null;
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
+        mPostAdapter = null;
+        mLinearLayoutManager = null;
         mOnItemClickListener = null;
-        mOnRecyclerViewCreateListener = null;
+        mOnRecyclerViewCreatedListener = null;
         super.onDetach();
     }
 

@@ -9,9 +9,15 @@ import android.os.Bundle;
 import com.leavjenn.hews.R;
 
 public class FeedbackDialogFragment extends DialogFragment {
-    OnFeedbackListClickListener mListener;
+    OnSelectFeedbackListener mListener;
 
     public FeedbackDialogFragment() {
+    }
+
+    public static FeedbackDialogFragment newInstance(OnSelectFeedbackListener onSelectFeedbackListener) {
+        FeedbackDialogFragment fragment = new FeedbackDialogFragment();
+        fragment.mListener = onSelectFeedbackListener;
+        return fragment;
     }
 
     @Override
@@ -41,11 +47,11 @@ public class FeedbackDialogFragment extends DialogFragment {
             }).create();
     }
 
-    public void setOnFeedbackListClickListener(OnFeedbackListClickListener listener) {
+    public void setOnSelectFeedbackListener(OnSelectFeedbackListener listener) {
         mListener = listener;
     }
 
-    public interface OnFeedbackListClickListener {
+    public interface OnSelectFeedbackListener {
         void onSelectTwitter();
 
         void onSelectGooglePlus();

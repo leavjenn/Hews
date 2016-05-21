@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?bg_color"
-    tools:context="com.leavjenn.hews.ui.CommentsFragment">
+    tools:context=".ui.comment.CommentsFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_layout"

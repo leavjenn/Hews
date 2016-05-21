@@ -20,13 +20,14 @@
     <string name="snackebar_action_retry">Retry</string>
 
     <!--Comment Fragment-->
-    <string name="no_comment_prompt">No comment yet</string>
+    <string name="prompt_no_comments">No comments yet</string>
+    <string name="prompt_comments_loading_error">Something\'s wrong&#8230;</string>
     <string name="comments_collapsed_prompt">%d collapsed</string>
 
     <!--Search Fragment-->
     <string name="no_search_result_prompt">No result.\nTry different keywords?</string>
     <!--Bookmark Fragment-->
-    <string name="no_bookmark_prompt">No bookmarked post yet</string>
+    <string name="no_bookmark_prompt">No bookmarked posts yet</string>
     <!-- Nav drawer -->
     <string name="nav_login">Login</string>
     <string name="nav_logout">Logout</string>
@@ -81,10 +82,15 @@
     </string-array>
 
     <!--Login dialog-->
+    <string name="login_dialog_login">Login</string>
     <string name="login_prompt_privacy">* Your password will NOT be saved</string>
-    <string name="login_prompt_logging_in">Logging in...</string>
+    <string name="login_prompt_logging_in">Logging in&#8230;</string>
     <string name="login_prompt_error_empty_username">Catch you, anonymous!</string>
-    <string name="login_prompt_error_short_password">You got a short...password</string>
+    <string name="login_prompt_error_short_password">You got a short&#8230;password</string>
     <string name="login_prompt_error_offline">Where\'s the Internet? Can\'t get it</string>
-    <string name="login_prompt_error_wrong_info">Arrr...wrong username/password</string>
+    <string name="login_prompt_error_wrong_info">Arrr&#8230;wrong username/password</string>
+
+    <!--Discard reply dialog-->
+    <string name="discard_dialog_discard">Discard</string>
+    <string name="discard_dialog_prompt_discard">Discard the reply?</string>
 </resources>

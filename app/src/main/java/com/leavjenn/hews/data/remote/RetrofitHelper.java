@@ -1,4 +1,4 @@
-package com.leavjenn.hews.network;
+package com.leavjenn.hews.data.remote;
 
 import com.google.gson.GsonBuilder;
 import com.leavjenn.hews.Constants;
@@ -12,7 +12,7 @@ public class RetrofitHelper {
         RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(Constants.KEY_API_URL)
             .setConverter(new GsonConverter(new GsonBuilder().create()))
-            .setLogLevel(RestAdapter.LogLevel.NONE)
+            .setLogLevel(RestAdapter.LogLevel.BASIC)
             .build();
 
         return restAdapter.create(HackerNewsService.class);
@@ -22,7 +22,7 @@ public class RetrofitHelper {
         RestAdapter restAdapter = new RestAdapter.Builder()
             .setEndpoint(Constants.SEARCH_BASE_URL)
             .setConverter(new GsonConverter(new GsonBuilder().create()))
-            .setLogLevel(RestAdapter.LogLevel.NONE)
+            .setLogLevel(RestAdapter.LogLevel.BASIC)
             .build();
 
         return restAdapter.create(HackerNewsService.class);

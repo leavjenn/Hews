@@ -16,7 +16,8 @@ public final class Constants {
 
     public static final String SEARCH_BASE_URL = "https://hn.algolia.com/api/v1/";
 
-    public final static int NUM_LOADING_ITEM = 25;
+    public final static int NUM_LOADING_ITEMS = 25;
+    public final static int NUM_LOADING_ITEMS_SPLIT = 7;
 
     public final static int LOADING_IDLE = 0;
     public final static int LOADING_IN_PROGRESS = 1;

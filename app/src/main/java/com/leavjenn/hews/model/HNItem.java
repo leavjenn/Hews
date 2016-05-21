@@ -19,9 +19,14 @@ public class HNItem {
         public SearchResult() {
         }
 
+        public void setHits(SearchHit[] hits) {
+            this.hits = hits;
+        }
+
         public SearchHit[] getHits(){
             return hits;
         }
+
         public int getNbPages(){
             return nbPages;
         }

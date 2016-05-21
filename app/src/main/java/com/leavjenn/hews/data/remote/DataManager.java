@@ -1,23 +1,14 @@
-package com.leavjenn.hews.network;
+package com.leavjenn.hews.data.remote;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.Html;
 import android.util.Log;
 
 import com.leavjenn.hews.Constants;
-import com.leavjenn.hews.data.StorIOHelper;
-import com.leavjenn.hews.data.table.CommentTable;
-import com.leavjenn.hews.data.table.PostTable;
 import com.leavjenn.hews.misc.SharedPrefsManager;
 import com.leavjenn.hews.model.Comment;
 import com.leavjenn.hews.model.HNItem;
 import com.leavjenn.hews.model.Post;
-import com.pushtorefresh.storio.sqlite.operations.delete.DeleteResult;
-import com.pushtorefresh.storio.sqlite.operations.put.PutResult;
-import com.pushtorefresh.storio.sqlite.operations.put.PutResults;
-import com.pushtorefresh.storio.sqlite.queries.DeleteQuery;
-import com.pushtorefresh.storio.sqlite.queries.Query;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -57,7 +48,7 @@ public class DataManager {
         return mHackerNewsService.getStory(String.valueOf(postId));
     }
 
-    public Observable<Post> getPosts(List<Long> postIds, boolean isByOrder) {
+    public Observable<Post> getPostsn(List<Long> postIds, boolean isByOrder) {
         if (isByOrder) {
             return Observable.from(postIds)
                 .concatMap(new Func1<Long, Observable<Post>>() {
@@ -103,9 +94,77 @@ public class DataManager {
         }
     }
 
+    public Observable<Post> getPosts(List<Long> postIds) {
+        if (postIds.size() > Constants.NUM_LOADING_ITEMS_SPLIT * 2) {
+            return Observable.concat(
+                getSubListPosts(postIds.subList(0, Constants.NUM_LOADING_ITEMS_SPLIT)),
+                getSubListPosts(postIds.subList(Constants.NUM_LOADING_ITEMS_SPLIT,
+                    Constants.NUM_LOADING_ITEMS_SPLIT * 2)),
+                getSubListPosts(postIds.subList(Constants.NUM_LOADING_ITEMS_SPLIT * 2,
+                    postIds.size())))
+                .flatMap(new Func1<List<Post>, Observable<Post>>() {
+                    @Override
+                    public Observable<Post> call(List<Post> posts) {
+                        return Observable.from(posts);
+                    }
+                });
+        } else {
+            return getSubListPosts(postIds)
+                .flatMap(new Func1<List<Post>, Observable<Post>>() {
+                    @Override
+                    public Observable<Post> call(List<Post> posts) {
+                        return Observable.from(posts);
+                    }
+                });
+        }
+    }
+
+    public Observable<List<Post>> getSubListPosts(final List<Long> postIds) {
+        return Observable.from(postIds)
+            .flatMap(new Func1<Long, Observable<Post>>() {
+                @Override
+                public Observable<Post> call(Long aLong) {
+                    return mHackerNewsService.getStory(String.valueOf(aLong));
+                }
+            })
+            .onErrorReturn(new Func1<Throwable, Post>() {
+                @Override
+                public Post call(Throwable throwable) {
+                    Log.e("getPosts", throwable.toString());
+                    return null;
+                }
+            })
+            .filter(new Func1<Post, Boolean>() {
+                @Override
+                public Boolean call(Post post) {
+                    return post != null && post.getTitle() != null;
+                }
+            })
+            .toList()
+            .map(new Func1<List<Post>, List<Post>>() {
+                @Override
+                public List<Post> call(List<Post> posts) {
+                    return sortPosts(postIds, posts);
+                }
+            });
+    }
+
+    private List<Post> sortPosts(List<Long> postIds, List<Post> postList) {
+        HashMap<Long, Post> postsMap = new HashMap<>();
+        List<Post> orderedPostList = new ArrayList<>();
+        for (Post post : postList) {
+            postsMap.put(post.getId(), post);
+        }
+        for (Long id : postIds) {
+            orderedPostList.add(postsMap.get(id));
+        }
+        return orderedPostList;
+    }
+
     public Observable<Comment> getSummary(List<Long> commentIds) {
         return Observable.from(commentIds)
-            .flatMap(new Func1<Long, Observable<Comment>>() {
+            // if use flatMap(), there would be too many concurrent calls
+            .concatMap(new Func1<Long, Observable<Comment>>() {
                 @Override
                 public Observable<Comment> call(Long aLong) {
                     return mHackerNewsService.getComment(aLong);
@@ -303,15 +362,15 @@ public class DataManager {
     }
 
     public Observable<HNItem.SearchResult> getPopularPosts(String startTime, int page) {
-        return mSearchService.searchPopularity(startTime, page, Constants.NUM_LOADING_ITEM);
+        return mSearchService.searchPopularity(startTime, page, Constants.NUM_LOADING_ITEMS);
     }
 
     public Observable<HNItem.SearchResult> getSearchResult(String keyword, String timeRange,
                                                            int page, boolean isSortByDate) {
         if (isSortByDate) {
-            return mSearchService.searchByDate(keyword, timeRange, page, Constants.NUM_LOADING_ITEM);
+            return mSearchService.searchByDate(keyword, timeRange, page, Constants.NUM_LOADING_ITEMS);
         } else {
-            return mSearchService.search(keyword, timeRange, page, Constants.NUM_LOADING_ITEM);
+            return mSearchService.search(keyword, timeRange, page, Constants.NUM_LOADING_ITEMS);
         }
     }
 
@@ -459,74 +518,5 @@ public class DataManager {
                 }
             }
         });
-    }
-
-    public Observable<PutResult> putPostToDb(Context context, Post post) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .put()
-            .object(post)
-            .prepare()
-            .createObservable();
-    }
-
-    public Observable<List<Post>> getPostFromDb(Context context, long postId) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .get()
-            .listOfObjects(Post.class)
-            .withQuery(Query.builder()
-                .table(PostTable.TABLE)
-                .where(PostTable.COLUMN_ID + " = " + postId)
-                .build())
-            .prepare()
-            .createObservable();
-    }
-
-    public Observable<List<Post>> getAllPostsFromDb(Context context) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .get()
-            .listOfObjects(Post.class)
-            .withQuery(Query.builder().table(PostTable.TABLE).build())
-            .prepare()
-            .createObservable();
-    }
-
-    public Observable<DeleteResult> deletePostFromDb(Context context, Post post) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .delete()
-            .object(post)
-            .prepare()
-            .createObservable();
-    }
-
-    public Observable<PutResults<Comment>> putCommentsToDb(Context context, List<Comment> commentList) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .put()
-            .objects(commentList)
-            .prepare()
-            .createObservable();
-    }
-
-    public Observable<List<Comment>> getStoryCommentsFromDb(Context context, long postId) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .get()
-            .listOfObjects(Comment.class)
-            .withQuery(Query.builder()
-                .table(CommentTable.TABLE)
-                .where(CommentTable.COLUMN_PARENT + " = " + postId)
-                .orderBy(CommentTable.COLUMN_INDEX + " ASC")
-                .build())
-            .prepare()
-            .createObservable();
-    }
-
-    public Observable<DeleteResult> deleteStoryCommentsFromDb(Context context, long postId) {
-        return StorIOHelper.getStorIOSQLite(context)
-            .delete()
-            .byQuery(DeleteQuery.builder()
-                .table(CommentTable.TABLE)
-                .where(CommentTable.COLUMN_PARENT + "=" + postId)
-                .build())
-            .prepare()
-            .createObservable();
     }
 }

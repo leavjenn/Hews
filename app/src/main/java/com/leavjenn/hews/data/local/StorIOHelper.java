@@ -1,4 +1,4 @@
-package com.leavjenn.hews.data;
+package com.leavjenn.hews.data.local;
 
 import android.content.Context;
 

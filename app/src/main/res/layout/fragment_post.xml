@@ -7,7 +7,7 @@
     android:background="?bg_color"
     android:clipChildren="false"
     android:clipToPadding="false"
-    tools:context="com.leavjenn.hews.ui.PostFragment">
+    tools:context=".ui.post.PostFragment">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_layout"
