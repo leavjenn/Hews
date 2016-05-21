@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 import com.leavjenn.hews.R;
 
-public class SharedPrefsManager {
+public class SharedPrefsManager implements SharedPrefsContract {
     public static final String KEY_POST_FONT = "key_post_font";
     public static final String KEY_POST_FONT_SIZE = "key_post_font_size";
     public static final String KEY_POST_LINE_HEIGHT = "key_post_line_height";
@@ -35,6 +35,14 @@ public class SharedPrefsManager {
         "Vollkorn", "Merriweather"};
     static String[] fontsForPost = {"Open Sans", "Dosis SemiBold", "Roboto Slab", "Merriweather",
         "RobotoMono"};
+
+    private Context mContext;
+    private SharedPreferences mPreferences;
+
+    public SharedPrefsManager(Context context, SharedPreferences preferences) {
+        mContext = context;
+        mPreferences = preferences;
+    }
 
     public static String[] getPostFontsList() {
         return fontsForPost;
@@ -192,5 +200,54 @@ public class SharedPrefsManager {
 
     public static Boolean getIsOpenLinkInApp(SharedPreferences sp, Context context) {
         return sp.getBoolean(context.getResources().getString(R.string.pref_key_open_link_option), true);
+    }
+
+    @Override
+    public boolean isPostRead(long postId) {
+        return mPreferences.getBoolean(KEY_POST_IS_READ + postId, false);
+    }
+
+    @Override
+    public boolean isShowPostSummary() {
+        return mPreferences.getBoolean(mContext.getResources()
+            .getString(R.string.pref_key_show_post_summary), false);
+    }
+
+    @Override
+    public boolean isPostBookmarked(long postId) {
+        return mPreferences.getBoolean(KEY_POST_IS_BOOKMARKED + postId, false);
+    }
+
+    @Override
+    public boolean areCommentsBookmarked(long postId) {
+        return mPreferences.getBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, false);
+    }
+
+    @Override
+    public void setPostBookmarked(long postId) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(KEY_POST_IS_BOOKMARKED + postId, true);
+        editor.apply();
+    }
+
+    @Override
+    public void setCommentsBookmarked(long postId) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, true);
+        editor.apply();
+    }
+
+    @Override
+    public void setPostUnbookmarked(long postId) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(KEY_POST_IS_BOOKMARKED + postId, false);
+        editor.apply();
+    }
+
+    @Override
+    public void setCommentsUnbookmarked(long postId) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, false);
+        editor.apply();
     }
 }

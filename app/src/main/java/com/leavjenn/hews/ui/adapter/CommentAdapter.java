@@ -118,6 +118,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             @Override
             public void onLongClick(int position) {
+                showCommentOptionDialog(position);
             }
         };
     }
@@ -391,7 +392,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return mCollapsedOlderCommentsIndex.containsKey(Comment.getCommentId());
     }
 
+    private void showCommentOptionDialog(int position) {
         final Comment comment = (Comment) mItemList.get(position);
+        ((CommentsActivity) mContext).showCommentOptionDialog(comment);
         // scrollToPosition() not working
         ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(position, 0);
     }

@@ -24,8 +24,18 @@ import com.leavjenn.hews.ui.adapter.PostAdapter;
 public class BasePostListFragment extends Fragment implements PostAdapter.OnReachBottomListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "BaseListFragment";
+    protected SwipeRefreshLayout swipeRefreshLayout;
+    protected RecyclerView rvPostList;
+    protected LinearLayoutManager mLinearLayoutManager;
+    protected PostAdapter mPostAdapter;
 
+    protected PostAdapter.OnItemClickListener mOnItemClickListener;
+    protected OnRecyclerViewCreatedListener mOnRecyclerViewCreatedListener;
 
+    protected SharedPreferences prefs;
+    protected SharedPrefsManager mPrefsManager;
+    protected DataManager mDataManager;
+    protected Utils mUtils;
 
     public BasePostListFragment() {
     }
