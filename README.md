@@ -5,12 +5,12 @@ A hacker news reader focuses on readng experience with some handy features.
 
 ## Basic features
 * Clear nested comments
-* Three themes: light, sepia and dark
+* Three themes: light, sepia, dark and AmoLED black
 * Browse Top, New, Show HN and Ask HN stories
 * Browse popular posts by any date range
 • Login hacker news account, upvote and reply to post/comment
 * Search by any date range, with popularity/date sorting
-* Open hacker news links by this app
+* Open hacker news links from other app
 * Open post/other links in external browser
 * Check User's HN profile (long press)
 * Share comment link/content (long press)
@@ -33,7 +33,7 @@ Not only collapsible children comments (press comment content), it can also coll
 
 * Scroll-down floating button
 
-Scroll down the page by pressing or draging the big floating button, swipe no more. 
+Scroll down the page by pressing or dragging the big floating button, swipe no more. 
 
 [Video demo](https://youtu.be/kuffdR2GCqU)
 
