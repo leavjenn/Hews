@@ -47,4 +47,8 @@
     <string name="summary_open_link_option_unavailable">Google Chrome(ver > 44) required.
         Or you could try Firefox(ver > 42) which supports opening link in background.</string>
     <string name="pref_key_open_link_option">key_open_link</string>
+
+    <string name="pref_key_export_bookmark">pref_key_export_bookmark</string>
+    <string name="pref_title_export_bookmark">Export bookmark</string>
+    <string name="summary_export_bookmark">Data will save in Download folder as .csv file</string>
 </resources>

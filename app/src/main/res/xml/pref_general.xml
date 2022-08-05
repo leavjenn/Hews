@@ -31,4 +31,9 @@
         android:key="@string/pref_key_open_link_option"
         android:summary="@string/summary_open_link_option_available"
         android:title="@string/pref_title_open_link_option" />
+
+    <Preference
+        android:key="@string/pref_key_export_bookmark"
+        android:summary="@string/summary_export_bookmark"
+        android:title="@string/pref_title_export_bookmark" />
 </PreferenceScreen>
