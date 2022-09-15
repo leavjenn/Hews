@@ -169,6 +169,15 @@ public class SettingsActivity extends AppCompatActivity
                     return false;
                 }
             });
+
+            Preference newVersionAnnounce = findPreference(getString(R.string.pref_key_new_version));
+            newVersionAnnounce.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    startActivity(new Intent(getActivity(), NewVersionAnnounceActivity.class));
+                    return false;
+                }
+            });
         }
 
         private void disableOpenLinkOptionPreference() {

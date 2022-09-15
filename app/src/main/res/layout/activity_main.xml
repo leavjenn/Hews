@@ -42,13 +42,44 @@
                     android:paddingRight="16dp"
                     app:layout_scrollFlags="scroll|enterAlways">
 
+                    <android.support.v7.widget.LinearLayoutCompat
+                        android:id="@+id/ll_new_version_prompt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        >
+
+                        <TextView
+                            android:id="@+id/tv_new_version_prompt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Announce the new version of Hews"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_close_new_version_prompt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="8dp"
+                            android:text="&#10005;"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            />
+                    </android.support.v7.widget.LinearLayoutCompat>
+
                     <com.leavjenn.hews.ui.widget.AlwaysShowDialogSpinner
                         android:id="@+id/spinner_time_range"
                         style="@style/Widget.AppCompat.Spinner"
                         android:layout_width="wrap_content"
                         android:layout_height="56dp"
                         android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
+                        android:layout_below="@+id/ll_new_version_prompt"
                         android:gravity="bottom"
                         android:minWidth="25dp"
                         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"

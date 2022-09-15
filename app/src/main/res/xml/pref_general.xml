@@ -36,4 +36,9 @@
         android:key="@string/pref_key_export_bookmark"
         android:summary="@string/summary_export_bookmark"
         android:title="@string/pref_title_export_bookmark" />
+
+    <Preference
+        android:key="@string/pref_key_new_version"
+        android:summary="@string/summary_new_version"
+        android:title="@string/pref_title_new_version" />
 </PreferenceScreen>

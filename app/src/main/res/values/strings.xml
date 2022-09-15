@@ -38,6 +38,7 @@
     <string name="nav_popular">Popular by time range</string>
     <string name="nav_bookmark">Bookmark</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_new_version">&#9733; New version &#9733;</string>
     <string name="nav_feedback">Feedback</string>
 
     <!--Time Range Popular Spinner-->

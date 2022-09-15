@@ -29,6 +29,7 @@ public class SharedPrefsManager implements SharedPrefsContract {
     public static final String SCROLL_MODE_FAB_DRAG = "2";
     public static final String SCROLL_MODE_FAB_HOLD = "3";
     public static final String KEY_SHOW_POST_SUMMARY = "key_show_post_summary";
+    public static final String KEY_IS_NEW_VERSION_PROMPT_SHOWED = "key_is_new_version_prompt_showed";
 
     static String[] fontsForComment = {"PT Sans", "Roboto", "Lato",
         "Open Sans", "Muli", "Slabo 27px", "Crimson Text", "Roboto Slab",
@@ -248,6 +249,17 @@ public class SharedPrefsManager implements SharedPrefsContract {
     public void setCommentsUnbookmarked(long postId) {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putBoolean(KEY_COMMENTS_ARE_BOOKMARKED + postId, false);
+        editor.apply();
+    }
+
+    public static boolean isNewVersionPromptShowed(SharedPreferences sp, Context context) {
+        return sp.getBoolean(context.getResources()
+            .getString(R.string.pref_key_is_new_version_prompt_showed), false);
+    }
+
+    public static void setNewVersionPromptShowed(SharedPreferences sp) {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(KEY_IS_NEW_VERSION_PROMPT_SHOWED, true);
         editor.apply();
     }
 }

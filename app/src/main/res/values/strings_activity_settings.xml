@@ -48,7 +48,13 @@
         Or you could try Firefox(ver > 42) which supports opening link in background.</string>
     <string name="pref_key_open_link_option">key_open_link</string>
 
-    <string name="pref_key_export_bookmark">pref_key_export_bookmark</string>
+    <string name="pref_key_export_bookmark">key_export_bookmark</string>
     <string name="pref_title_export_bookmark">Export bookmark</string>
-    <string name="summary_export_bookmark">Data will save in Download folder as .csv file</string>
+    <string name="summary_export_bookmark">Data will save in Download folder as .csv file.</string>
+
+    <string name="pref_key_new_version">key_new_version</string>
+    <string name="pref_title_new_version">&#9733; New version &#9733;</string>
+    <string name="summary_new_version">The brand new Hews 2 is here.</string>
+
+    <string name="pref_key_is_new_version_prompt_showed">key_is_new_version_prompt_showed</string>
 </resources>

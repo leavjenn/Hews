@@ -54,6 +54,10 @@
             android:icon="@drawable/drawer_setting"
             android:title="@string/nav_settings" />
         <item
+            android:id="@+id/nav_new_version"
+            android:icon="@drawable/drawer_story_top"
+            android:title="@string/nav_new_version" />
+        <item
             android:id="@+id/nav_feedback"
             android:icon="@drawable/drawer_feedback"
             android:title="@string/nav_feedback" />

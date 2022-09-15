@@ -24,6 +24,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -166,6 +167,29 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        // init new version prompt
+        if (!SharedPrefsManager.isNewVersionPromptShowed(prefs, this)) {
+            LinearLayoutCompat llNewVersionPrompt = (LinearLayoutCompat) findViewById(R.id.ll_new_version_prompt);
+            llNewVersionPrompt.setVisibility(View.VISIBLE);
+            TextView tvNewVersionPrompt = (TextView) findViewById(R.id.tv_new_version_prompt);
+            tvNewVersionPrompt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    llNewVersionPrompt.setVisibility(View.GONE);
+                    startActivity(new Intent(MainActivity.this, NewVersionAnnounceActivity.class));
+                    SharedPrefsManager.setNewVersionPromptShowed(prefs);
+                }
+            });
+            TextView tvCloseNewVersionPrompt = (TextView) findViewById(R.id.tv_close_new_version_prompt);
+            tvCloseNewVersionPrompt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    llNewVersionPrompt.setVisibility(View.GONE);
+                    SharedPrefsManager.setNewVersionPromptShowed(prefs);
+                }
+            });
+        }
+
         // init spinner
         mSpinnerDateRange = (AlwaysShowDialogSpinner) findViewById(R.id.spinner_time_range);
         mSpinnerSortOrder = (Spinner) findViewById(R.id.spinner_sort_order);
@@ -508,6 +532,9 @@ public class MainActivity extends AppCompatActivity implements PostAdapter.OnIte
                                     MainActivity.this.getResources().getString(R.string.nav_logout));
                                 SharedPrefsManager.setLoginCookie(prefs, "");
                                 updateLoginName();
+                            } else if (type == R.id.nav_new_version) {
+                                Intent i = new Intent(getBaseContext(), NewVersionAnnounceActivity.class);
+                                startActivity(i);
                             } else if (type == R.id.nav_feedback) {
                                 feedback();
                             } else if (type == R.id.nav_settings) {
